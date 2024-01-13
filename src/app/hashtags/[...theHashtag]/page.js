@@ -457,7 +457,6 @@ export default async function Country({
   return (
     <div>
       <div className="container">
-        {JSON.stringify(_360photos)}
         <div
           style={{
             display: 'flex',
