@@ -18,9 +18,10 @@ const links = [
   },
   {
     text: '360 Photos',
-    url: 'https://photos.app.goo.gl/SBX7s3qeSp3824Eg9',
+    url: '/hashtags/360photo',
+    url_pt: '/hashtags/foto',
     image: 'images/360.jpeg',
-    translate: true,
+    subpage: true,
   },
   {
     text: 'Kwai',
