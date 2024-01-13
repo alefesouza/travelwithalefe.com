@@ -33,8 +33,8 @@ export async function GET(req) {
     if (!cache.exists) {
       const photosSnapshot = await db
         .collectionGroup('medias')
-        .orderBy('date', 'desc')
         .limit(20)
+        .orderBy('createdAt', 'desc')
         .get();
 
       photosSnapshot.forEach((doc) => {
@@ -117,6 +117,7 @@ export async function GET(req) {
       file: c.image,
     }));
   const _360photos = photos.filter((p) => p.type === '360photo');
+  const mapsPhotos = photos.filter((p) => p.type === 'maps');
 
   instagramStories.sort(function (a, b) {
     return new Date(b.date) - new Date(a.date);
@@ -135,7 +136,7 @@ export async function GET(req) {
         img_index: i + 2,
       }));
       const itemWithHashtag = gallery.findIndex(
-        (g) => g.item_hashtags && g.item_hashtags.includes(hashtag)
+        (g) => g.item_hashtags && g.item_hashtags.includes(finalHashtag.name)
       );
 
       if (itemWithHashtag > -1) {
@@ -210,6 +211,7 @@ export async function GET(req) {
         ...shortVideos,
         ...youtubeVideos,
         ..._360photos,
+        ...mapsPhotos,
       ]
         .filter((c) => !c.rss_ignore)
         .map((p) => {
@@ -226,7 +228,8 @@ export async function GET(req) {
             .replace(city + '-post-', '')
             .replace(city + '-youtube-', '')
             .replace(city + '-short-video-', '')
-            .replace(city + '-360photo-', '');
+            .replace(city + '-360photo-', '')
+            .replace(city + '-maps-', '');
 
           const link = host(
             `/countries/${country}/cities/${city}/${getTypePath(
@@ -273,7 +276,9 @@ export async function GET(req) {
               },
               '#': link,
             },
-            pubDate: new Date(p.date).toUTCString(),
+            pubDate: hashtag
+              ? new Date(p.date).toUTCString()
+              : p.createdAt.toDate().toUTCString(),
             category: 'Travel',
             ['media:category']: p.hashtags
               ? isBR && p.hashtags_pt
