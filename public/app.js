@@ -84,7 +84,6 @@
   let firstPage = window.location.pathname;
 
   function onBackClick(e) {
-    console.log(firstPage);
     if (window.location.pathname === firstPage) {
       firstPage = e.target.parentElement.pathname;
       return;
@@ -184,7 +183,7 @@
     });
   }
 
-  function initPanorama() {
+  function initPanorama(fullQuality) {
     if (!document.querySelector('#pannellum-css')) {
       // Required because the script does not run on router navigation.
       const link = document.createElement('link');
@@ -193,6 +192,18 @@
       link.id = 'pannellum-css';
       link.rel = 'stylesheet';
       document.head.appendChild(link);
+    }
+
+    const loadFullQuality = document.querySelector('#load-full-quality');
+
+    if (loadFullQuality) {
+      loadFullQuality.onclick = () => {
+        initPanorama(true);
+      };
+
+      if (fullQuality) {
+        loadFullQuality.remove();
+      }
     }
 
     const pannellumLoader = document.querySelector('#pannellum-loader');
@@ -211,9 +222,17 @@
 
     const panorama = document.querySelector('#panorama');
 
+    const canvas = document.getElementById('max-texture-size');
+    const gl = canvas.getContext('experimental-webgl');
+    const maxWidth = gl.getParameter(gl.MAX_TEXTURE_SIZE);
+
     pannellum.viewer('panorama', {
       type: 'equirectangular',
-      panorama: panorama.dataset.photo,
+      panorama: fullQuality
+        ? panorama.dataset.photo
+        : maxWidth > 8192
+        ? panorama.dataset.resize11968
+        : panorama.dataset.resize8192,
       autoLoad: true,
       autoRotate: -2,
       preview: panorama.dataset.thumbnail,
@@ -287,33 +306,26 @@
       document
         .querySelector('#title-bar .nav-item:nth-child(1)')
         .classList.add('active');
-    } else if (window.location.pathname == '/countries') {
+    } else if (window.location.pathname == '/map') {
       document
         .querySelector('.navbar .nav-item:nth-child(2)')
         .classList.add('active');
       document
         .querySelector('#title-bar .nav-item:nth-child(2)')
         .classList.add('active');
-    } else if (window.location.pathname == '/map') {
+    } else if (window.location.pathname == '/hashtags') {
       document
         .querySelector('.navbar .nav-item:nth-child(3)')
         .classList.add('active');
       document
         .querySelector('#title-bar .nav-item:nth-child(3)')
         .classList.add('active');
-    } else if (window.location.pathname == '/hashtags') {
+    } else if (window.location.pathname == '/about') {
       document
         .querySelector('.navbar .nav-item:nth-child(4)')
         .classList.add('active');
       document
         .querySelector('#title-bar .nav-item:nth-child(4)')
-        .classList.add('active');
-    } else if (window.location.pathname == '/about') {
-      document
-        .querySelector('.navbar .nav-item:nth-child(5)')
-        .classList.add('active');
-      document
-        .querySelector('#title-bar .nav-item:nth-child(5)')
         .classList.add('active');
     }
 
@@ -327,15 +339,17 @@
         paths[5] === 'stories' ||
         paths[5] === 'videos' ||
         paths[5] === 'short-videos' ||
-        paths[5] === '360-photos') &&
+        paths[5] === '360-photos' ||
+        paths[5] === 'maps') &&
       paths[6] &&
       (paths[5] === 'stories' ||
         paths[5] === 'videos' ||
         paths[5] === 'short-videos' ||
         paths[5] === '360-photos' ||
+        paths[5] === 'maps' ||
         paths[7]);
 
-    if (pathname !== '/' && pathname !== '/countries') {
+    if (pathname !== '/') {
       document.querySelector('body').classList.add('sub-page');
     } else {
       document.querySelector('body').classList.remove('sub-page');
@@ -442,8 +456,9 @@
         e.preventDefault();
         scroller.dataset.maximized =
           scroller.dataset.maximized === 'yes' ? 'no' : 'yes';
-        console.log(scroller.dataset.maximized);
+
         scroller.classList.toggle(this.dataset.maximize);
+        scroller.classList.toggle('instagram_highlights_items');
         scroller.classList.toggle('container-fluid');
         scroller.classList.toggle(this.dataset.minimize);
         highlightScrollRight.style.display = 'none';
@@ -482,7 +497,7 @@
 
   const elementToObserve = document.querySelector('main');
 
-  observer = new MutationObserver(function () {
+  observer = new MutationObserver(function (e) {
     const panorama = document.querySelector('#panorama');
 
     if (panorama) {
@@ -501,6 +516,10 @@
 
     loadingSpinner.style.display = 'none';
 
+    if (e.length === 1) {
+      return;
+    }
+
     setupLinks('main');
 
     if (
@@ -511,12 +530,14 @@
     }
   });
 
-  observer.observe(elementToObserve, {
-    characterData: false,
-    childList: true,
-    attributes: false,
-    subtree: true,
-  });
+  if (elementToObserve) {
+    observer.observe(elementToObserve, {
+      characterData: false,
+      childList: true,
+      attributes: true,
+      subtree: true,
+    });
+  }
 
   setupLinks('body');
 
@@ -555,7 +576,6 @@
       const isOverlayVisible = navigator.windowControlsOverlay.visible;
 
       const session = getCookie('__session');
-      console.log(session);
 
       if (isOverlayVisible) {
         body.classList.add('window-controls-overlay');
