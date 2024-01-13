@@ -2,12 +2,18 @@ import useHost from '@/app/hooks/use-host';
 import { redirect, permanentRedirect } from 'next/navigation';
 import getCookie from '@/app/utils/get-cookies';
 import { getStorage } from 'firebase-admin/storage';
+import { customInitApp } from '@/app/firebase';
+import { getFirestore } from 'firebase-admin/firestore';
+import logAccess from '@/app/utils/log-access';
+
+customInitApp();
 
 // Remove Next.js assets from Web Stories pages.
 export async function GET(req) {
   const host = useHost();
   let { pathname, searchParams } = new URL(req.url);
-  const sort = searchParams.get('sort');
+  let sort = searchParams.get('sort');
+  sort = sort === 'asc' ? 'asc' : 'desc';
 
   if (pathname.includes('/highlights/')) {
     const [, , , country, , city] = pathname.split('/');
@@ -22,7 +28,7 @@ export async function GET(req) {
 
   const reference =
     'webstories/' +
-    host(pathname + '-' + (sort === 'asc' ? 'asc' : 'desc') + '.html')
+    host(pathname + '-' + sort + '.html')
       .split('//')[1]
       .replaceAll('/', '-')
       .replace('www.', '')
@@ -80,6 +86,105 @@ export async function GET(req) {
     $('head').append(
       `<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>`
     );
+    $('head').append(
+      '<style amp-custom>' +
+        `
+      .header-container { 
+        width: 100%;
+        margin-left: 6px;
+        margin-right: 6px;
+      }
+
+      .common-text {
+        background: #ffffff;
+        width: auto;
+        padding-top: 2px;
+        padding-bottom: 2px;
+        padding-left: 10px;
+        padding-right: 10px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-family: system-ui,-apple-system,Roboto,Arial,sans-serif;
+        -webkit-box-decoration-break: clone;
+        box-decoration-break: clone;
+        display: inline;
+        padding-bottom: 5px;
+      }
+      
+      .story-title {
+        line-height: 40px;
+      }
+
+      .username {
+        color: #fff;
+        background: none;
+        position: absolute;
+        top: 8px;
+        left: 5px;
+        display: flex;
+        align-items: center;
+        color: rgba(255, 255, 255, 0.8);
+        padding-bottom: 0;
+        height: 48px;
+        gap: 8px;
+        padding-top: 0px;
+        padding-bottom: 0px;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .username-text {
+        height: 20px;
+        line-height: 18px;
+        font-size: 20px;
+      }
+
+      .date {
+        font-weight: normal;
+        font-size: 12px;
+        margin-top: 1px;
+      }
+
+      .post-type-container {
+        width: 90%;
+        text-align: center;
+        padding-top: 32px;
+      }
+
+      .end-text {
+        font-size: 32px;
+        line-height: 40px;
+      }
+
+      .end-text-container {
+        width: 100%;
+        text-align: center;
+      }
+
+      .flag-container {
+        display: flex;
+        justify-content: center;
+        margin-top: 10px;
+        font-size: 55px;
+      }
+
+      .no-padding {
+        padding-left: 0;
+        padding-right: 0;
+        align-content: center;
+      }
+
+      .end-content {
+        align-content: end;
+        padding-bottom: 115px;
+      }
+
+      .darker { filter: brightness(70%); }
+      `
+          .replaceAll(' ', '')
+          .replaceAll('\n', '') +
+        '</style>'
+    );
 
     html = $.html();
 
@@ -93,6 +198,9 @@ export async function GET(req) {
       .download();
     html = contents;
   }
+
+  const db = getFirestore();
+  logAccess(db, host(pathname + ('?sort=' + sort)));
 
   if (ignoreAnalytics) {
     let $ = require('cheerio').load(html.toString());

@@ -12,6 +12,7 @@ import getMetadata from '@/app/utils/get-metadata';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
+import getTypePath from '@/app/utils/get-type-path';
 
 export default async function WebStories({
   title,
@@ -19,6 +20,7 @@ export default async function WebStories({
   items,
   countryData,
   hashtag,
+  isLocation,
 }) {
   const i18n = useI18n();
   const host = useHost();
@@ -43,23 +45,43 @@ export default async function WebStories({
 
   const theCover = firstItem?.file?.replace('.mp4', '-thumb.png');
 
-  const textStyles = {
-    background: '#ffffff',
-    width: 'auto',
-    padding: '2px 10px',
-    borderRadius: '5px',
-    fontWeight: 'bold',
-    fontFamily:
-      'system-ui,-apple-system,Segoe UI,Roboto,Helvetica Neue,Noto Sans,Liberation Sans,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol,Noto Color Emoji',
-    WebkitBoxDecorationBreak: 'clone',
-    boxDecorationBreak: 'clone',
-    display: 'inline',
-    paddingBottom: 5,
-  };
-
   const needSplit = storyTitle.split(' ').length == 1;
 
   const { description } = getMetadata(firstItem, isBR);
+
+  let firstLandscape = items.find((i) => i.width > i.height);
+  const firstPortrait = items.find((i) => i.height > i.width);
+  const firstSquare = items.find((i) => i.width === i.height);
+
+  if (firstLandscape && firstLandscape.type === 'youtube') {
+    const url = new URL(item.link);
+    const youtubeId = url.searchParams.get('v');
+
+    firstLandscape.file = 'https://img.youtube.com/vi/' + youtubeId + '/0.jpg';
+  }
+
+  const portraitPhoto =
+    firstItem.type === 'story'
+      ? FILE_DOMAIN_PORTRAIT + theCover
+      : firstPortrait
+      ? FILE_DOMAIN + firstPortrait.file
+      : null;
+
+  const landscapePhoto =
+    firstItem.type === 'story'
+      ? FILE_DOMAIN_LANDSCAPE + theCover
+      : firstLandscape
+      ? firstLandscape.type === 'youtube'
+        ? firstLandscape.file
+        : FILE_DOMAIN + firstLandscape.file
+      : null;
+
+  const squarePhoto =
+    firstItem.type === 'story'
+      ? FILE_DOMAIN_SQUARE + theCover
+      : firstSquare
+      ? FILE_DOMAIN + firstSquare.file
+      : null;
 
   return (
     <amp-story
@@ -67,9 +89,9 @@ export default async function WebStories({
       title={title}
       publisher={SITE_NAME}
       publisher-logo-src={host('/icons/96x96.png')}
-      poster-portrait-src={FILE_DOMAIN_PORTRAIT + theCover}
-      poster-landscape-src={FILE_DOMAIN_LANDSCAPE + theCover}
-      poster-square-src={FILE_DOMAIN_SQUARE + theCover}
+      poster-portrait-src={portraitPhoto}
+      poster-landscape-src={portraitPhoto || squarePhoto || landscapePhoto}
+      poster-square-src={squarePhoto}
     >
       <amp-story-page id="cover" auto-advance-after="2s">
         <amp-story-grid-layer template="fill">
@@ -79,7 +101,7 @@ export default async function WebStories({
             height={firstItem.height}
             layout="responsive"
             alt={description}
-            style={{ filter: 'brightness(70%)' }}
+            className="darker"
           ></amp-img>
           <SchemaData media={firstItem} isWebStories={true} />
         </amp-story-grid-layer>
@@ -90,10 +112,10 @@ export default async function WebStories({
             width={96}
             height={96}
           ></amp-img>
-          <div style={{ width: '100%', marginLeft: 6, marginRight: 6 }}>
+          <div className="header-container">
             <h1
+              className="common-text story-title"
               style={{
-                ...textStyles,
                 fontSize:
                   storyTitle.length >= 35 && needSplit
                     ? 17
@@ -107,14 +129,7 @@ export default async function WebStories({
               {storyTitle}
             </h1>
 
-            <div
-              style={{
-                display: 'flex',
-                justifyContent: 'center',
-                marginTop: 10,
-                fontSize: 55,
-              }}
-            >
+            <div className="flag-container">
               {countryData ? (
                 isWindows ? (
                   <amp-img
@@ -137,19 +152,37 @@ export default async function WebStories({
         </amp-story-page-outlink>
       </amp-story-page>
       {items.map((item) => {
-        const { description } = getMetadata(item, isBR);
+        const { description, shortDescription, locationDescription } =
+          getMetadata(item, isBR);
         const [, country, , city] = item.path.split('/');
 
+        const originalId =
+          item.id + (item.img_index ? '-' + item.img_index : '');
         item.id = item.id
           .replace(city + '-post-', '')
-          .replace(city + '-story-', '');
+          .replace(city + '-story-', '')
+          .replace(city + '-youtube-', '')
+          .replace(city + '-short-video-', '')
+          .replace(city + '-360photo-', '')
+          .replace(city + '-maps-', '');
+
+        if (item.type === 'youtube') {
+          const url = new URL(item.link);
+          const youtubeId = url.searchParams.get('v');
+
+          item.file = 'https://img.youtube.com/vi/' + youtubeId + '/0.jpg';
+        }
 
         return (
           <amp-story-page
-            key={item.id}
-            id={item.id}
+            key={originalId}
+            id={originalId}
             auto-advance-after={
-              item.file.includes('.mp4') ? item.id + '-video' : '5s'
+              item.file.includes('.mp4')
+                ? originalId + '-video'
+                : item.type === '360photo'
+                ? '10s'
+                : '5s'
             }
             itemScope
             itemType={
@@ -158,14 +191,29 @@ export default async function WebStories({
                 : 'http://schema.org/ImageObject'
             }
           >
-            <amp-story-grid-layer template="fill">
+            <amp-story-grid-layer
+              template={
+                item.type === 'story' ||
+                item.type === 'short-video' ||
+                (item.type === 'maps' && item.height > item.width)
+                  ? 'fill'
+                  : 'vertical'
+              }
+              className={
+                item.type === 'story' ||
+                item.type === 'short-video' ||
+                (item.type === 'maps' && item.height > item.width)
+                  ? null
+                  : 'no-padding'
+              }
+            >
               {item.file.includes('.mp4') ? (
                 <amp-video
-                  width={item.width}
-                  height={item.height}
+                  width={item.width || 1080}
+                  height={item.height || 1350}
                   layout="responsive"
                   poster={FILE_DOMAIN + item.file.replace('.mp4', '-thumb.png')}
-                  id={item.id + '-video'}
+                  id={originalId + '-video'}
                   autoplay
                   cache="google"
                 >
@@ -174,44 +222,124 @@ export default async function WebStories({
               ) : (
                 <>
                   <amp-img
-                    src={FILE_DOMAIN + item.file.replace('.mp4', '-thumb.png')}
-                    width={item.width}
-                    height={item.height}
+                    src={
+                      item.type === 'youtube'
+                        ? item.file
+                        : FILE_DOMAIN + item.file.replace('.mp4', '-thumb.png')
+                    }
+                    width={(item.type === 'youtube' ? 480 : item.width) || 1080}
+                    height={
+                      (item.type === 'youtube' ? 360 : item.height) || 1350
+                    }
                     layout="responsive"
                     alt={description}
+                    animate-in={item.type === '360photo' ? 'pan-right' : null}
+                    animate-in-duration={
+                      item.type === '360photo' ? '10s' : null
+                    }
                   ></amp-img>
                 </>
               )}
 
               <SchemaData media={item} isWebStories={true} />
             </amp-story-grid-layer>
-            <amp-story-grid-layer template="vertical">
-              <div
-                style={{
-                  ...textStyles,
-                  color: '#fff',
-                  background: 'none',
-                  position: 'absolute',
-                  top: 18,
-                  left: 5,
-                  display: 'flex',
-                  alignContent: 'center',
-                  color: 'rgba(255, 255, 255, 0.8)',
-                }}
-              >
-                @viajarcomale{' '}
-                <div
-                  style={{
-                    fontWeight: 'normal',
-                    fontSize: 14,
-                    marginTop: 6,
-                    marginLeft: 8,
-                  }}
-                >
-                  {expandDate(item.date, isBR, true)}
-                </div>
+            <amp-story-grid-layer
+              template="vertical"
+              className={
+                item.type === 'short-video' ||
+                item.type === 'youtube' ||
+                item.type === 'post' ||
+                item.type === 'maps'
+                  ? 'end-content'
+                  : null
+              }
+            >
+              <div className="common-text username">
+                <span className="username-text">@viajarcomale</span>{' '}
+                {!(
+                  item.city === 'sao-paulo' &&
+                  (item.date.startsWith('2023-09') ||
+                    item.date.startsWith('2023-08'))
+                ) && (
+                  <div className="date">
+                    {expandDate(item.date, isBR, true)}
+                  </div>
+                )}
               </div>
+
+              {(item.type === '360photo' ||
+                item.type === 'short-video' ||
+                item.type === 'youtube' ||
+                item.type === 'post' ||
+                (item.type === 'maps' && !isLocation)) && (
+                <div className="post-type-container" justify-self="center">
+                  <h1
+                    className="common-text"
+                    style={{
+                      fontSize:
+                        item.type === 'post' || item.type === 'maps' ? 22 : 24,
+                      lineHeight:
+                        item.type === 'post' || item.type === 'maps'
+                          ? '24px'
+                          : '30px',
+                    }}
+                  >
+                    {i18n(
+                      item.type === '360photo'
+                        ? '360 Photo'
+                        : item.type === 'short-video'
+                        ? 'Short Video'
+                        : item.type === 'youtube'
+                        ? 'YouTube Video'
+                        : ''
+                    )}
+                    {item.type === 'youtube' && <br />}
+                    {item.type === 'youtube'
+                      ? isBR & item.title_pt
+                        ? item.title_pt
+                        : item.title
+                      : null}
+                    {item.type === 'post'
+                      ? 'Post: ' +
+                        shortDescription +
+                        (item.gallery
+                          ? ' - ' +
+                            (item.gallery.length + 1) +
+                            ' ' +
+                            i18n('items')
+                          : '')
+                      : null}
+                    {item.type !== 'maps' && <br />}
+                    {item.type !== 'youtube' &&
+                      item.type !== 'post' &&
+                      item.type !== 'maps' &&
+                      i18n(
+                        item.type === '360photo'
+                          ? 'swipe up to navigate'
+                          : 'swipe up to watch'
+                      )}
+                    {item.type === 'maps' && !isLocation
+                      ? '📍 ' + locationDescription
+                      : ''}
+                  </h1>
+                </div>
+              )}
             </amp-story-grid-layer>
+            {item.type === '360photo' && !isLocation && locationDescription && (
+              <amp-story-grid-layer template="vertical" className="end-content">
+                <div className="post-type-container" justify-self="center">
+                  <h1
+                    className="common-text"
+                    style={{
+                      fontSize: 24,
+                      lineHeight: '30px',
+                    }}
+                  >
+                    📍 {locationDescription}
+                  </h1>
+                </div>
+              </amp-story-grid-layer>
+            )}
             <amp-story-page-outlink layout="nodisplay">
               <a
                 href={host(
@@ -219,17 +347,59 @@ export default async function WebStories({
                     country +
                     '/cities/' +
                     city +
-                    '/stories/' +
+                    '/' +
+                    getTypePath(item.type) +
+                    '/' +
                     item.id
                 )}
                 target="_blank"
               >
-                {i18n('Open')}
+                {i18n(
+                  item.type === '360photo' ||
+                    item.type === 'short-video' ||
+                    item.type === 'youtube' ||
+                    item.type === 'post'
+                    ? 'Swipe up'
+                    : 'Open'
+                )}
               </a>
             </amp-story-page-outlink>
           </amp-story-page>
         );
       })}
+      <amp-story-page id="end">
+        <amp-story-grid-layer template="fill">
+          <amp-img
+            src={
+              FILE_DOMAIN +
+              '/stories/united-states/death-valley/story-18285703003137254-4.jpg'
+            }
+            width={firstItem.width}
+            height={firstItem.height}
+            layout="responsive"
+            alt={description}
+            className="darker"
+          ></amp-img>
+          <SchemaData media={firstItem} isWebStories={true} />
+        </amp-story-grid-layer>
+        <amp-story-grid-layer template="vertical">
+          <amp-img
+            src={host('/icons/96x96.png')}
+            srcSet={host('/icons/192x192.png') + ' 2x'}
+            width={96}
+            height={96}
+            justify-self="center"
+          ></amp-img>
+          <div className="end-text-container" justify-self="center">
+            <h1 className="common-text end-text">
+              {i18n('Swipe up for more travel photos and videos')}
+            </h1>
+          </div>
+        </amp-story-grid-layer>
+        <amp-story-page-outlink layout="nodisplay">
+          <a href={host('/')}>{i18n('Swipe up')}</a>
+        </amp-story-page-outlink>
+      </amp-story-page>
       <amp-story-auto-analytics
         gtag-id={
           isBR ? process.env.NEXT_GA_TRACKING_BR : process.env.NEXT_GA_TRACKING

@@ -46,8 +46,18 @@ export default function SchemaData({
 
       {media.type !== '360photo' && (
         <>
-          <span itemProp="width" content={media.width}></span>
-          <span itemProp="height" content={media.height}></span>
+          <span
+            itemProp="width"
+            content={
+              isWebStories && media.type === 'youtube' ? 480 : media.width
+            }
+          ></span>
+          <span
+            itemProp="height"
+            content={
+              isWebStories && media.type === 'youtube' ? 360 : media.height
+            }
+          ></span>
         </>
       )}
 

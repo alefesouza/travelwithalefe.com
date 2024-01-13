@@ -96,12 +96,7 @@ export async function generateMetadata({ params: { country, city, stories } }) {
     isBR && theCity.name_pt ? theCity.name_pt : theCity.name,
     i18n(countryData.name),
   ].join(' - ');
-  const title = [
-    i18n('Stories'),
-    location,
-    isWebStories ? 'Web Stories' : '',
-    SITE_NAME,
-  ]
+  const title = [location, isWebStories ? 'Web Stories' : '', SITE_NAME]
     .filter((c) => c)
     .join(' - ');
   const description = i18n('Viajar com Alê stories in :location:', {
@@ -166,8 +161,10 @@ export default async function Highlight({
 
   const db = getFirestore();
   const cache = await db.doc(cacheRef).get();
+  // const cache = { exists: false };
 
   let isRandom = sort === 'random';
+  const isWebStories = stories && stories[0] === 'webstories';
 
   if (isRandom) {
     sort = 'desc';
@@ -175,24 +172,30 @@ export default async function Highlight({
 
   let photos = [];
 
-  if (!cache.exists) {
-    const photosSnapshot = await db
+  if (!cache.exists || isWebStories) {
+    let photosSnapshot = await db
       .collection('countries')
       .doc(country)
       .collection('cities')
       .doc(city)
-      .collection('medias')
-      .where('type', '==', 'story')
-      .orderBy('date', sort)
-      .get();
+      .collection('medias');
+
+    if (!isWebStories) {
+      photosSnapshot = photosSnapshot.where('type', '==', 'story');
+    }
+
+    photosSnapshot = await photosSnapshot.orderBy('date', sort).get();
 
     photosSnapshot.forEach((photo) => {
       const data = photo.data();
       data.path = photo.ref.path;
-      data.link =
-        'https://www.instagram.com/stories/highlights/' +
-        data.original_id +
-        '/';
+
+      if (data.type === 'story') {
+        data.link =
+          'https://www.instagram.com/stories/highlights/' +
+          data.original_id +
+          '/';
+      }
 
       photos = [...photos, data];
     });
@@ -201,7 +204,7 @@ export default async function Highlight({
       redirect('/');
     }
 
-    if (!isRandom && !cache.exists) {
+    if (!isRandom && !isWebStories && !cache.exists) {
       db.doc(cacheRef).set({
         photos,
         last_update: new Date().toISOString().split('T')[0],
@@ -219,7 +222,6 @@ export default async function Highlight({
     sort = 'random';
   }
 
-  const isWebStories = stories && stories[0] === 'webstories';
   logAccess(
     db,
     host((isWebStories ? '/webstories' : '') + '/stories/') +
@@ -230,16 +232,72 @@ export default async function Highlight({
   let instagramStories = photos.filter((p) => p.type === 'story');
 
   if (stories && stories[0] === 'webstories') {
+    let expandedList = [];
+    const posts = photos.filter((p) => p.type === 'post');
+
+    photos.forEach((item) => {
+      expandedList = [...expandedList, item];
+
+      if (item.gallery && item.gallery.length) {
+        const gallery = item.gallery.map((g, i) => ({
+          ...item,
+          ...g,
+          is_gallery: true,
+          img_index: i + 2,
+        }));
+        const itemWithHashtag = gallery.findIndex((g) => g.item_hashtags);
+
+        if (itemWithHashtag > -1) {
+          delete gallery[itemWithHashtag].is_gallery;
+          expandedList[expandedList.length - 1] = gallery[itemWithHashtag];
+
+          item.file_type = 'image';
+          gallery[itemWithHashtag] = item;
+        }
+
+        if (posts.length <= 5 || item.is_compilation) {
+          expandedList = [...expandedList, ...gallery];
+        } else if (
+          gallery.some(
+            (g) => g.rss_include && g.rss_include.includes(finalHashtag.name)
+          )
+        ) {
+          expandedList = [
+            ...expandedList,
+            ...gallery.filter(
+              (g) => g.rss_include && g.rss_include.includes(finalHashtag.name)
+            ),
+          ];
+        }
+      }
+    });
+    photos = expandedList;
+
     const location = [
       isBR && theCity.name_pt ? theCity.name_pt : theCity.name,
       i18n(countryData.name),
     ].join(' - ');
 
+    let items = [
+      ...instagramStories,
+      ...photos.filter((p) => p.type === 'post'),
+      ...photos.filter((p) => p.type === '360photo'),
+      ...photos.filter((p) => p.type === 'short-video'),
+      ...photos.filter((p) => p.type === 'youtube'),
+    ];
+
+    if (items.length < 100) {
+      items = [...items, ...photos.filter((p) => p.type === 'maps')].slice(
+        0,
+        100
+      );
+    }
+
     return (
       <WebStories
         title={location}
         storyTitle={location}
-        items={instagramStories}
+        items={items.filter((c) => !c.rss_ignore)}
         countryData={countryData}
       />
     );
@@ -415,7 +473,7 @@ export default async function Highlight({
 
               <div className="instagram_highlights_items">
                 {instagramStories.map((p) => (
-                  <Media key={p.id} media={p} isBR={isBR} hasPoster isListing />
+                  <Media media={p} isBR={isBR} key={p.id} hasPoster isListing />
                 ))}
               </div>
             </div>
