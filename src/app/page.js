@@ -3,9 +3,11 @@ import HomeButton from './components/home-button';
 import useI18n from './hooks/use-i18n';
 import useHost from './hooks/use-host';
 import Link from 'next/link';
-import logAccess from './utils/log-access';
-import { getFirestore } from 'firebase-admin/firestore';
 import defaultMetadata from './utils/default-metadata';
+import styles from './page.module.css';
+import countries from './utils/countries';
+import { UAParser } from 'ua-parser-js';
+import { headers } from 'next/headers';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -27,25 +29,47 @@ export async function generateMetadata() {
 export default async function Home() {
   const host = useHost();
   const i18n = useI18n();
-
-  const db = getFirestore();
-  logAccess(db, host('/'));
+  const isBR = host().includes('viajarcomale.com.br');
+  const isWindows =
+    new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
 
   return (
     <div className="container">
+      <h2 className={styles.headline}>
+        {i18n('My photos and videos by country')}
+      </h2>
+      <div className={styles.country_selector}>
+        {countries.map((c) => (
+          <Link
+            href={`/countries/${c.slug}`}
+            key={c.name}
+            className={styles.country}
+            prefetch={false}
+          >
+            <div className={styles.country_flag}>
+              {isWindows ? (
+                <img
+                  src={host('/flags/' + c.slug + '.png')}
+                  alt={i18n(c.name)}
+                  width={30}
+                  height={30}
+                />
+              ) : (
+                c.flag
+              )}
+            </div>
+            <span>{i18n(c.name)}</span>
+          </Link>
+        ))}
+      </div>
       <div className="list-group">
-        <Link
-          href="/countries"
-          className="list-group-item list-group-item-action"
-        >
-          {i18n('Albums - Photos separated by country')}
-        </Link>
         {links.map((l) => (
           <HomeButton
             key={l.text}
-            text={l.translate ? i18n(l.text) : l.text}
-            url={l.url}
+            text={i18n(l.text)}
+            url={isBR && l.url_pt ? l.url_pt : l.url}
             image={l.image ? host(l.image) : null}
+            subpage={l.subpage}
           />
         ))}
         <a

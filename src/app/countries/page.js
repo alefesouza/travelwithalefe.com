@@ -54,7 +54,7 @@ export default function Countries() {
             className={styles.country}
             prefetch={false}
           >
-            <span className={styles.country_flag}>
+            <div className={styles.country_flag}>
               {isWindows ? (
                 <img
                   src={host('/flags/' + c.slug + '.png')}
@@ -65,7 +65,7 @@ export default function Countries() {
               ) : (
                 c.flag
               )}
-            </span>
+            </div>
             <span>{i18n(c.name)}</span>
           </Link>
         ))}

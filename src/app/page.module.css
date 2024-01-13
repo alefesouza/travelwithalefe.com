@@ -1,1 +1,107 @@
+.country {
+  height: 87px;
+  border: 1px solid #212529;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  cursor: pointer;
+}
 
+.country:hover {
+  background: #dddddd;
+}
+
+.country_flag {
+  font-size: 30px;
+}
+
+.country_selector {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+  text-align: center;
+}
+
+.country_selector a {
+  color: #212529;
+}
+
+.country_selector a:hover {
+  text-decoration: none;
+}
+
+.country_selector span {
+  font-size: 14px;
+}
+
+@media (min-width: 395px) {
+  .country_selector span {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 494px) {
+  .country_selector span {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 520px) {
+  .country_selector span {
+    font-size: 15px;
+  }
+}
+
+@media (min-width: 614px) {
+  .country_selector span {
+    font-size: 14px;
+  }
+}
+
+@media (min-width: 655px) {
+  .country_selector span {
+    font-size: 15px;
+  }
+}
+
+.vertical_content {
+  width: 260px;
+  height: 462px;
+  object-fit: cover;
+}
+
+@media (min-width: 644px) {
+  .vertical_content {
+    width: 300px;
+    height: 533px;
+  }
+}
+
+.instagram_photos_title {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.instagram_photos_title a {
+  text-decoration: underline;
+}
+
+.short_video_links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+
+.headline {
+  font-size: 21px;
+}
+
+@media (min-width: 380px) {
+  .headline {
+    font-size: 22px;
+  }
+}
