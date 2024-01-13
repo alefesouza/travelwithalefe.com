@@ -1,14 +1,16 @@
-export default function getTypePath(type) {
+export default function getTypePath(type, isDb) {
   switch (type) {
     case 'story':
-      return 'stories';
+      return isDb ? 'story' : 'stories';
     case 'youtube':
-      return 'videos';
+      return isDb ? 'youtube' : 'videos';
     case 'short-video':
-      return 'short-videos';
+      return isDb ? 'shorts' : 'short-videos';
     case '360photo':
-      return '360-photos';
+      return isDb ? '360photo' : '360-photos';
+    case 'maps':
+      return 'maps';
     default:
-      return 'posts';
+      return isDb ? 'post' : 'posts';
   }
 }

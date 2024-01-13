@@ -33,6 +33,9 @@ querySnapshot2.forEach((theDoc) => {
       (c) =>
         c.type === 'short-video' && c.hashtags && c.hashtags.includes(data.name)
     ).length,
+    maps: medias.filter(
+      (c) => c.type === 'maps' && c.hashtags && c.hashtags.includes(data.name)
+    ).length,
   };
 
   theBatch.update(doc(db, theDoc.ref.path), {
@@ -41,7 +44,8 @@ querySnapshot2.forEach((theDoc) => {
       (totals.posts || 0) +
       (totals.photos360 || 0) +
       (totals.videos || 0) +
-      (totals.shorts || 0),
+      (totals.shorts || 0) +
+      (totals.maps || 0),
     totals: {
       ...totals,
     },

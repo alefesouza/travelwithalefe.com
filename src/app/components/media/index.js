@@ -30,7 +30,8 @@ export default function Media({
     .replace(city + '-story-', '')
     .replace(city + '-youtube-', '')
     .replace(city + '-short-video-', '')
-    .replace(city + '-360photo-', '');
+    .replace(city + '-360photo-', '')
+    .replace(city + '-maps-', '');
 
   const isVideo =
     media.type === 'youtube' ||
@@ -38,7 +39,7 @@ export default function Media({
     media.file.includes('.mp4');
 
   const mediaElement =
-    media.type === 'post' || media.type === 'story' ? (
+    media.type === 'post' || media.type === 'story' || media.type === 'maps' ? (
       isVideo ? (
         <>
           {isListing ? (
@@ -109,6 +110,7 @@ export default function Media({
         (isMain && media.type === 'story' && media.mode === 'portrait'
           ? ' ' + 'instagram_media_portrait'
           : '') +
+        (isMain ? ' ' + 'main_item' : '') +
         (media.gallery && media.gallery.length > 0 && !expandGalleries
           ? ' ' + 'instagram_media_is_gallery'
           : '')
@@ -139,7 +141,7 @@ export default function Media({
           {(media.type === 'post' || media.type === 'story') && (
             <a
               href={
-                media.highlight
+                media.type === 'story'
                   ? 'https://www.instagram.com/stories/highlights/' +
                     media.original_id +
                     '/'
@@ -200,7 +202,13 @@ export default function Media({
           {media.img_index ? '- Item ' + media.img_index : ''}
         </div>
 
-        {media.type === 'story' && (
+        {(media.type === 'story' ||
+          (media.type === 'maps' &&
+            !(
+              media.city === 'sao-paulo' &&
+              (media.date.startsWith('2023-08') ||
+                media.date.startsWith('2023-09'))
+            ))) && (
           <div style={{ marginTop: 4 }}>{expandDate(media.date, isBR)}</div>
         )}
 
@@ -212,7 +220,7 @@ export default function Media({
               style={{ marginTop: 4 }}
               className={'instagram_media_location'}
             >
-              {i18n(media.location_data.length > 1 ? 'Locations' : 'Location')}:{' '}
+              {i18n(media.location_data.length > 1 ? 'Places' : 'Place')}:{' '}
               <span>
                 {media.location_data.map((location, i) => (
                   <>

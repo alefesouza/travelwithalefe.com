@@ -54,6 +54,7 @@ export default function getMetadata(media, isBR, position) {
         ? media.title_pt
         : media.title
       : shortDescription,
+    media.type === '360photo' ? i18n('360 Photo') : '',
     media.img_index || position ? 'Item ' + (media.img_index || position) : '',
     locationTitle,
     locationCity,
@@ -63,12 +64,14 @@ export default function getMetadata(media, isBR, position) {
     .join(' - ');
 
   let embedVideo = null;
+  let image = null;
 
   if (media.type === 'youtube') {
     const url = new URL(media.link);
     const id = url.searchParams.get('v');
 
     embedVideo = 'https://www.youtube.com/embed/' + id;
+    image = 'https://img.youtube.com/vi/' + id + '/0.jpg';
   }
 
   if (media.type === 'short-video') {
@@ -76,13 +79,14 @@ export default function getMetadata(media, isBR, position) {
     const id = split[split.length - 1];
 
     embedVideo = 'https://www.youtube.com/embed/' + id;
+    image = 'https://img.youtube.com/vi/' + id + '/0.jpg';
   }
 
   const theDescription = [
     description,
     media.img_index ? 'Item ' + media.img_index : null,
     locationDescription
-      ? i18n(media.location_data.length > 1 ? 'Locations' : 'Location') +
+      ? i18n(media.location_data.length > 1 ? 'Places' : 'Place') +
         ': ' +
         locationDescription
       : i18n('City') +
@@ -97,8 +101,10 @@ export default function getMetadata(media, isBR, position) {
   return {
     title,
     description: theDescription,
+    shortDescription,
     hashtags,
     locationDescription,
     embedVideo,
+    image,
   };
 }

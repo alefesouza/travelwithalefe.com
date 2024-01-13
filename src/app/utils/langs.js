@@ -10,6 +10,7 @@ const langs = {
     '#food': '#comida',
     '#observationdeck': '#mirante',
     '#favorites': '#favoritos',
+    'My photos and videos by country': 'Minhas fotos e vídeos de cada país',
 
     // Albums
     'Select Country': 'Selecione o país',
@@ -40,13 +41,39 @@ const langs = {
     Share: 'Compartilhar',
     Photo: 'Foto',
     Video: 'Vídeo',
-    Location: 'Local',
-    Locations: 'Locais',
+    Place: 'Local',
+    Places: 'Locais',
     Open: 'Abrir',
     City: 'Cidade',
     Maximize: 'Maximizar',
     Minimize: 'Minimizar',
     Contact: 'Contato',
+    'Swipe up for more travel photos and videos':
+      'Arraste para cima para mais fotos e vídeos de viagem',
+    'Swipe up': 'Arraste para cima',
+    '360 Photo': 'Foto 360',
+    'Short Video': 'Vídeo curto',
+    'YouTube Video': 'Vídeo do YouTube',
+    'swipe up to navigate': 'arraste para cima para navegar',
+    'swipe up to watch': 'arraste para cima para assistir',
+    items: 'itens',
+    'Main visited places': 'Principais locais visitados',
+
+    'Next post': 'Próximo post',
+    'Next story': 'Próximo story',
+    'Next video': 'Próximo vídeo',
+    'Next short video': 'Próximo vídeo curto',
+    'Next 360 photo': 'Próxima foto 360',
+    'Next place photo': 'Próxima foto de local',
+    'Previous post': 'Post anterior',
+    'Previous story': 'Story anterior',
+    'Previous video': 'Vídeo anterior',
+    'Previous short video': 'Vídeo curto anterior',
+    'Previous 360 photo': 'Foto 360 anterior',
+    'Previous place photo': 'Foto de local anterior',
+
+    'Place Photos': 'Fotos do local',
+    'Places Photos': 'Foto dos locais',
 
     // Map
     Map: 'Mapa',
@@ -57,6 +84,7 @@ const langs = {
     'Google Maps logo': 'Logo do Google Maps',
     'The map of the places I have been.':
       'O mapa dos lugares que eu já visitei.',
+    'Load visited places map': 'Carregar mapa dos locais visitados',
 
     // About
     About: 'Sobre',

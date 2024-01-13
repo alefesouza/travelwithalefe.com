@@ -14,7 +14,7 @@ export async function GET() {
   //   new URL(string, 'https://viajarcomale.com/').toString();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const lastmod = '2024-01-07';
+  const lastmod = '2024-01-13';
 
   const db = getFirestore();
   const reference = host('sitemap.xml')
@@ -76,7 +76,7 @@ export async function GET() {
         item.type === 'short-video' ||
         item.file.includes('.mp4')
       ) {
-        const { title, description, embedVideo } = getMetadata(
+        const { title, description, embedVideo, image } = getMetadata(
           media,
           isBR,
           position
@@ -86,8 +86,8 @@ export async function GET() {
           'video:video': [
             {
               'video:thumbnail_loc':
-                item.type === 'youtube'
-                  ? item.image
+                item.type === 'youtube' || item.type === 'short-video'
+                  ? image
                   : FILE_DOMAIN + item.file.replace('.mp4', '-thumb.png'),
               [item.type === 'youtube' || item.type === 'short-video'
                 ? 'video:player_loc'
@@ -185,9 +185,7 @@ export async function GET() {
           },
           ...Array.from(
             {
-              length: Math.ceil(
-                c?.totals?.instagram_photos / ITEMS_PER_PAGE - 1
-              ),
+              length: Math.ceil(c?.totals?.posts / ITEMS_PER_PAGE - 1),
             },
             (_, i) => [
               {
@@ -214,9 +212,7 @@ export async function GET() {
               },
               ...Array.from(
                 {
-                  length: Math.ceil(
-                    city?.totals?.instagram_photos / ITEMS_PER_PAGE - 1
-                  ),
+                  length: Math.ceil(city?.totals?.posts / ITEMS_PER_PAGE - 1),
                 },
                 (_, i) => [
                   {
@@ -346,6 +342,23 @@ export async function GET() {
                   city +
                   '/360-photos/' +
                   m.id.replace(city + '-360photo-', '')
+              ),
+              ...mediaProcessing(m, null),
+            };
+          }),
+        ...medias
+          .filter((m) => m.type === 'maps')
+          .map((m) => {
+            const [, country, , city] = m.path.split('/');
+
+            return {
+              ...makeLoc(
+                '/countries/' +
+                  country +
+                  '/cities/' +
+                  city +
+                  '/maps/' +
+                  m.id.replace(city + '-maps-', '')
               ),
               ...mediaProcessing(m, null),
             };

@@ -35,18 +35,11 @@ export default function defaultMetadata(title, description, media, isSingle) {
   }
 
   if (media) {
-    if (media.type === 'youtube' || media.type === 'short-video') {
-      const split = (media.link || media.youtube_link).split('/');
-      const youtubeId = split[split.length - 1];
-
-      media.file = 'https://img.youtube.com/vi/' + youtubeId + '/0.jpg';
-    }
-
     images = [
       {
         url:
           media.type === 'youtube' || media.type === 'short-video'
-            ? media.file
+            ? metadata.image
             : (media.type === 'story' ? FILE_DOMAIN_SQUARE : FILE_DOMAIN) +
               media.file.replace('.mp4', '-thumb.png'),
         width: media.width,

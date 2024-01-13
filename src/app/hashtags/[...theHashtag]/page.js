@@ -27,6 +27,7 @@ export async function generateMetadata({
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const isWebStories = theHashtag[1] === 'webstories';
+  const isExpand = theHashtag[1] === 'expand';
 
   const hashtag = removeDiacritics(decodeURIComponent(theHashtag[0]));
 
@@ -116,17 +117,6 @@ export async function generateMetadata({
     );
   }
 
-  const enUrl =
-    'https://viajarcomale.com' +
-    (isWebStories ? '/webstories' : '') +
-    '/hashtags/' +
-    finalHashtag.name;
-  const ptUrl =
-    'https://viajarcomale.com.br' +
-    (isWebStories ? '/webstories' : '') +
-    '/hashtags/' +
-    (finalHashtag.name_pt ? finalHashtag.name_pt : finalHashtag.name);
-
   const sort = getSort(searchParams, false, false);
   let coverSnapshot = await db
     .collectionGroup('medias')
@@ -135,15 +125,9 @@ export async function generateMetadata({
     .get();
 
   if (coverSnapshot.size === 0) {
-    coverSnapshot = db
+    coverSnapshot = await db
       .collectionGroup('medias')
-      .where('hashtags', 'array-contains', finalHashtag.name);
-
-    if (isWebStories) {
-      coverSnapshot = coverSnapshot.where('type', '==', 'story');
-    }
-
-    coverSnapshot = await coverSnapshot
+      .where('hashtags', 'array-contains', finalHashtag.name)
       .orderBy('date', sort)
       .limit(isWebStories ? 1 : 2)
       .get();
@@ -165,6 +149,19 @@ export async function generateMetadata({
 
   const defaultMeta = defaultMetadata(title, description, cover);
 
+  const enUrl =
+    'https://viajarcomale.com' +
+    (isWebStories ? '/webstories' : '') +
+    '/hashtags/' +
+    finalHashtag.name +
+    (isExpand ? '/expand' : '');
+  const ptUrl =
+    'https://viajarcomale.com.br' +
+    (isWebStories ? '/webstories' : '') +
+    '/hashtags/' +
+    (finalHashtag.name_pt ? finalHashtag.name_pt : finalHashtag.name) +
+    (isExpand ? '/expand' : '');
+
   return {
     ...defaultMeta,
     openGraph: {
@@ -182,7 +179,7 @@ export async function generateMetadata({
         'application/rss+xml': host('/rss/hashtags/' + hashtag),
       },
     },
-    ...(finalHashtag?.totals?.stories > 0 && !isWebStories
+    ...(!isWebStories
       ? {
           icons: {
             // Why Next.js doesn't just allow us to create custom <link> tags directly...
@@ -228,7 +225,7 @@ export default async function Country({
 
   hashtag = finalHashtag.name;
 
-  const expandGalleries = expand;
+  const expandGalleries = expand === 'expand';
   let sort = getSort(searchParams);
 
   const cacheRef = `/caches/hashtags/hashtags-cache/${hashtag}/sort/${
@@ -236,6 +233,7 @@ export default async function Country({
   }`;
 
   const cache = await db.doc(cacheRef).get();
+  // const cache = { exists: false };
 
   let isRandom = sort === 'random';
 
@@ -245,7 +243,9 @@ export default async function Country({
 
   let photos = [];
 
-  if (!cache.exists) {
+  const isWebStories = theHashtag[1] === 'webstories';
+
+  if (!cache.exists || isWebStories) {
     const photosSnapshot = await db
       .collectionGroup('medias')
       .where('hashtags', 'array-contains', hashtag)
@@ -300,14 +300,6 @@ export default async function Country({
     sort = 'random';
   }
 
-  const isWebStories = theHashtag[1] === 'webstories';
-  logAccess(
-    db,
-    host((isWebStories ? '/webstories' : '') + '/hashtags/') +
-      decodeURIComponent(queryHashtag) +
-      ('?sort=' + sort)
-  );
-
   let newShuffle = randomIntFromInterval(1, 15);
 
   if (newShuffle == searchParams.shuffle) {
@@ -321,6 +313,7 @@ export default async function Country({
   const shortVideos = photos.filter((p) => p.type === 'short-video');
   const youtubeVideos = photos.filter((p) => p.type === 'youtube');
   const _360photos = photos.filter((p) => p.type === '360photo');
+  const mapsPhotos = photos.filter((p) => p.type === 'maps');
 
   if (sort == 'desc') {
     instagramStories.sort(function (a, b) {
@@ -330,17 +323,6 @@ export default async function Country({
     instagramStories.sort(function (a, b) {
       return new Date(a.date) - new Date(b.date);
     });
-  }
-
-  if (expand == 'webstories') {
-    return (
-      <WebStories
-        title={`#${hashtagPt ? hashtagPt.name_pt : hashtag}`}
-        storyTitle={`#${hashtagPt ? hashtagPt.name_pt : hashtag}`}
-        items={instagramStories}
-        hashtag={hashtagPt ? hashtagPt.name_pt : hashtag}
-      />
-    );
   }
 
   let expandedList = [];
@@ -356,7 +338,7 @@ export default async function Country({
         img_index: i + 2,
       }));
       const itemWithHashtag = gallery.findIndex(
-        (g) => g.item_hashtags && g.item_hashtags.includes(hashtag)
+        (g) => g.item_hashtags && g.item_hashtags.includes(finalHashtag.name)
       );
 
       if (itemWithHashtag > -1) {
@@ -367,13 +349,44 @@ export default async function Country({
         gallery[itemWithHashtag] = item;
       }
 
-      if (expandGalleries) {
+      if (expandGalleries || (isWebStories && !item.is_compilation)) {
         expandedList = [...expandedList, ...gallery];
       }
     }
   });
 
   instagramPhotos = expandedList;
+
+  if (expand == 'webstories') {
+    let items = [
+      ...instagramStories,
+      ...instagramPhotos,
+      ..._360photos,
+      ...youtubeVideos,
+      ...shortVideos,
+    ];
+
+    if (items.length < 100) {
+      items = [...items, ...mapsPhotos].slice(0, 100);
+    }
+
+    return (
+      <WebStories
+        title={`#${hashtagPt ? hashtagPt.name_pt : hashtag}`}
+        storyTitle={`#${hashtagPt ? hashtagPt.name_pt : hashtag}`}
+        items={items}
+        hashtag={hashtagPt ? hashtagPt.name_pt : hashtag}
+      />
+    );
+  }
+
+  logAccess(
+    db,
+    host('/hashtags/') +
+      decodeURIComponent(queryHashtag) +
+      (expand ? '/expand' : '') +
+      ('?sort=' + sort)
+  );
 
   const currentHashtag = decodeURIComponent(
     hashtagPt ? hashtagPt.name_pt : hashtag
@@ -439,9 +452,12 @@ export default async function Country({
     </div>
   );
 
+  const webStoriesHref = host('/webstories/hashtags/' + currentHashtag);
+
   return (
     <div>
       <div className="container">
+        {JSON.stringify(_360photos)}
         <div
           style={{
             display: 'flex',
@@ -500,6 +516,20 @@ export default async function Country({
         <h2>#{currentHashtag}</h2>
       </div>
 
+      {finalHashtag.name === '360photo' && (
+        <>
+          {_360photos.length > 1 && sortPicker('360photos')}
+
+          {_360photos.length > 0 && (
+            <Scroller
+              title={i18n('360 Photos')}
+              items={_360photos}
+              is360Photos
+            />
+          )}
+        </>
+      )}
+
       <div className={styles.galleries}>
         {instagramStories.length > 1 && sortPicker('stories')}
 
@@ -508,9 +538,20 @@ export default async function Country({
             title="Stories"
             items={instagramStories}
             isStories
-            webStoriesHref={host('/webstories/hashtags/' + currentHashtag)}
+            webStoriesHref={webStoriesHref}
             sort={sort}
           />
+        )}
+
+        {instagramStories.length === 0 && (
+          <div className="center_link">
+            <a
+              href={webStoriesHref + (sort !== 'desc' ? '?sort=' + sort : '')}
+              target="_blank"
+            >
+              {i18n('Open in Stories format')}
+            </a>
+          </div>
         )}
 
         {shortVideos.length > 1 && sortPicker('short')}
@@ -533,10 +574,18 @@ export default async function Country({
           />
         )}
 
-        {_360photos.length > 1 && sortPicker('360photos')}
+        {finalHashtag.name !== '360photo' && (
+          <>
+            {_360photos.length > 1 && sortPicker('360photos')}
 
-        {_360photos.length > 0 && (
-          <Scroller title={i18n('360 Photos')} items={_360photos} is360Photos />
+            {_360photos.length > 0 && (
+              <Scroller
+                title={i18n('360 Photos')}
+                items={_360photos}
+                is360Photos
+              />
+            )}
+          </>
         )}
 
         {instagramPhotos.filter((p) => !p.file_type).length > 1 &&
@@ -575,8 +624,33 @@ export default async function Country({
                 )}
               </div>
 
-              <div className={styles.instagram_highlights_items}>
+              <div className="instagram_highlights_items">
                 {instagramPhotos.map((p) => (
+                  <Media
+                    key={p.id}
+                    media={p}
+                    isBR={isBR}
+                    expandGalleries={expandGalleries}
+                    isListing
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {mapsPhotos.filter((p) => !p.file_type).length > 1 &&
+          sortPicker('maps')}
+
+        {mapsPhotos.filter((p) => !p.file_type).length > 0 && (
+          <div className="container-fluid">
+            <div className={styles.instagram_photos}>
+              <div className={styles.instagram_photos_title}>
+                <h3>{i18n('Places Photos')}</h3>
+              </div>
+
+              <div className="instagram_highlights_items">
+                {mapsPhotos.map((p) => (
                   <Media
                     key={p.id}
                     media={p}

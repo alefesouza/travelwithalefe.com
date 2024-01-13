@@ -1,13 +1,9 @@
 import useI18n from '@/app/hooks/use-i18n';
 import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
-import { getFirestore, FieldValue } from 'firebase-admin/firestore';
+import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
-import {
-  FILE_DOMAIN,
-  FILE_DOMAIN_SQUARE,
-  SITE_NAME,
-} from '@/app/utils/constants';
+import { SITE_NAME } from '@/app/utils/constants';
 import Scroller from '@/app/components/scroller';
 import { redirect } from 'next/navigation';
 import Media from '@/app/components/media';
@@ -116,16 +112,10 @@ export async function generateMetadata({
   );
 
   const sort = getSort(searchParams, false, false);
-  let coverSnapshot = db
+  let coverSnapshot = await db
     .collectionGroup('medias')
     .where('locations', 'array-contains', location)
-    .where('city', '==', city);
-
-  if (isWebStories) {
-    coverSnapshot = coverSnapshot.where('type', '==', 'story');
-  }
-
-  coverSnapshot = await coverSnapshot
+    .where('city', '==', city)
     .orderBy('date', sort)
     .limit(isWebStories ? 1 : 2)
     .get();
@@ -146,7 +136,7 @@ export async function generateMetadata({
 
   return {
     ...defaultMetadata(title, description, cover),
-    ...(theMedia?.totals?.stories > 0 && !isWebStories
+    ...(!isWebStories
       ? {
           icons: {
             // Why Next.js doesn't just allow us to create custom <link> tags directly...
@@ -180,7 +170,7 @@ export default async function Country({
   const [queryLocation, expand] = theLocation;
   const location = decodeURIComponent(queryLocation);
 
-  const expandGalleries = expand;
+  const expandGalleries = expand === 'expand';
   let sort = getSort(searchParams, theLocation[1] === 'webstories');
 
   const countryData = await getCountry(country, city);
@@ -191,12 +181,13 @@ export default async function Country({
 
   let theCity = countryData.cities.find((c) => c.slug === city);
 
-  const cacheRef = `/caches/locations/locations-cache/${location}/sort/${
+  const cacheRef = `/caches/locations/locations-cache/${city}-${location}/sort/${
     sort === 'asc' ? 'asc' : 'desc'
   }`;
 
   const db = getFirestore();
   const cache = await db.doc(cacheRef).get();
+  // const cache = { exists: false };
 
   let isRandom = sort === 'random';
 
@@ -216,7 +207,9 @@ export default async function Country({
     .get();
   let theMedia = mediaRef.data();
 
-  if (!cache.exists) {
+  const isWebStories = theLocation[1] === 'webstories';
+
+  if (!cache.exists || isWebStories) {
     const photosSnapshot = await db
       .collectionGroup('medias')
       .where('locations', 'array-contains', location)
@@ -227,7 +220,6 @@ export default async function Country({
     photosSnapshot.forEach((photo) => {
       const data = photo.data();
       data.path = photo.ref.path;
-
       photos = [...photos, data];
     });
 
@@ -235,7 +227,7 @@ export default async function Country({
       redirect(`/countries/${country}/cities/${city}`);
     }
 
-    if (!isRandom && !cache.exists) {
+    if (!isRandom && !cache.exists && !isWebStories) {
       db.doc(cacheRef).set({
         photos,
         last_update: new Date().toISOString().split('T')[0],
@@ -253,11 +245,11 @@ export default async function Country({
     sort = 'random';
   }
 
-  const isWebStories = theLocation[1] === 'webstories';
   logAccess(
     db,
     host((isWebStories ? '/webstories' : '') + '/locations/') +
       location +
+      (expand ? '/expand' : '') +
       ('?sort=' + sort)
   );
 
@@ -315,6 +307,7 @@ export default async function Country({
   const shortVideos = photos.filter((p) => p.type === 'short-video');
   const youtubeVideos = photos.filter((p) => p.type === 'youtube');
   const _360photos = photos.filter((p) => p.type === '360photo');
+  const mapsPhotos = photos.filter((p) => p.type === 'maps');
 
   if (sort == 'desc') {
     instagramStories.sort(function (a, b) {
@@ -324,26 +317,6 @@ export default async function Country({
     instagramStories.sort(function (a, b) {
       return new Date(a.date) - new Date(b.date);
     });
-  }
-
-  if (expand == 'webstories') {
-    const title = [
-      (isBR && theMedia.name_pt ? theMedia.name_pt : theMedia.name) +
-        (theMedia.alternative_names
-          ? ' (' + theMedia.alternative_names.join(', ') + ')'
-          : ''),
-      isBR && theCity.name_pt ? theCity.name_pt : theCity.name,
-      i18n(countryData.name),
-    ].join(' - ');
-
-    return (
-      <WebStories
-        title={title}
-        storyTitle={title}
-        items={instagramStories}
-        countryData={countryData}
-      />
-    );
   }
 
   let expandedList = [];
@@ -370,13 +343,41 @@ export default async function Country({
         gallery[itemWithLocation] = item;
       }
 
-      if (expandGalleries) {
+      if (expandGalleries || (isWebStories && !item.is_compilation)) {
         expandedList = [...expandedList, ...gallery];
       }
     }
   });
 
   instagramPhotos = expandedList;
+
+  if (expand == 'webstories') {
+    const title = [
+      (isBR && theMedia.name_pt ? theMedia.name_pt : theMedia.name) +
+        (theMedia.alternative_names
+          ? ' (' + theMedia.alternative_names.join(', ') + ')'
+          : ''),
+      isBR && theCity.name_pt ? theCity.name_pt : theCity.name,
+      i18n(countryData.name),
+    ].join(' - ');
+
+    return (
+      <WebStories
+        title={title}
+        storyTitle={title}
+        items={[
+          ...instagramStories,
+          ...instagramPhotos,
+          ..._360photos,
+          ...youtubeVideos,
+          ...shortVideos,
+          ...mapsPhotos,
+        ]}
+        countryData={countryData}
+        isLocation
+      />
+    );
+  }
 
   const breadcrumbs = [
     {
@@ -407,6 +408,15 @@ export default async function Country({
     return a > b ? 1 : a < b ? -1 : 0;
   });
 
+  const webStoriesHref = host(
+    '/webstories/countries/' +
+      country +
+      '/cities/' +
+      city +
+      '/locations/' +
+      location
+  );
+
   return (
     <div>
       <div className="container">
@@ -421,7 +431,7 @@ export default async function Country({
           </Link>
 
           <div style={{ display: 'flex', gap: 16 }}>
-            {
+            {theMedia.latitude !== 0 && theMedia.longitude !== 0 && (
               <a
                 href={`https://www.google.com/maps/search/${theMedia.name}/@${theMedia.latitude},${theMedia.longitude},13z`}
                 target="_blank"
@@ -434,7 +444,7 @@ export default async function Country({
                   alt={i18n('Google Maps logo')}
                 />
               </a>
-            }
+            )}
             <ShareButton />
           </div>
         </div>
@@ -493,16 +503,20 @@ export default async function Country({
             title="Stories"
             items={instagramStories}
             isStories
-            webStoriesHref={host(
-              '/webstories/countries/' +
-                country +
-                '/cities/' +
-                city +
-                '/locations/' +
-                location
-            )}
+            webStoriesHref={webStoriesHref}
             sort={sort}
           />
+        )}
+
+        {instagramStories.length === 0 && (
+          <div className="center_link">
+            <a
+              href={webStoriesHref + (sort !== 'desc' ? '?sort=' + sort : '')}
+              target="_blank"
+            >
+              {i18n('Open in Stories format')}
+            </a>
+          </div>
         )}
 
         {shortVideos.length > 1 && sortPicker('short')}
@@ -531,44 +545,18 @@ export default async function Country({
           <Scroller title={i18n('360 Photos')} items={_360photos} is360Photos />
         )}
 
-        {instagramPhotos.filter((p) => !p.file_type).length > 1 &&
-          sortPicker('photos')}
+        {mapsPhotos.filter((p) => !p.file_type).length > 1 &&
+          sortPicker('maps')}
 
-        {instagramPhotos.filter((p) => !p.file_type).length > 0 && (
+        {mapsPhotos.filter((p) => !p.file_type).length > 0 && (
           <div className="container-fluid">
             <div className={styles.instagram_photos}>
               <div className={styles.instagram_photos_title}>
-                <h3>{i18n('Posts')}</h3>
+                <h3>{i18n('Place Photos')}</h3>
               </div>
 
-              <div className="center_link">
-                {!expandGalleries ? (
-                  <Link
-                    href={
-                      `/countries/${country}/cities/${city}/locations/${location}/expand` +
-                      (sort !== 'desc' ? '?sort=' + sort : '')
-                    }
-                    scroll={false}
-                    prefetch={false}
-                  >
-                    {i18n('Expand Galleries')}
-                  </Link>
-                ) : (
-                  <Link
-                    href={
-                      `/countries/${country}/cities/${city}/locations/${location}` +
-                      (sort !== 'desc' ? '?sort=' + sort : '')
-                    }
-                    scroll={false}
-                    prefetch={false}
-                  >
-                    {i18n('Minimize Galleries')}
-                  </Link>
-                )}
-              </div>
-
-              <div className={styles.instagram_highlights_items}>
-                {instagramPhotos.map((p) => (
+              <div className="instagram_highlights_items">
+                {mapsPhotos.map((p) => (
                   <Media
                     key={p.id}
                     media={p}

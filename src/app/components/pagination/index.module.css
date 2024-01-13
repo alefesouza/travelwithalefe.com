@@ -42,7 +42,7 @@
   display: none;
 }
 
-@media(min-width: 400px) {
+@media (min-width: 400px) {
   .pagination a {
     padding: 10px 10px;
   }
@@ -56,7 +56,7 @@
   }
 }
 
-@media(min-width: 1000px) {
+@media (min-width: 1000px) {
   .mobile_pagination {
     display: none;
   }
@@ -81,7 +81,9 @@
   text-align: center;
 }
 
-.page_number_active, .page_number_active:hover, .pagination a:active {
+.page_number_active,
+.page_number_active:hover,
+.pagination a:active {
   background-color: #2096cc !important;
   color: #ffffff !important;
 }

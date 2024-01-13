@@ -93,6 +93,9 @@ exports.onMediaUpdated = onDocumentUpdated(
             case '360photo':
               key = 'photos360';
               break;
+            case 'maps':
+              key = 'maps';
+              break;
             case 'youtube':
               key = 'videos';
               break;

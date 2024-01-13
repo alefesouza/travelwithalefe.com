@@ -50,6 +50,13 @@ querySnapshot2.forEach((theDoc) => {
         c.locations &&
         c.locations.includes(data.slug)
     ).length,
+    maps: medias.filter(
+      (c) =>
+        c.country === data.country &&
+        c.type === 'maps' &&
+        c.locations &&
+        c.locations.includes(data.slug)
+    ).length,
   };
 
   theBatch.update(doc(db, theDoc.ref.path), {
@@ -58,7 +65,8 @@ querySnapshot2.forEach((theDoc) => {
       (totals.posts || 0) +
       (totals.photos360 || 0) +
       (totals.videos || 0) +
-      (totals.shorts || 0),
+      (totals.shorts || 0) +
+      (totals.maps || 0),
     totals: {
       ...totals,
     },

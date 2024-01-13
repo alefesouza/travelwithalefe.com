@@ -1,12 +1,15 @@
-export default function HomeButton({ text, url, image }) {
+import Link from 'next/link';
+
+export default function HomeButton({ text, url, image, subpage }) {
   return (
-    <a
+    <Link
       href={url}
-      target="_blank"
+      target={subpage ? '_self' : '_blank'}
       className="list-group-item list-group-item-action"
+      prefetch={false}
     >
       {image && <img src={image} alt={text} width={48} height={48} />}
       {text}
-    </a>
+    </Link>
   );
 }
