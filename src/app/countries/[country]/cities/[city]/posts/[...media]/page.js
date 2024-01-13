@@ -16,6 +16,7 @@ import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 import getTypePath from '@/app/utils/get-type-path';
+import getTypeLabel from '@/app/utils/get-type-label';
 
 async function getCountry(country, city) {
   const db = getFirestore();
@@ -119,7 +120,8 @@ export async function generateMetadata({ params: { country, city, media } }) {
       theMedia.type === 'story' ||
       theMedia.type === 'youtube' ||
       theMedia.type === 'short-video' ||
-      theMedia.type === '360-photo'
+      theMedia.type === '360-photo' ||
+      theMedia.type === 'maps'
   );
 }
 
@@ -143,6 +145,7 @@ export default async function Country({ params: { country, city, media } }) {
     !media[0].includes(city + '-youtube-') &&
     !media[0].includes(city + '-short-video-') &&
     !media[0].includes(city + '-360photo-') &&
+    !media[0].includes(city + '-maps-') &&
     isNaN(parseInt(media[0]))
   ) {
     let base = '/countries/' + country + '/cities/' + city;
@@ -264,15 +267,15 @@ export default async function Country({ params: { country, city, media } }) {
   const split = theMedia.id.split('-');
   let mediaId = split[split.length - 1];
 
-  const basePath =
+  const mainPath =
     '/countries/' +
     country +
     '/cities/' +
     city +
     '/' +
     getTypePath(theMedia.type) +
-    '/' +
-    mediaId;
+    '/';
+  const basePath = mainPath + mediaId;
 
   breadcrumbs.push({
     name: [shortDescription, location].filter((c) => c).join(' - '),
@@ -354,7 +357,8 @@ export default async function Country({ params: { country, city, media } }) {
     theMedia.type === 'story' ||
     theMedia.type === 'youtube' ||
     theMedia.type === 'short-video' ||
-    theMedia.type === '360photo';
+    theMedia.type === '360photo' ||
+    theMedia.type === 'maps';
 
   return (
     <>
@@ -389,7 +393,10 @@ export default async function Country({ params: { country, city, media } }) {
           (isSingleMedia ? 'container-fluid ' : 'container ') + styles.media
         }
         style={{
-          marginTop: media[1] || theMedia.type === 'story' ? 14 : null,
+          marginTop:
+            media[1] || theMedia.type === 'story' || theMedia.type === 'maps'
+              ? 14
+              : null,
           maxWidth: isSingleMedia ? 1000 : null,
           padding:
             isSingleMedia &&
@@ -420,11 +427,13 @@ export default async function Country({ params: { country, city, media } }) {
             />
           </div>
         )}
+      </div>
 
-        {theMedia.gallery &&
-          theMedia.gallery.length > 0 &&
-          theMedia.gallery.map((g) => (
-            <div key={g.file} style={{ marginTop: 16 }}>
+      {theMedia.gallery &&
+        theMedia.gallery.length > 0 &&
+        theMedia.gallery.map((g, i) => (
+          <div key={g.file} style={{ marginTop: 16 }}>
+            <div className="container">
               <Media
                 key={g.file}
                 media={g}
@@ -434,8 +443,45 @@ export default async function Country({ params: { country, city, media } }) {
                 isListing
               />
             </div>
-          ))}
+          </div>
+        ))}
 
+      <div className="container single-pagination-buttons">
+        {theMedia.previous ? (
+          <Link
+            href={
+              mainPath +
+              theMedia.previous.replace(
+                city + '-' + getTypePath(theMedia.type, true) + '-',
+                ''
+              )
+            }
+            className="btn"
+          >
+            &lt; {i18n(getTypeLabel(theMedia.type, 'Previous'))}
+          </Link>
+        ) : (
+          <div />
+        )}
+        {theMedia.next ? (
+          <Link
+            href={
+              mainPath +
+              theMedia.next.replace(
+                city + '-' + getTypePath(theMedia.type, true) + '-',
+                ''
+              )
+            }
+            className="btn"
+          >
+            {i18n(getTypeLabel(theMedia.type, 'Next'))} &gt;
+          </Link>
+        ) : (
+          <div />
+        )}
+      </div>
+
+      <div className="container">
         {isSingleMedia && <div style={{ textAlign: 'center' }}>{header}</div>}
 
         <StructuredBreadcrumbs breadcrumbs={breadcrumbs} />
@@ -454,7 +500,9 @@ export default async function Country({ params: { country, city, media } }) {
             src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"
           ></Script>
         )}
-        {(theMedia.type === 'post' || theMedia.type === 'story') && (
+        {(theMedia.type === 'post' ||
+          theMedia.type === 'story' ||
+          theMedia.type === 'maps') && (
           <Script src="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.js"></Script>
         )}
       </div>

@@ -34,15 +34,17 @@ export default function RootLayout({ children }) {
       paths[5] === 'stories' ||
       paths[5] === 'videos' ||
       paths[5] === 'short-videos' ||
-      paths[5] === '360-photos') &&
+      paths[5] === '360-photos' ||
+      paths[5] === 'maps') &&
     paths[6] &&
     (paths[5] === 'stories' ||
       paths[5] === 'videos' ||
       paths[5] === 'short-videos' ||
       paths[5] === '360-photos' ||
+      paths[5] === 'maps' ||
       paths[7]);
 
-  const isSubPage = pathname !== '/' && pathname !== 'countries';
+  const isSubPage = pathname !== '/';
 
   const ignoreAnalytics =
     getCookie('ignore_analytics') || host().includes('localhost');
