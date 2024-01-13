@@ -9,13 +9,23 @@ export default function LocationsMap({
   loadingText,
   resetZoomText,
   apiKey,
+  mapContainerStyle,
+  centerPosition,
+  defaultZoom,
+  withLoadButton,
+  visitedLabel,
 }) {
   const isBR =
     typeof window !== 'undefined' &&
     window.location.href.includes('viajarcomale.com.br');
 
-  const [currentLocation, setCurrentLocation] = useState({ lat: 0, lng: 0 });
-  const [center, setCenter] = useState({ lat: 0, lng: 0 });
+  const [currentLocation, setCurrentLocation] = useState(
+    centerPosition ? centerPosition : { lat: 0, lng: 0 }
+  );
+  const [center, setCenter] = useState(
+    centerPosition ? centerPosition : { lat: 0, lng: 0 }
+  );
+  const [load, setLoad] = useState(!withLoadButton);
 
   let mapRef = null;
 
@@ -34,23 +44,46 @@ export default function LocationsMap({
 
     setCurrentLocation(latLng);
 
-    if (mapRef.state.map.getZoom() <= 7) {
+    if (
+      mapRef.state.map.getZoom() <=
+      (defaultZoom && defaultZoom <= 11 ? defaultZoom : 7)
+    ) {
       setCenter(latLng);
       mapRef.state.map.setZoom(window.innerWidth < 493 ? 11 : 12);
     }
   };
 
   const resetZoom = () => {
-    setCurrentLocation({
-      lat: 0,
-      lng: 0,
-    });
-    mapRef.state.map.setZoom(
-      window.innerWidth < 493 ? 1 : window.innerWidth <= 1440 ? 2 : 3
+    setCurrentLocation(
+      centerPosition
+        ? centerPosition
+        : {
+            lat: 0,
+            lng: 0,
+          }
     );
+    mapRef.state.map.setZoom(
+      defaultZoom
+        ? defaultZoom
+        : window.innerWidth < 493
+        ? 1
+        : window.innerWidth <= 1440
+        ? 2
+        : 3
+    );
+
+    if (centerPosition) {
+      setCenter(centerPosition);
+    }
   };
 
-  return !isLoaded ? (
+  return withLoadButton && !load ? (
+    <div className="center_link" style={{ marginBottom: 0 }}>
+      <button className="btn" onClick={() => setLoad(true)}>
+        {visitedLabel}
+      </button>
+    </div>
+  ) : !isLoaded ? (
     <div className="container-fluid" style={{ textAlign: 'center' }}>
       {loadingText}...
     </div>
@@ -62,11 +95,23 @@ export default function LocationsMap({
 
       <GoogleMap
         ref={(ref) => (mapRef = ref)}
-        mapContainerStyle={{
-          width: '100vw',
-          height: window.innerWidth < 493 ? '40vh' : '100vh',
-        }}
-        zoom={window.innerWidth < 493 ? 1 : window.innerWidth <= 1440 ? 2 : 3}
+        mapContainerStyle={
+          mapContainerStyle
+            ? mapContainerStyle
+            : {
+                width: '100vw',
+                height: window.innerWidth < 493 ? '40vh' : '90vh',
+              }
+        }
+        zoom={
+          defaultZoom
+            ? defaultZoom
+            : window.innerWidth < 493
+            ? 1
+            : window.innerWidth <= 1440
+            ? 2
+            : 3
+        }
         center={center}
         mapContainerClassName="map-container"
       >
@@ -81,7 +126,10 @@ export default function LocationsMap({
         ))}
       </GoogleMap>
 
-      <div className="center_link" style={{ marginTop: 16 }}>
+      <div
+        className="center_link"
+        style={{ marginTop: 16, marginBottom: withLoadButton ? 0 : null }}
+      >
         <button onClick={resetZoom}>{resetZoomText}</button>
       </div>
     </div>

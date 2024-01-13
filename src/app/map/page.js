@@ -35,7 +35,34 @@ export default async function MapPage() {
     locationsSnapshot.forEach((photo) => {
       const data = photo.data();
 
+      if (!data.latitude || !data.longitude) {
+        return;
+      }
+
+      if (data.hide_in_map) {
+        return;
+      }
+
       locations = [...locations, data];
+    });
+
+    const countriesSnapshot = await db.collectionGroup('countries').get();
+    countriesSnapshot.forEach((doc) => {
+      const data = doc.data();
+
+      locations.push(
+        ...data.cities
+          .filter((c) => !c.hide_in_map)
+          .map((c) => ({
+            latitude: c.latitude,
+            longitude: c.longitude,
+            name: c.name,
+            name_pt: c.name_pt || null,
+            is_placeholder: true,
+            city: c.slug,
+            country: data.slug,
+          }))
+      );
     });
 
     db.doc(cacheRef).set({

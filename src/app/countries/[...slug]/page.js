@@ -17,6 +17,7 @@ import defaultMetadata from '@/app/utils/default-metadata';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
+import LocationsMap from '@/app/components/locations-map';
 
 function getDataFromRoute(slug, searchParams) {
   const [country, path1, path2, path3, path4, path5] = slug;
@@ -183,12 +184,14 @@ export default async function Country({ params: { slug }, searchParams }) {
   }/page/${page}/sort/${sort === 'asc' ? 'asc' : 'desc'}`;
 
   const cache = await db.doc(cacheRef).get();
+  // const cache = { exists: false };
 
   let instagramHighLightsSnapshot = [];
   let shortVideosSnapshot = [];
   let instagramPhotosSnapshot = [];
   let youtubeSnapshot = [];
   let _360PhotosSnapshot = [];
+  let mapsPhotosSnapshot = [];
   let isRandom = sort === 'random';
   let randomArray = [];
 
@@ -199,17 +202,26 @@ export default async function Country({ params: { slug }, searchParams }) {
   }, {});
 
   const totalPhotos = city
-    ? cityData[city]?.totals?.instagram_photos
-    : countryData?.totals?.instagram_photos;
+    ? cityData[city]?.totals?.posts
+    : countryData?.totals?.posts;
   const paginationStart =
     sort === 'asc'
       ? (page - 1) * ITEMS_PER_PAGE
       : totalPhotos - (page - 1) * ITEMS_PER_PAGE;
 
+  const totalMapsPhotos = city
+    ? cityData[city]?.totals?.maps
+    : countryData?.totals?.maps;
+  const paginationMapsStart =
+    sort === 'asc'
+      ? (page - 1) * ITEMS_PER_PAGE
+      : totalMapsPhotos - (page - 1) * ITEMS_PER_PAGE;
+
   let instagramHighLights = [];
   let shortVideos = [];
   let youtubeVideos = [];
   let _360photos = [];
+  let mapsPhotos = [];
   let instagramPhotos = [];
 
   if (!cache.exists || isRandom) {
@@ -225,6 +237,8 @@ export default async function Country({ params: { slug }, searchParams }) {
       } else {
         const array = Array.from(Array(totalPhotos).keys());
         randomArray = arrayShuffle(array).slice(0, ITEMS_PER_PAGE);
+        const arrayMaps = Array.from(Array(totalMapsPhotos).keys());
+        randomArrayMaps = arrayShuffle(arrayMaps).slice(0, ITEMS_PER_PAGE);
       }
     }
 
@@ -319,6 +333,27 @@ export default async function Country({ params: { slug }, searchParams }) {
           .where('type', '==', 'post')
           .orderBy('city_index', sort);
       }
+
+      if (isRandom && totalMapsPhotos > 0) {
+        mapsPhotosSnapshot = await db
+          .collection('countries')
+          .doc(country)
+          .collection('cities')
+          .doc(city)
+          .collection('medias')
+          .where('type', '==', 'maps')
+          .where('city_index', 'in', randomMapsArray)
+          .get();
+      } else {
+        mapsPhotosSnapshot = await db
+          .collection('countries')
+          .doc(country)
+          .collection('cities')
+          .doc(city)
+          .collection('medias')
+          .where('type', '==', 'maps')
+          .orderBy('city_index', sort);
+      }
     } else {
       if (isRandom && totalPhotos > 0) {
         instagramPhotosSnapshot = await db
@@ -334,20 +369,39 @@ export default async function Country({ params: { slug }, searchParams }) {
           .where('type', '==', 'post')
           .orderBy('country_index', sort);
       }
+
+      if (isRandom && totalMapsPhotos > 0) {
+        mapsPhotosSnapshot = await db
+          .collectionGroup('medias')
+          .where('country', '==', country)
+          .where('type', '==', 'maps')
+          .where('country_index', 'in', randomMapsArray)
+          .get();
+      } else {
+        mapsPhotosSnapshot = await db
+          .collectionGroup('medias')
+          .where('country', '==', country)
+          .where('type', '==', 'maps')
+          .orderBy('country_index', sort);
+      }
     }
 
     if (!isRandom) {
       if (sort === 'asc') {
         instagramPhotosSnapshot =
           instagramPhotosSnapshot.startAt(paginationStart);
+        mapsPhotosSnapshot = mapsPhotosSnapshot.startAt(paginationMapsStart);
       } else {
         instagramPhotosSnapshot =
           instagramPhotosSnapshot.startAfter(paginationStart);
+        mapsPhotosSnapshot = mapsPhotosSnapshot.startAfter(paginationMapsStart);
       }
 
       instagramPhotosSnapshot = await instagramPhotosSnapshot
         .limit(ITEMS_PER_PAGE)
         .get();
+
+      mapsPhotosSnapshot = await mapsPhotosSnapshot.limit(ITEMS_PER_PAGE).get();
     }
 
     if (!cache.exists) {
@@ -384,6 +438,14 @@ export default async function Country({ params: { slug }, searchParams }) {
           instagramPhotos = [...instagramPhotos, data];
         });
       }
+
+      if (totalMapsPhotos > 0) {
+        mapsPhotosSnapshot.forEach((photo) => {
+          const data = photo.data();
+          data.path = photo.ref.path;
+          mapsPhotos = [...mapsPhotos, data];
+        });
+      }
     }
 
     if (!isRandom && !cache.exists) {
@@ -393,6 +455,7 @@ export default async function Country({ params: { slug }, searchParams }) {
         youtubeVideos,
         instagramPhotos,
         _360photos,
+        mapsPhotos,
         last_update: new Date().toISOString().split('T')[0],
       });
     }
@@ -407,6 +470,7 @@ export default async function Country({ params: { slug }, searchParams }) {
 
     if (!isRandom) {
       instagramPhotos = cacheData.instagramPhotos;
+      mapsPhotos = cacheData.mapsPhotos;
     }
   }
 
@@ -430,6 +494,9 @@ export default async function Country({ params: { slug }, searchParams }) {
       .sort((a, b) => a.sort - b.sort)
       .map(({ value }) => value);
     instagramPhotos = instagramPhotos.sort(
+      (a, b) => randomArray.indexOf(a[index]) - randomArray.indexOf(b[index])
+    );
+    mapsPhotos = mapsPhotos.sort(
       (a, b) => randomArray.indexOf(a[index]) - randomArray.indexOf(b[index])
     );
     sort = 'random';
@@ -459,6 +526,7 @@ export default async function Country({ params: { slug }, searchParams }) {
 
   let paginationBase = null;
   const pageNumber = Math.ceil(totalPhotos / ITEMS_PER_PAGE);
+  const pageMapsNumber = Math.ceil(totalMapsPhotos / ITEMS_PER_PAGE);
 
   paginationBase = `/countries/${country}${
     city ? '/cities/' + city : ''
@@ -571,6 +639,21 @@ export default async function Country({ params: { slug }, searchParams }) {
     });
   }
 
+  const locationsCacheRef = '/caches/static_pages/static_pages/locations';
+  const locationsCache = await db.doc(locationsCacheRef).get();
+  let locations = locationsCache
+    .data()
+    .locations.filter((l) => l.country === country);
+
+  if (city) {
+    locations = locations.filter((l) => l.city === city);
+  }
+
+  const mainLocations = locations
+    .filter((l) => !l.hide_in_main_visited && l.total)
+    .sort((a, b) => b.total - b.totals.maps - (a.total - a.totals.maps))
+    .slice(0, 10);
+
   return (
     <div>
       <div className="container">
@@ -649,6 +732,60 @@ export default async function Country({ params: { slug }, searchParams }) {
             </li>
           ))}
         </ul>
+      </div>
+
+      {mainLocations.length > 0 && (
+        <div className="container-fluid" style={{ marginTop: 16 }}>
+          <b>{i18n('Main visited places')}</b>:{' '}
+          {mainLocations.map((l, i) => (
+            <span key={l.slug}>
+              <Link
+                href={host(
+                  '/countries/' +
+                    l.country +
+                    '/cities/' +
+                    l.city +
+                    '/locations/' +
+                    l.slug
+                )}
+                target="_blank"
+              >
+                {isBR && l.name_pt ? l.name_pt : l.name}
+              </Link>
+              {i < mainLocations.length - 1 && ', '}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <div
+        className="container"
+        style={{ marginTop: 16, paddingLeft: 0, paddingRight: 0 }}
+      >
+        <LocationsMap
+          locations={locations}
+          loadingText={i18n('Loading')}
+          resetZoomText={i18n('Reset Zoom')}
+          apiKey={process.env.NEXT_MAPS_API_KEY}
+          mapContainerStyle={{
+            width: '100%',
+            height: 600,
+          }}
+          defaultZoom={city ? cityData[city].mapZoom : countryData.mapZoom}
+          withLoadButton={true}
+          visitedLabel={i18n('Load visited places map')}
+          centerPosition={
+            city
+              ? {
+                  lat: cityData[city].latitude,
+                  lng: cityData[city].longitude,
+                }
+              : {
+                  lat: countryData.latitude,
+                  lng: countryData.longitude,
+                }
+          }
+        />
       </div>
 
       {instagramHighLights.length > 1 && sortPicker('stories')}
@@ -734,15 +871,17 @@ export default async function Country({ params: { slug }, searchParams }) {
                 </Link>
               </div>
 
-              <div className={styles.instagram_highlights_items}>
-                {instagramPhotos.map((p) => (
-                  <Media
-                    key={p.id}
-                    media={p}
-                    isBR={isBR}
-                    expandGalleries={expandGalleries}
-                    isListing
-                  />
+              <div className="instagram_highlights_items">
+                {instagramPhotos.map((p, i) => (
+                  <div key={p.id} className={p.type === 'ad' ? 'row-ad' : null}>
+                    <Media
+                      key={p.id}
+                      media={p}
+                      isBR={isBR}
+                      expandGalleries={expandGalleries}
+                      isListing
+                    />
+                  </div>
                 ))}
               </div>
 
@@ -769,6 +908,70 @@ export default async function Country({ params: { slug }, searchParams }) {
                     pageNumber={pageNumber}
                     total={totalPhotos}
                     textPosition="top"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {mapsPhotos.filter((p) => !p.file_type).length > 1 &&
+          sortPicker('maps')}
+
+        {mapsPhotos.length > 0 && (
+          <div className="container-fluid">
+            <div className={styles.instagram_photos}>
+              <div className={styles.instagram_photos_title}>
+                <h3>{i18n('Places Photos')}</h3>
+              </div>
+
+              {!isRandom && pageMapsNumber > 1 && (
+                <Pagination
+                  base={paginationBase}
+                  currentPage={Number(page) || 1}
+                  pageNumber={pageMapsNumber}
+                  total={totalMapsPhotos}
+                  textPosition="bottom"
+                  label={i18n('items')}
+                />
+              )}
+
+              <div className="instagram_highlights_items">
+                {mapsPhotos.map((p, i) => (
+                  <Media
+                    key={p.id}
+                    media={p}
+                    isBR={isBR}
+                    expandGalleries={expandGalleries}
+                    isListing
+                  />
+                ))}
+              </div>
+
+              {isRandom && (
+                <div style={{ textAlign: 'center', marginTop: 30 }}>
+                  <Link
+                    href={'?sort=random&shuffle=' + newShuffle}
+                    scroll={false}
+                    prefetch={false}
+                    className="shuffle"
+                  >
+                    <button className="btn btn-primary">
+                      {i18n('Shuffle')}
+                    </button>
+                  </Link>
+                </div>
+              )}
+
+              {!isRandom && pageMapsNumber > 1 && (
+                <div style={{ marginTop: 30 }}>
+                  <Pagination
+                    base={paginationBase}
+                    currentPage={Number(page) || 1}
+                    pageNumber={pageMapsNumber}
+                    total={totalMapsPhotos}
+                    textPosition="top"
+                    label={i18n('items')}
                   />
                 </div>
               )}
