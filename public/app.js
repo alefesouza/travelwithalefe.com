@@ -537,10 +537,6 @@
 
     loadingSpinner.style.display = 'none';
 
-    if (e.length === 1) {
-      return;
-    }
-
     setupLinks('main');
 
     if (
