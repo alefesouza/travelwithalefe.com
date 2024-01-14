@@ -7,15 +7,25 @@ import { SITE_NAME } from '@/app/utils/constants';
 import defaultMetadata from '@/app/utils/default-metadata';
 import logAccess from '@/app/utils/log-access';
 import styles from './page.module.css';
+// @ad
+import AdSense from '../components/adsense';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const host = useHost();
+  const isBR = host().includes('viajarcomale.com.br');
+
+  const db = getFirestore();
+
+  const couponsPageRef = await db.doc('/pages/coupons').get();
+  const couponsPageData = couponsPageRef.data();
 
   const title = i18n('Coupons') + ' - ' + SITE_NAME;
-  const description = i18n(
-    'Use Viajar com Alê to get discounts on products and services.'
-  );
+  const description = isBR
+    ? couponsPageData.description_pt
+    : couponsPageData.description;
 
   return defaultMetadata(title, description);
 }
@@ -89,9 +99,7 @@ export default async function Coupons() {
           <b>{i18n('Quick Access')}</b>:{' '}
           {coupons.map((c, i) => (
             <span key={c.slug}>
-              <Link href={host('/coupons/' + c.slug)} target="_blank">
-                {c.name}
-              </Link>
+              <Link href={host('/coupons/' + c.slug)}>{c.name}</Link>
               {i < coupons.length - 1 && ', '}
             </span>
           ))}
@@ -152,6 +160,11 @@ export default async function Coupons() {
             </div>
           ))}
         </div>
+      </div>
+
+      {/* @ad */}
+      <div className="ad">
+        <AdSense index={1} />
       </div>
     </>
   );

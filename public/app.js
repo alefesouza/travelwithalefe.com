@@ -320,12 +320,19 @@
       document
         .querySelector('#title-bar .nav-item:nth-child(3)')
         .classList.add('active');
-    } else if (window.location.pathname == '/about') {
+    } else if (window.location.pathname == '/coupons') {
       document
         .querySelector('.navbar .nav-item:nth-child(4)')
         .classList.add('active');
       document
         .querySelector('#title-bar .nav-item:nth-child(4)')
+        .classList.add('active');
+    } else if (window.location.pathname == '/about') {
+      document
+        .querySelector('.navbar .nav-item:nth-child(5)')
+        .classList.add('active');
+      document
+        .querySelector('#title-bar .nav-item:nth-child(5)')
         .classList.add('active');
     }
 
@@ -498,6 +505,20 @@
   const elementToObserve = document.querySelector('main');
 
   observer = new MutationObserver(function (e) {
+    if (
+      document.querySelector(
+        '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
+      )
+    ) {
+      document
+        .querySelectorAll(
+          '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
+        )
+        .forEach((el) => {
+          el.parentElement.style.display = 'none';
+        });
+    }
+
     const panorama = document.querySelector('#panorama');
 
     if (panorama) {

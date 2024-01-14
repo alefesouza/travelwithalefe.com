@@ -161,8 +161,7 @@ const langs = {
     en: 'pt',
     en_US: 'pt_BR',
     'en-US': 'pt-BR',
-    'Developed by AS.dev and available on GitHub':
-      'Desenvolvido por AS.dev e disponível no GitHub',
+    'Developed by AS.dev': 'Desenvolvido por AS.dev',
   },
 };
 

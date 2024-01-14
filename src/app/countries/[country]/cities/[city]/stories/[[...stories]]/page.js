@@ -19,6 +19,8 @@ import Country, {
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 import getSort from '@/app/utils/get-sort';
+// @ad
+import AdSense from '@/app/components/adsense';
 
 async function getCountry(country, city) {
   const db = getFirestore();
@@ -303,6 +305,15 @@ export default async function Highlight({
     );
   }
 
+  // @ad
+  let inserted = 0;
+  instagramStories.forEach((_, i) => {
+    if (i % 8 === 0 && i !== 0 && i <= instagramStories.length - 4) {
+      instagramStories.splice(i + inserted, 0, { type: 'ad', id: 'ad-' + i });
+      inserted++;
+    }
+  });
+
   let newShuffle = randomIntFromInterval(1, 15);
 
   if (newShuffle == searchParams.shuffle) {
@@ -473,12 +484,30 @@ export default async function Highlight({
 
               <div className="instagram_highlights_items">
                 {instagramStories.map((p) => (
-                  <Media media={p} isBR={isBR} key={p.id} hasPoster isListing />
+                  <div key={p.id} className={p.type === 'ad' ? 'row-ad' : null}>
+                    {/* @ad */}
+                    {p.type === 'ad' ? (
+                      <AdSense index={p.id} />
+                    ) : (
+                      <Media
+                        media={p}
+                        isBR={isBR}
+                        key={p.id}
+                        hasPoster
+                        isListing
+                      />
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
           </div>
         )}
+      </div>
+
+      {/* @ad */}
+      <div className="container-fluid ad" style={{ textAlign: 'center' }}>
+        <AdSense index={2} />
       </div>
 
       <StructuredBreadcrumbs breadcrumbs={breadcrumbs} />

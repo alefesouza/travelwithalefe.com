@@ -17,6 +17,8 @@ import defaultMetadata from '@/app/utils/default-metadata';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
+// @ad
+import AdSense from '@/app/components/adsense';
 import LocationsMap from '@/app/components/locations-map';
 
 function getDataFromRoute(slug, searchParams) {
@@ -639,6 +641,34 @@ export default async function Country({ params: { slug }, searchParams }) {
     });
   }
 
+  // @ad
+  let inserted = 0;
+  instagramPhotos.forEach((_, i) => {
+    if (
+      i % 8 === 0 &&
+      i !== 0 &&
+      i < instagramPhotos.length - 4 &&
+      !instagramPhotos.find((item) => item.id === 'ad-' + i)
+    ) {
+      instagramPhotos.splice(i + inserted, 0, { type: 'ad', id: 'ad-' + i });
+      inserted++;
+    }
+  });
+
+  // @ad
+  let insertedMaps = 0;
+  mapsPhotos.forEach((_, i) => {
+    if (
+      i % 8 === 0 &&
+      i !== 0 &&
+      i < mapsPhotos.length - 4 &&
+      !mapsPhotos.find((item) => item.id === 'ad-' + i)
+    ) {
+      mapsPhotos.splice(i + insertedMaps, 0, { type: 'ad', id: 'ad-' + i });
+      insertedMaps++;
+    }
+  });
+
   const locationsCacheRef = '/caches/static_pages/static_pages/locations';
   const locationsCache = await db.doc(locationsCacheRef).get();
   let locations = locationsCache
@@ -658,7 +688,7 @@ export default async function Country({ params: { slug }, searchParams }) {
     <div>
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Link href="/countries" id="back-button" scroll={false}>
+          <Link href="/" id="back-button" scroll={false}>
             <img
               src={host('/images/back.svg')}
               alt={i18n('Back')}
@@ -827,6 +857,17 @@ export default async function Country({ params: { slug }, searchParams }) {
           <Scroller title={i18n('360 Photos')} items={_360photos} is360Photos />
         )}
 
+        {/* @ad */}
+        {(instagramHighLights.length > 0 ||
+          shortVideos.length > 0 ||
+          youtubeVideos.length > 0 ||
+          _360photos.length > 0) &&
+          (instagramPhotos.length >= 8 || mapsPhotos.length >= 8) && (
+            <div className="container-fluid ad">
+              <AdSense index={1} />
+            </div>
+          )}
+
         {instagramPhotos.filter((p) => !p.file_type).length > 1 &&
           sortPicker('photos')}
 
@@ -874,13 +915,18 @@ export default async function Country({ params: { slug }, searchParams }) {
               <div className="instagram_highlights_items">
                 {instagramPhotos.map((p, i) => (
                   <div key={p.id} className={p.type === 'ad' ? 'row-ad' : null}>
-                    <Media
-                      key={p.id}
-                      media={p}
-                      isBR={isBR}
-                      expandGalleries={expandGalleries}
-                      isListing
-                    />
+                    {/* @ad */}
+                    {p.type === 'ad' ? (
+                      <AdSense index={p.id} />
+                    ) : (
+                      <Media
+                        key={p.id}
+                        media={p}
+                        isBR={isBR}
+                        expandGalleries={expandGalleries}
+                        isListing
+                      />
+                    )}
                   </div>
                 ))}
               </div>
@@ -915,6 +961,13 @@ export default async function Country({ params: { slug }, searchParams }) {
           </div>
         )}
 
+        {/* @ad */}
+        {instagramPhotos.length > 16 && (
+          <div className="container-fluid ad" style={{ textAlign: 'center' }}>
+            <AdSense index={5} />
+          </div>
+        )}
+
         {mapsPhotos.filter((p) => !p.file_type).length > 1 &&
           sortPicker('maps')}
 
@@ -938,13 +991,20 @@ export default async function Country({ params: { slug }, searchParams }) {
 
               <div className="instagram_highlights_items">
                 {mapsPhotos.map((p, i) => (
-                  <Media
-                    key={p.id}
-                    media={p}
-                    isBR={isBR}
-                    expandGalleries={expandGalleries}
-                    isListing
-                  />
+                  <div key={p.id} className={p.type === 'ad' ? 'row-ad' : null}>
+                    {/* @ad */}
+                    {p.type === 'ad' ? (
+                      <AdSense index={p.id} />
+                    ) : (
+                      <Media
+                        key={p.id}
+                        media={p}
+                        isBR={isBR}
+                        expandGalleries={expandGalleries}
+                        isListing
+                      />
+                    )}
+                  </div>
                 ))}
               </div>
 
@@ -978,6 +1038,11 @@ export default async function Country({ params: { slug }, searchParams }) {
             </div>
           </div>
         )}
+      </div>
+
+      {/* @ad */}
+      <div className="container-fluid ad" style={{ textAlign: 'center' }}>
+        <AdSense index={2} />
       </div>
 
       {breadcrumbs.length && (

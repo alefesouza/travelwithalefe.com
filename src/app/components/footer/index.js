@@ -104,15 +104,10 @@ export default function Footer() {
           className="developed-by"
           dangerouslySetInnerHTML={{
             __html:
-              i18n('Developed by AS.dev and available on GitHub')
-                .replace(
-                  'AS.dev',
-                  '<a href="https://as.dev" target="_blank">AS.dev</a>'
-                )
-                .replace(
-                  'GitHub',
-                  '<a href="https://github.com/alefesouza/viajarcomale.com" target="_blank">GitHub</a>'
-                ) +
+              i18n('Developed by AS.dev').replace(
+                'AS.dev',
+                '<a href="https://as.dev" target="_blank">AS.dev</a>'
+              ) +
               (isWindows
                 ? '<br><br>' +
                   i18n('Flag emojis by Twemoji').replace(

@@ -8,6 +8,8 @@ import defaultMetadata from '@/app/utils/default-metadata';
 import logAccess from '@/app/utils/log-access';
 import styles from '../page.module.css';
 import { redirect } from 'next/navigation';
+// @ad
+import AdSense from '@/app/components/adsense';
 
 export async function generateMetadata({ params: { coupon } }) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -96,7 +98,7 @@ export default async function Coupons({ params: { coupon } }) {
             {couponData.how_i_use && (
               <>
                 <b>{i18n('How I Use')}:</b>{' '}
-                {!isBR && item.isBR && '(Brazil only) '}
+                {!isBR && couponData.isBR && '(Brazil only) '}
                 {isBR && couponData.how_i_use_pt
                   ? couponData.how_i_use_pt
                   : couponData.how_i_use}
@@ -104,6 +106,11 @@ export default async function Coupons({ params: { coupon } }) {
             )}
           </div>
         </div>
+      </div>
+
+      {/* @ad */}
+      <div className="ad">
+        <AdSense index={1} />
       </div>
     </>
   );

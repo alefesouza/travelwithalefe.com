@@ -17,6 +17,8 @@ import defaultMetadata from '@/app/utils/default-metadata';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
+// @ad
+import AdSense from '@/app/components/adsense';
 
 async function getCountry(country, city) {
   const db = getFirestore();
@@ -408,6 +410,34 @@ export default async function Country({
     return a > b ? 1 : a < b ? -1 : 0;
   });
 
+  // @ad
+  let inserted = 0;
+  instagramPhotos.forEach((_, i) => {
+    if (
+      i % 12 === 0 &&
+      i !== 0 &&
+      i < instagramPhotos.length - 8 &&
+      !instagramPhotos.find((item) => item.id === 'ad-' + i)
+    ) {
+      instagramPhotos.splice(i + inserted, 0, { type: 'ad', id: 'ad-' + i });
+      inserted++;
+    }
+  });
+
+  // @ad
+  let insertedMaps = 0;
+  mapsPhotos.forEach((_, i) => {
+    if (
+      i % 8 === 0 &&
+      i !== 0 &&
+      i < mapsPhotos.length - 4 &&
+      !mapsPhotos.find((item) => item.id === 'ad-' + i)
+    ) {
+      mapsPhotos.splice(i + insertedMaps, 0, { type: 'ad', id: 'ad-' + i });
+      insertedMaps++;
+    }
+  });
+
   const webStoriesHref = host(
     '/webstories/countries/' +
       country +
@@ -545,6 +575,16 @@ export default async function Country({
           <Scroller title={i18n('360 Photos')} items={_360photos} is360Photos />
         )}
 
+        {/* @ad */}
+        {(shortVideos.length > 0 ||
+          youtubeVideos.length > 0 ||
+          _360photos.length > 0) &&
+          (instagramPhotos.length >= 8 || mapsPhotos.length >= 8) && (
+            <div className="container-fluid ad" style={{ textAlign: 'center' }}>
+              <AdSense index={1} />
+            </div>
+          )}
+
         {mapsPhotos.filter((p) => !p.file_type).length > 1 &&
           sortPicker('maps')}
 
@@ -557,18 +597,30 @@ export default async function Country({
 
               <div className="instagram_highlights_items">
                 {mapsPhotos.map((p) => (
-                  <Media
-                    key={p.id}
-                    media={p}
-                    isBR={isBR}
-                    expandGalleries={expandGalleries}
-                    isListing
-                  />
+                  <div key={p.id} className={p.type === 'ad' ? 'row-ad' : null}>
+                    {/* @ad */}
+                    {p.type === 'ad' ? (
+                      <AdSense index={p.id} />
+                    ) : (
+                      <Media
+                        key={p.id}
+                        media={p}
+                        isBR={isBR}
+                        expandGalleries={expandGalleries}
+                        isListing
+                      />
+                    )}
+                  </div>
                 ))}
               </div>
             </div>
           </div>
         )}
+      </div>
+
+      {/* @ad */}
+      <div className="container-fluid ad" style={{ textAlign: 'center' }}>
+        <AdSense index={2} />
       </div>
 
       <StructuredBreadcrumbs breadcrumbs={breadcrumbs} />
