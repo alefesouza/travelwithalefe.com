@@ -58,6 +58,12 @@ const langs = {
     'swipe up to watch': 'arraste para cima para assistir',
     items: 'itens',
     'Main visited places': 'Principais locais visitados',
+    Coupons: 'Cupons',
+    'Use Viajar com Alê to get discounts on products and services.':
+      'Use os cupons do Viajar com Alê para ganhar descontos em produtos e serviços.',
+    'Click here': 'Clique aqui',
+    Code: 'Código',
+    'How I Use': 'Como eu uso',
 
     'Next post': 'Próximo post',
     'Next story': 'Próximo story',

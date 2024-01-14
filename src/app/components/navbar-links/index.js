@@ -40,6 +40,16 @@ const NavbarLinks = () => {
       <li
         className={
           'nav-item' +
+          (headersList.get('x-pathname') === '/coupons' ? ' active' : '')
+        }
+      >
+        <Link className="nav-link" href="/coupons">
+          {i18n('Coupons')}
+        </Link>
+      </li>
+      <li
+        className={
+          'nav-item' +
           (headersList.get('x-pathname') === '/about' ? ' active' : '')
         }
       >

@@ -1,0 +1,108 @@
+import { getFirestore } from 'firebase-admin/firestore';
+import Link from 'next/link';
+import ShareButton from '@/app/components/share-button';
+import useHost from '@/app/hooks/use-host';
+import useI18n from '@/app/hooks/use-i18n';
+import { SITE_NAME } from '@/app/utils/constants';
+import defaultMetadata from '@/app/utils/default-metadata';
+import logAccess from '@/app/utils/log-access';
+import styles from '../page.module.css';
+import { redirect } from 'next/navigation';
+
+export async function generateMetadata({ params: { coupon } }) {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const i18n = useI18n();
+
+  const db = getFirestore();
+  const couponRef = await db.collection('coupons').doc(coupon).get();
+
+  if (!couponRef.exists) {
+    redirect('/coupons');
+  }
+
+  const couponData = couponRef.data();
+
+  const title = couponData.title + ' - ' + i18n('Coupons') + ' - ' + SITE_NAME;
+  const description = i18n(
+    'Use Viajar com Alê to get discounts on products and services.'
+  );
+
+  return defaultMetadata(title, description);
+}
+
+export default async function Coupons({ params: { coupon } }) {
+  const i18n = useI18n();
+  const host = useHost();
+  const isBR = host().includes('viajarcomale.com.br');
+
+  const db = getFirestore();
+  const couponRef = await db.collection('coupons').doc(coupon).get();
+
+  if (!couponRef.exists) {
+    redirect('/coupons');
+  }
+
+  const couponData = couponRef.data();
+
+  logAccess(db, host('/coupons/' + coupon));
+
+  return (
+    <>
+      <div className="container">
+        <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+          <Link href="/coupons" id="back-button" scroll={false}>
+            <img
+              src={host('/images/back.svg')}
+              alt={i18n('Back')}
+              width="32px"
+            ></img>
+          </Link>
+
+          <ShareButton />
+        </div>
+      </div>
+      <div className="page container">
+        <h2>
+          {isBR && couponData.title_pt ? couponData.title_pt : couponData.title}
+        </h2>
+        <div
+          className={'instagram_media_gallery_item ' + styles.coupon}
+          key={couponData.slug}
+        >
+          <div className={styles.coupon_body}>
+            <div>
+              {isBR && couponData.description_pt
+                ? couponData.description_pt
+                : couponData.description}
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              {couponData.code && (
+                <div className={styles.coupon_code}>
+                  {i18n('Code')}: <h4>{couponData.code}</h4>
+                </div>
+              )}
+              {couponData.link && (
+                <a
+                  className="btn"
+                  href={couponData.link}
+                  target="_blank"
+                  style={{ margin: '20px 0' }}
+                >
+                  {i18n('Click here')}
+                </a>
+              )}
+            </div>
+            {couponData.how_i_use && (
+              <>
+                <b>{i18n('How I Use')}:</b>{' '}
+                {isBR && couponData.how_i_use_pt
+                  ? couponData.how_i_use_pt
+                  : couponData.how_i_use}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </>
+  );
+}

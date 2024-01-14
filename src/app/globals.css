@@ -91,12 +91,6 @@ body {
   background-color: #f8f9fa;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
-}
-
 .container {
   max-width: 680px;
 }
@@ -588,16 +582,16 @@ button:not(:disabled) {
   display: none;
 }
 
-/* @media (min-width: 400px) { */
-.navbar-nav .nav-link {
-  padding-right: 0.5rem;
-  padding-left: 0.5rem;
-}
+@media (min-width: 400px) {
+  .navbar-nav .nav-link {
+    padding-right: 0.5rem;
+    padding-left: 0.5rem;
+  }
 
-.navbar-brand {
-  margin-right: 0.5rem;
+  .navbar-brand {
+    margin-right: 0.5rem;
+  }
 }
-/* } */
 
 @media (min-width: 538px) {
   .navbar .site-name {

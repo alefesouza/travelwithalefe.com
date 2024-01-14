@@ -11,7 +11,7 @@ customInitApp();
 
 export async function GET() {
   // const host = (string = '') =>
-  //   new URL(string, 'https://viajarcomale.com/').toString();
+  //   new URL(string, 'https://viajarcomale.com.br/').toString();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const lastmod = '2024-01-13';
@@ -63,6 +63,13 @@ export async function GET() {
     });
     hashtags = hashtags.filter((h) => !h.is_country && !h.is_city);
     const highlights = medias.filter((m) => m.is_highlight);
+    const couponsSnapshot = await db.collection('coupons').get();
+    const coupons = [];
+    couponsSnapshot.forEach((doc) => {
+      const data = doc.data();
+      data.path = doc.ref.path;
+      coupons.push(data);
+    });
 
     const mediaProcessing = (media, gallery, position) => {
       const item = gallery || media;
@@ -171,6 +178,9 @@ export async function GET() {
           ...makeLoc('/hashtags'),
         },
         {
+          ...makeLoc('/coupons'),
+        },
+        {
           ...makeLoc('/about'),
         },
         {
@@ -251,6 +261,9 @@ export async function GET() {
             '/countries/' + m.country + '/cities/' + m.city + '/locations/',
             decodeURIComponent(m.slug)
           ),
+        })),
+        ...coupons.map((m) => ({
+          ...makeLoc('/coupons/' + m.slug),
         })),
         ...locations
           .filter((m) => m?.totals?.posts > 0)
