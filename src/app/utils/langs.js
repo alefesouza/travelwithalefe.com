@@ -65,6 +65,8 @@ const langs = {
     Code: 'Código',
     'How I Use': 'Como eu uso',
     'Quick Access': 'Acesso rápido',
+    Copy: 'Copiar',
+    Regulation: 'Regulamento',
 
     'Next post': 'Próximo post',
     'Next story': 'Próximo story',

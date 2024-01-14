@@ -126,35 +126,53 @@ export default async function Coupons() {
                 />
               </div>
               <div className={styles.coupon_body}>
-                <div>
+                <div className={styles.coupon_body_padding}>
                   {isBR && item.description_pt
                     ? item.description_pt
                     : item.description}
                 </div>
                 <div style={{ textAlign: 'center' }}>
-                  {item.code && (
-                    <div className={styles.coupon_code}>
-                      {i18n('Code')}: <h4>{item.code}</h4>
-                    </div>
-                  )}
                   {item.link && (
                     <a
                       className="btn"
                       href={item.link}
-                      style={{ margin: '20px 0' }}
+                      style={{
+                        margin: '20px 0',
+                        marginBottom: item.code ? 0 : 20,
+                      }}
+                      target="_blank"
                     >
                       {i18n('Click here')}
                     </a>
                   )}
+                  {item.code && (
+                    <div className={styles.coupon_code}>
+                      {i18n('Code')}: <h4>{item.code}</h4>
+                      <button
+                        className="btn"
+                        data-copy={item.code}
+                        style={{ padding: '2px 8px' }}
+                      >
+                        {i18n('Copy')}
+                      </button>
+                    </div>
+                  )}
                 </div>
                 {item.how_i_use && (
-                  <>
+                  <div className={styles.coupon_body_padding}>
                     <b>{i18n('How I Use')}:</b>{' '}
                     {!isBR && item.isBR && '(Brazil only) '}
                     {isBR && item.how_i_use_pt
                       ? item.how_i_use_pt
                       : item.how_i_use}
-                  </>
+                    {item.regulation && (
+                      <div style={{ marginTop: 14, textAlign: 'center' }}>
+                        <a href={item.regulation} target="_blank">
+                          {i18n('Regulation')}
+                        </a>
+                      </div>
+                    )}
+                  </div>
                 )}
               </div>
             </div>

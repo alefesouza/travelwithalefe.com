@@ -336,6 +336,20 @@
         .classList.add('active');
     }
 
+    document.querySelectorAll('[data-copy]').forEach((item) => {
+      item.onclick = function () {
+        const clipBoard = navigator.clipboard;
+
+        clipBoard.writeText(this.dataset.copy).then(() => {
+          alert(
+            window.location.host.includes('viajarcomale.com.br')
+              ? 'Copiado para a área de transferência.'
+              : 'Copied to clipboard.'
+          );
+        });
+      };
+    });
+
     const { pathname } = window.location;
 
     const paths = pathname.split('/');

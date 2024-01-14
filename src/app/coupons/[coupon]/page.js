@@ -27,7 +27,12 @@ export async function generateMetadata({ params: { coupon } }) {
 
   const couponData = couponRef.data();
 
-  const title = couponData.title + ' - ' + i18n('Coupons') + ' - ' + SITE_NAME;
+  const title =
+    (isBR && couponData.title_pt ? couponData.title_pt : couponData.title) +
+    ' - ' +
+    i18n('Coupons') +
+    ' - ' +
+    SITE_NAME;
   const description =
     isBR && couponData.description_pt
       ? couponData.description_pt
@@ -73,36 +78,53 @@ export default async function Coupons({ params: { coupon } }) {
         </h2>
         <div className={'instagram_media_gallery_item ' + styles.coupon}>
           <div className={styles.coupon_body}>
-            <div>
+            <div className={styles.coupon_body_padding}>
               {isBR && couponData.description_pt
                 ? couponData.description_pt
                 : couponData.description}
             </div>
             <div style={{ textAlign: 'center' }}>
-              {couponData.code && (
-                <div className={styles.coupon_code}>
-                  {i18n('Code')}: <h4>{couponData.code}</h4>
-                </div>
-              )}
               {couponData.link && (
                 <a
                   className="btn"
                   href={couponData.link}
+                  style={{
+                    margin: '20px 0',
+                    marginBottom: couponData.code ? 0 : 20,
+                  }}
                   target="_blank"
-                  style={{ margin: '20px 0' }}
                 >
                   {i18n('Click here')}
                 </a>
               )}
+              {couponData.code && (
+                <div className={styles.coupon_code}>
+                  {i18n('Code')}: <h4>{couponData.code}</h4>
+                  <button
+                    className="btn"
+                    data-copy={couponData.code}
+                    style={{ padding: '2px 8px' }}
+                  >
+                    {i18n('Copy')}
+                  </button>
+                </div>
+              )}
             </div>
             {couponData.how_i_use && (
-              <>
+              <div className={styles.coupon_body_padding}>
                 <b>{i18n('How I Use')}:</b>{' '}
                 {!isBR && couponData.isBR && '(Brazil only) '}
                 {isBR && couponData.how_i_use_pt
                   ? couponData.how_i_use_pt
                   : couponData.how_i_use}
-              </>
+                {couponData.regulation && (
+                  <div style={{ marginTop: 14, textAlign: 'center' }}>
+                    <a href={couponData.regulation} target="_blank">
+                      {i18n('Regulation')}
+                    </a>
+                  </div>
+                )}
+              </div>
             )}
           </div>
         </div>
