@@ -12,6 +12,9 @@ import { redirect } from 'next/navigation';
 export async function generateMetadata({ params: { coupon } }) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const host = useHost();
+  const isBR = host().includes('viajarcomale.com.br');
 
   const db = getFirestore();
   const couponRef = await db.collection('coupons').doc(coupon).get();
@@ -23,9 +26,10 @@ export async function generateMetadata({ params: { coupon } }) {
   const couponData = couponRef.data();
 
   const title = couponData.title + ' - ' + i18n('Coupons') + ' - ' + SITE_NAME;
-  const description = i18n(
-    'Use Viajar com Alê to get discounts on products and services.'
-  );
+  const description =
+    isBR && couponData.description_pt
+      ? couponData.description_pt
+      : couponData.description;
 
   return defaultMetadata(title, description);
 }
@@ -65,10 +69,7 @@ export default async function Coupons({ params: { coupon } }) {
         <h2>
           {isBR && couponData.title_pt ? couponData.title_pt : couponData.title}
         </h2>
-        <div
-          className={'instagram_media_gallery_item ' + styles.coupon}
-          key={couponData.slug}
-        >
+        <div className={'instagram_media_gallery_item ' + styles.coupon}>
           <div className={styles.coupon_body}>
             <div>
               {isBR && couponData.description_pt
@@ -95,6 +96,7 @@ export default async function Coupons({ params: { coupon } }) {
             {couponData.how_i_use && (
               <>
                 <b>{i18n('How I Use')}:</b>{' '}
+                {!isBR && item.isBR && '(Brazil only) '}
                 {isBR && couponData.how_i_use_pt
                   ? couponData.how_i_use_pt
                   : couponData.how_i_use}

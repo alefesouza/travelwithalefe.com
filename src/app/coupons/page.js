@@ -7,7 +7,6 @@ import { SITE_NAME } from '@/app/utils/constants';
 import defaultMetadata from '@/app/utils/default-metadata';
 import logAccess from '@/app/utils/log-access';
 import styles from './page.module.css';
-import { redirect } from 'next/navigation';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -78,7 +77,6 @@ export default async function Coupons() {
         </div>
       </div>
       <div
-        className="page"
         dangerouslySetInnerHTML={{
           __html:
             isBR && couponsPageData.text_pt
@@ -87,6 +85,17 @@ export default async function Coupons() {
         }}
       />
       <div className="container">
+        <div style={{ marginBottom: 20 }}>
+          <b>{i18n('Quick Access')}</b>:{' '}
+          {coupons.map((c, i) => (
+            <span key={c.slug}>
+              <Link href={host('/coupons/' + c.slug)} target="_blank">
+                {c.name}
+              </Link>
+              {i < coupons.length - 1 && ', '}
+            </span>
+          ))}
+        </div>
         <div className="instagram_highlights_items">
           {coupons.map((item) => (
             <div
@@ -95,7 +104,11 @@ export default async function Coupons() {
             >
               <div className={styles.coupon_header}>
                 <h3>
-                  <Link href={host('/coupons/' + item.slug)} prefetch={false}>
+                  <Link
+                    href={host('/coupons/' + item.slug)}
+                    prefetch={false}
+                    style={{ color: '#000000' }}
+                  >
                     {item.name}
                   </Link>
                 </h3>
@@ -129,6 +142,7 @@ export default async function Coupons() {
                 {item.how_i_use && (
                   <>
                     <b>{i18n('How I Use')}:</b>{' '}
+                    {!isBR && item.isBR && '(Brazil only) '}
                     {isBR && item.how_i_use_pt
                       ? item.how_i_use_pt
                       : item.how_i_use}

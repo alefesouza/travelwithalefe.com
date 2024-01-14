@@ -64,6 +64,7 @@ const langs = {
     'Click here': 'Clique aqui',
     Code: 'Código',
     'How I Use': 'Como eu uso',
+    'Quick Access': 'Acesso rápido',
 
     'Next post': 'Próximo post',
     'Next story': 'Próximo story',
