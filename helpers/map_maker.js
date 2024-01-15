@@ -6,6 +6,9 @@ const mt = require('media-thumbnail');
 const getDimensions = require('get-video-dimensions');
 const { getVideoDurationInSeconds } = require('get-video-duration');
 const sizeOf = require('image-size');
+const convert = require('heic-convert');
+const { promisify } = require('util');
+const ExifReader = require('exifreader');
 
 async function* getFiles(dir) {
   const dirents = await readdir(dir, { withFileTypes: true });
@@ -20,13 +23,15 @@ async function* getFiles(dir) {
 }
 
 const items = [];
-const cities = {};
+const cities = {
+  toronto: 5,
+};
 
 (async () => {
   const files = [];
 
   for await (const f of getFiles('./done')) {
-    if (f.includes('.DS_Store') || f.includes('.HEIC')) {
+    if (f.includes('.DS_Store')) {
       continue;
     }
 
@@ -35,24 +40,24 @@ const cities = {};
 
   files.sort((a, b) => {
     const splitA = a.split('/');
-    const fileA = splitA[11];
+    const fileA = splitA[9];
     const splitB = b.split('/');
-    const fileB = splitB[11];
+    const fileB = splitB[9];
 
     return fileA.localeCompare(fileB);
   });
 
-  for await (const f of files) {
-    if (f.includes('.DS_Store') || f.includes('.HEIC')) {
+  for await (let f of files) {
+    if (f.includes('.DS_Store')) {
       continue;
     }
 
     const split = f.split('/');
 
-    const city = split[9];
-    const country = split[8];
-    const location = split[10];
-    const file = split[11];
+    const city = split[7];
+    const country = split[6];
+    const location = split[8];
+    const file = split[9].toLowerCase();
 
     if (!fs.existsSync('./to_send/' + country)) {
       fs.mkdirSync('./to_send/' + country);
@@ -70,10 +75,22 @@ const cities = {};
       fs.mkdirSync('./to_send/500/' + country + '/' + city);
     }
 
+    if (!fs.existsSync('./jpegs/' + country)) {
+      fs.mkdirSync('./jpegs/' + country);
+    }
+
+    if (!fs.existsSync('./jpegs/' + country + '/' + city)) {
+      fs.mkdirSync('./jpegs/' + country + '/' + city);
+    }
+
+    if (!fs.existsSync('./jpegs/' + country + '/' + city + '/' + location)) {
+      fs.mkdirSync('./jpegs/' + country + '/' + city + '/' + location);
+    }
+
     if (!cities[city]) {
       cities[city] = 1;
     }
-    console.log(f);
+
     const itemData = {
       country,
       city,
@@ -92,50 +109,44 @@ const cities = {};
         (file.includes('.mp4') ? '.mp4' : '.jpg'),
     };
 
-    let data = null;
+    if (file.includes('.jpg') || file.includes('.heic')) {
+      const tags = await ExifReader.load(f);
 
-    if (
-      !file.includes('.mp4') &&
-      !file.includes('Google Brasil.jpg') &&
-      !file.includes('panoramio-99093262.jpg') &&
-      !file.includes('panoramio-99093250.jpg') &&
-      !file.includes('2023-12-02.jpg')
-    ) {
-      if (file.includes('(')) {
-        const [date, n] = file.split('(');
-        const [number] = n.split(')');
-        const jsonFile = date + '.jpg' + '(' + number + ').json';
-        if (fs.existsSync('./' + jsonFile)) {
-          data = fs.readFileSync('./' + jsonFile);
-        } else {
-          data = fs.readFileSync(
-            './' + date + '(' + number + ')' + '.jpg.json'
-          );
-        }
-      } else {
-        if (fs.existsSync('./' + file + '.json')) {
-          data = fs.readFileSync('./' + file + '.json');
-        } else {
-          data = fs.readFileSync('./' + file.split('.')[0] + '.HEIC.json');
-        }
+      const latitude = tags['GPSLatitudeRef']
+        ? (tags['GPSLatitudeRef'].value[0] == 'S' ? -1 : 1) *
+          tags['GPSLatitude'].description
+        : null;
+      const longitude = tags['GPSLongitudeRef']
+        ? (tags['GPSLongitudeRef'].value[0] == 'W' ? -1 : 1) *
+          tags['GPSLongitude'].description
+        : null;
+      const altitude = tags['GPSAltitude']
+        ? tags['GPSAltitude'].description
+        : null;
+
+      const datetime = tags['DateTimeOriginal'].description.split(' ');
+      const date = datetime[0].replaceAll(':', '-');
+      const time = datetime[1];
+
+      itemData.latitude = latitude;
+      itemData.longitude = longitude;
+      itemData.altitude = altitude;
+      itemData.date = date + ' ' + time;
+
+      if (f.includes('.HEIC')) {
+        const inputBuffer = await promisify(fs.readFile)(f);
+        const outputBuffer = await convert({
+          buffer: inputBuffer, // the HEIC file buffer
+          format: 'JPEG', // output format
+          quality: 1, // the jpeg compression quality, between 0 and 1
+        });
+
+        f = f.replace('upload/done', 'upload/jpegs').replace('.HEIC', '.jpg');
+        console.log(f);
+
+        await promisify(fs.writeFile)(f, outputBuffer);
       }
 
-      const meta = JSON.parse(data.toString());
-
-      itemData.latitude = meta.geoDataExif.latitude;
-      itemData.longitude = meta.geoDataExif.longitude;
-      itemData.altitude = meta.geoDataExif.altitude;
-      itemData.latitude_span = meta.geoDataExif.latitudeSpan;
-      itemData.longitude_span = meta.geoDataExif.longitudeSpan;
-      itemData.date = new Date(meta.photoTakenTime.formatted)
-        .toISOString()
-        .replace('T', ' ')
-        .slice(0, 16);
-    }
-
-    console.log(itemData);
-
-    if (file.includes('.jpg')) {
       sharp(f)
         .rotate()
         .resize(1440)

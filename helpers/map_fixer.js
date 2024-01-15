@@ -71,9 +71,7 @@ items.forEach(function (item) {
 
   item.hashtags = [
     item.city.replaceAll('-', ''),
-    ,
     item.country.replaceAll('-', ''),
-    ,
     stringToSlug(item.location).replaceAll('-', ''),
   ];
   item.hashtags_pt = [
@@ -81,12 +79,10 @@ items.forEach(function (item) {
       ? stringToSlug(city.name_pt).replaceAll('-', '')
       : item.city
     ).replaceAll('-', ''),
-    ,
     (country.name_pt
       ? stringToSlug(country.name_pt).replaceAll('-', '')
       : item.city
     ).replaceAll('-', ''),
-    ,
     stringToSlug(item.location).replaceAll('-', ''),
   ];
 
