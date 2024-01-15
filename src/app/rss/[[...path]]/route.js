@@ -2,7 +2,7 @@ import { parse } from 'js2xmlparser';
 import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
 import { getFirestore } from 'firebase-admin/firestore';
-import { FILE_DOMAIN, SITE_NAME } from '@/app/utils/constants';
+import { FILE_DOMAIN, ITEMS_PER_PAGE, SITE_NAME } from '@/app/utils/constants';
 import removeDiacritics from '@/app/utils/remove-diacritics';
 import getMetadata from '@/app/utils/get-metadata';
 import getTypePath from '@/app/utils/get-type-path';
@@ -33,7 +33,7 @@ export async function GET(req) {
     if (!cache.exists) {
       const photosSnapshot = await db
         .collectionGroup('medias')
-        .limit(20)
+        .limit(ITEMS_PER_PAGE)
         .orderBy('createdAt', 'desc')
         .get();
 
@@ -84,25 +84,36 @@ export async function GET(req) {
       redirect('/hashtags');
     }
 
-    const cacheRef = `/caches/hashtags/hashtags-cache/${finalHashtag.name}/sort/desc`;
+    const cacheRef = `/caches/feeds/hashtags-cache/${finalHashtag.name}/sort/desc`;
 
     let cache = await db.doc(cacheRef).get();
 
     if (!cache.exists) {
-      await fetch(host(pathname.replace('/rss', '')), {
-        headers: {
-          'User-Agent': req.headers.get('user-agent'),
-        },
+      const photosSnapshot = await db
+        .collectionGroup('medias')
+        .where('hashtags', 'array-contains', finalHashtag.name)
+        .limit(finalHashtag.rss_limit ? finalHashtag.rss_limit : ITEMS_PER_PAGE)
+        .orderBy('createdAt', 'desc')
+        .get();
+
+      photosSnapshot.forEach((doc) => {
+        const data = doc.data();
+        data.path = doc.ref.path;
+
+        photos.push(data);
       });
 
-      cache = await db.doc(cacheRef).get();
-
-      if (!cache.exists) {
-        redirect(pathname.replace('/rss', ''));
+      if (photos.length === 0) {
+        redirect('/');
       }
-    }
 
-    photos = cache.data().photos;
+      db.doc(cacheRef).set({
+        photos,
+        last_update: new Date().toISOString().split('T')[0],
+      });
+    } else {
+      photos = cache.data().photos;
+    }
   }
 
   let instagramPhotos = photos.filter(
@@ -174,6 +185,15 @@ export async function GET(req) {
     }
   );
 
+  const items = [
+    ...instagramStories,
+    ...instagramPhotos,
+    ...shortVideos,
+    ...youtubeVideos,
+    ..._360photos,
+    ...mapsPhotos,
+  ].sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+
   let obj = {
     '@': {
       version: '2.0',
@@ -205,14 +225,7 @@ export async function GET(req) {
         width: 144,
         height: 144,
       },
-      item: [
-        ...instagramStories,
-        ...instagramPhotos,
-        ...shortVideos,
-        ...youtubeVideos,
-        ..._360photos,
-        ...mapsPhotos,
-      ]
+      item: items
         .filter((c) => !c.rss_ignore)
         .map((p) => {
           let { title, description } = getMetadata(p, isBR);
@@ -276,9 +289,7 @@ export async function GET(req) {
               },
               '#': link,
             },
-            pubDate: hashtag
-              ? new Date(p.date).toUTCString()
-              : p.createdAt.toDate().toUTCString(),
+            pubDate: p.createdAt.toDate().toUTCString(),
             category: 'Travel',
             ['media:category']: p.hashtags
               ? isBR && p.hashtags_pt
