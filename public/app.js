@@ -57,7 +57,6 @@
   // messing with the SSR on Next.js 14, please don't judge me.
   const countryRoutes = window.location.origin + '/countries';
   const hashtagRoutes = window.location.origin + '/hashtags';
-  const loadingSpinner = document.querySelector('#loader-spinner');
 
   function showSpinner(e) {
     const link = e?.target?.href || e?.target?.closest('a')?.href;
@@ -78,7 +77,7 @@
       return;
     }
 
-    loadingSpinner.style.display = 'block';
+    document.querySelector('#loader-spinner').style.display = 'block';
   }
 
   let firstPage = window.location.pathname;
@@ -522,7 +521,7 @@
     });
   }
 
-  const elementToObserve = document.querySelector('main');
+  const elementToObserve = document.querySelector('body');
 
   observer = new MutationObserver(function (e) {
     if (e.every((i) => i.type === 'attributes')) {
@@ -548,7 +547,7 @@
       if (!panorama.classList.contains('pnlm-container')) {
         initPanorama();
 
-        loadingSpinner.style.display = 'none';
+        document.querySelector('#loader-spinner').style.display = 'none';
       }
 
       return;
@@ -558,9 +557,9 @@
       return;
     }
 
-    loadingSpinner.style.display = 'none';
+    document.querySelector('#loader-spinner').style.display = 'none';
 
-    setupLinks('main');
+    setupLinks('body');
 
     if (
       window.location.href.includes(countryRoutes) ||
@@ -659,7 +658,7 @@
   }
 
   window.addEventListener('pageshow', function () {
-    loadingSpinner.style.display = 'none';
+    document.querySelector('#loader-spinner').style.display = 'none';
   });
 
   initNavbarLinkClick();

@@ -303,9 +303,10 @@ export default function RootLayout({ children }) {
             <noscript>
               <iframe
                 src={
-                  'https://www.googletagmanager.com/ns.html?id=' + isBR
+                  'https://www.googletagmanager.com/ns.html?id=' +
+                  (isBR
                     ? process.env.NEXT_GTM_TRACKING_BR
-                    : process.env.NEXT_GTM_TRACKING
+                    : process.env.NEXT_GTM_TRACKING)
                 }
                 height="0"
                 width="0"
@@ -378,7 +379,7 @@ export default function RootLayout({ children }) {
           <Footer />
 
           {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-          <script src={host('app.js')} />
+          <script id="app" src={host('app.js')} />
 
           {!ignoreAnalytics && (
             <>
