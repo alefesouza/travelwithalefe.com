@@ -40,7 +40,7 @@ export default function Scroller({
   });
 
   // @ad
-  if ((items.length - inserted) % 8 === 0) {
+  if ((items.length - inserted) % 8 === 0 || items.length === 7) {
     items.push({
       type: 'ad',
       id: 'ad-' + (items.length - 1),
