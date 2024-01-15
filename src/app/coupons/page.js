@@ -142,7 +142,7 @@ export default async function Coupons() {
                       }}
                       target="_blank"
                     >
-                      {i18n('Click here')}
+                      {i18n('Click here to open the referral link')}
                     </a>
                   )}
                   {item.code && (

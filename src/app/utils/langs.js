@@ -61,7 +61,8 @@ const langs = {
     Coupons: 'Cupons',
     'Use Viajar com Alê to get discounts on products and services.':
       'Use os cupons do Viajar com Alê para ganhar descontos em produtos e serviços.',
-    'Click here': 'Clique aqui',
+    'Click here to open the referral link':
+      'Clique para abrir o link de indicação',
     Code: 'Código',
     'How I Use': 'Como eu uso',
     'Quick Access': 'Acesso rápido',

@@ -94,7 +94,7 @@ export default async function Coupons({ params: { coupon } }) {
                   }}
                   target="_blank"
                 >
-                  {i18n('Click here')}
+                  {i18n('Click here to open the referral link')}
                 </a>
               )}
               {couponData.code && (
