@@ -169,7 +169,7 @@
     if (e?.metaKey) {
       return;
     }
-
+    console.log(e);
     const navLinks = [...document.querySelectorAll('.navbar .nav-link')];
 
     navLinks.forEach((item) => {
@@ -183,7 +183,7 @@
     const navLinks = [...document.querySelectorAll('.navbar .nav-link')];
 
     navLinks.forEach((item) => {
-      item.addEventListener('click', onNavbarLinkClick);
+      item.onclick = onNavbarLinkClick;
     });
   }
 
@@ -255,7 +255,7 @@
     const routeLinks = [...document.querySelectorAll(tag + ' a')];
 
     routeLinks.forEach((a) => {
-      a.addEventListener('click', showSpinner);
+      a.onclick = showSpinner;
     });
 
     const languageSwitcherLink = currentUrl.includes('viajarcomale.com.br')
@@ -270,8 +270,7 @@
     const backButton = document.querySelector('#back-button');
 
     if (backButton) {
-      backButton.removeEventListener('click', onBackClick);
-      backButton.addEventListener('click', onBackClick);
+      backButton.onclick = onBackClick;
     }
 
     if (
@@ -288,8 +287,7 @@
     }
 
     [...document.querySelectorAll('.shuffle button')].forEach((item) => {
-      item.removeEventListener('click', onShuffleClick);
-      item.addEventListener('click', onShuffleClick);
+      item.onclick = onShuffleClick;
     });
 
     initNavbarLinkClick();
@@ -523,18 +521,21 @@
   const elementToObserve = document.querySelector('main');
 
   observer = new MutationObserver(function (e) {
-    if (
-      document.querySelector(
-        '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
-      )
-    ) {
-      document
-        .querySelectorAll(
+    if (e.every((i) => i.type === 'attributes')) {
+      if (
+        document.querySelector(
           '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
         )
-        .forEach((el) => {
-          el.parentElement.style.display = 'none';
-        });
+      ) {
+        document
+          .querySelectorAll(
+            '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
+          )
+          .forEach((el) => {
+            el.parentElement.style.display = 'none';
+          });
+      }
+      return;
     }
 
     const panorama = document.querySelector('#panorama');
