@@ -10,6 +10,7 @@ import shuffle from '../utils/array-shuffle';
 import defaultMetadata from '../utils/default-metadata';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
+import AdSense from '../components/adsense';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -121,6 +122,11 @@ export default async function MapPage() {
             isAndroid={isAndroid}
           />
         </div>
+      </div>
+
+      {/* @ad */}
+      <div className="ad">
+        <AdSense index={1} />
       </div>
     </div>
   );

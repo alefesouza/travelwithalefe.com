@@ -7,6 +7,7 @@ import { SITE_NAME } from '../utils/constants';
 import Link from 'next/link';
 import ShareButton from '../components/share-button';
 import defaultMetadata from '../utils/default-metadata';
+import AdSense from '../components/adsense';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -98,6 +99,11 @@ export default async function MapPage() {
         resetZoomText={i18n('Reset Zoom')}
         apiKey={process.env.NEXT_MAPS_API_KEY}
       />
+
+      {/* @ad */}
+      <div className="ad">
+        <AdSense index={1} />
+      </div>
     </div>
   );
 }
