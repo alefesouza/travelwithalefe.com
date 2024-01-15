@@ -41,7 +41,6 @@ export default function AdSense({ index, isScroller }) {
       data-ad-slot={isScroller ? '8751581776' : '2160336859'}
       data-ad-format="auto"
       data-full-width-responsive={isScroller ? 'false' : 'true'}
-      data-adtest="on"
     />
   );
 }
