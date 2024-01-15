@@ -186,7 +186,7 @@ export default async function Highlight({
       photosSnapshot = photosSnapshot.where('type', '==', 'story');
     }
 
-    photosSnapshot = await photosSnapshot.orderBy('date', sort).get();
+    photosSnapshot = await photosSnapshot.orderBy('order', sort).get();
 
     photosSnapshot.forEach((photo) => {
       const data = photo.data();
