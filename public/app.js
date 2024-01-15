@@ -165,7 +165,11 @@
     }, 1000);
   }
 
-  function onNavbarLinkClick() {
+  function onNavbarLinkClick(e) {
+    if (e?.metaKey) {
+      return;
+    }
+
     const navLinks = [...document.querySelectorAll('.navbar .nav-link')];
 
     navLinks.forEach((item) => {
