@@ -68,6 +68,7 @@ const langs = {
     'Quick Access': 'Acesso rápido',
     Copy: 'Copiar',
     Regulation: 'Regulamento',
+    'Open in Stories format': 'Abrir em formato de Stories',
 
     'Next post': 'Próximo post',
     'Next story': 'Próximo story',
