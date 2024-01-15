@@ -271,7 +271,9 @@ export default async function WebStories({
                 item.type === 'short-video' ||
                 item.type === 'youtube' ||
                 item.type === 'post' ||
-                (item.type === 'maps' && !isLocation)) && (
+                (item.type === 'maps' &&
+                  !isLocation &&
+                  locationDescription)) && (
                 <div className="post-type-container" justify-self="center">
                   <h1
                     className="common-text"
@@ -318,7 +320,7 @@ export default async function WebStories({
                           ? 'swipe up to navigate'
                           : 'swipe up to watch'
                       )}
-                    {item.type === 'maps' && !isLocation
+                    {item.type === 'maps' && !isLocation && locationDescription
                       ? '📍 ' + locationDescription
                       : ''}
                   </h1>
