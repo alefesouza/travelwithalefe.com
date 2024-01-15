@@ -64,20 +64,13 @@ exports.onMediaUpdated = onDocumentUpdated(
       locationsSnapshot.forEach((doc) => {
         const data = doc.data();
 
-        if (
-          newValue.location_data &&
-          newValue.location_data.find((l) => l.slug === data.slug)
-        ) {
-          return;
-        }
-
         locations.push({
           name: data.name,
           name_pt: data.name_pt || null,
           alternative_names: data.alternative_names || [],
           slug: data.slug,
-          latitude: data.latitude,
-          longitude: data.longitude,
+          latitude: data.latitude || null,
+          longitude: data.longitude || null,
         });
 
         if (!oldValue.locations || !oldValue.locations.includes(data.slug)) {
@@ -147,6 +140,8 @@ exports.onLocationUpdated = onDocumentUpdated(
       oldValue.name_pt !== newValue.name_pt ||
       oldValue.slug !== newValue.slug ||
       oldValue.city !== newValue.city ||
+      oldValue.latitude !== newValue.latitude ||
+      oldValue.longitude !== newValue.longitude ||
       JSON.stringify(oldValue.alternative_names) !==
         JSON.stringify(newValue.alternative_names)
     ) {
