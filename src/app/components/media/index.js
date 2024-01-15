@@ -72,8 +72,8 @@ export default function Media({
           src={(fullQuality ? FILE_DOMAIN : FILE_DOMAIN_500) + media.file}
           srcSet={`${FILE_DOMAIN_500 + media.file} 500w, ${
             FILE_DOMAIN + media.file
-          } ${media.width}w`}
-          sizes={`(max-width: 500px) 500px, ${media.width}px`}
+          } ${media.width || 1440}w`}
+          sizes={`(max-width: 500px) 500px, ${media.width || 1440}px`}
           alt={isBR ? media.description_pt : media.description}
           loading="lazy"
           itemProp="contentUrl"

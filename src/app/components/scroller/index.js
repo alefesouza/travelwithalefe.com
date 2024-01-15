@@ -168,7 +168,7 @@ export default function Scroller({
                                 } 500w, ${
                                   FILE_DOMAIN +
                                   p.file.replace('.mp4', '-thumb.png')
-                                } ${p.width}w`
+                                } ${p.width || 1440}w`
                           }
                           alt={isBR ? p.description_pt : p.description}
                           className={styles.vertical_content}
@@ -192,7 +192,7 @@ export default function Scroller({
                                 } 500w, ${
                                   FILE_DOMAIN +
                                   p.file.replace('.mp4', '-thumb.png')
-                                } ${p.width}w`
+                                } ${p.width || 1440}w`
                           }
                           sizes={
                             !isYouTubeVideos
