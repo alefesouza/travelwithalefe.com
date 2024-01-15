@@ -81,19 +81,25 @@ export default function SchemaData({
         {locationDescription && (
           <span itemProp="name" content={locationDescription} />
         )}
-        {media.location_data?.[0]?.latitude && (
+        {(media.longitude || media.location_data?.[0]?.latitude) && (
           <span
             itemProp="geo"
             itemScope
             itemType="https://schema.org/GeoCoordinates"
           >
+            {(media.altitude || media.location_data?.[0]?.altitude) && (
+              <span
+                itemProp="elevation"
+                content={media.altitude || media.location_data[0].altitude}
+              />
+            )}
             <span
               itemProp="latitude"
-              content={media.location_data[0].latitude}
+              content={media.latitude || media.location_data[0].latitude}
             />
             <span
               itemProp="longitude"
-              content={media.location_data[0].longitude}
+              content={media.longitude || media.location_data[0].longitude}
             />
           </span>
         )}
