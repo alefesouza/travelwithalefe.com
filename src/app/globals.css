@@ -899,7 +899,7 @@ video {
 }
 
 .scroller_is_gallery:not(.scroller_ad)::after {
-  content: url('/images/gallery.scroller_svg');
+  content: url('/images/gallery.svg');
   position: absolute;
   top: 10px;
   right: 10px;
