@@ -286,14 +286,8 @@ export default async function Highlight({
       ...photos.filter((p) => p.type === '360photo'),
       ...photos.filter((p) => p.type === 'short-video'),
       ...photos.filter((p) => p.type === 'youtube'),
-    ];
-
-    if (items.length < 100) {
-      items = [...items, ...photos.filter((p) => p.type === 'maps')].slice(
-        0,
-        100
-      );
-    }
+      ...photos.filter((p) => p.type === 'maps'),
+    ].slice(0, 100);
 
     return (
       <WebStories

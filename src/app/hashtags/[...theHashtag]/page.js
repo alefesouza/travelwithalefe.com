@@ -366,11 +366,8 @@ export default async function Country({
       ..._360photos,
       ...youtubeVideos,
       ...shortVideos,
-    ];
-
-    if (items.length < 100) {
-      items = [...items, ...mapsPhotos].slice(0, 100);
-    }
+      ...mapsPhotos,
+    ].slice(0, 100);
 
     return (
       <WebStories
