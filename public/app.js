@@ -169,7 +169,7 @@
     if (e?.metaKey) {
       return;
     }
-    console.log(e);
+
     const navLinks = [...document.querySelectorAll('.navbar .nav-link')];
 
     navLinks.forEach((item) => {
@@ -183,7 +183,8 @@
     const navLinks = [...document.querySelectorAll('.navbar .nav-link')];
 
     navLinks.forEach((item) => {
-      item.onclick = onNavbarLinkClick;
+      item.removeEventListener('click', onNavbarLinkClick);
+      item.addEventListener('click', onNavbarLinkClick);
     });
   }
 
@@ -255,7 +256,8 @@
     const routeLinks = [...document.querySelectorAll(tag + ' a')];
 
     routeLinks.forEach((a) => {
-      a.onclick = showSpinner;
+      a.removeEventListener('click', showSpinner);
+      a.addEventListener('click', showSpinner);
     });
 
     const languageSwitcherLink = currentUrl.includes('viajarcomale.com.br')
@@ -270,7 +272,8 @@
     const backButton = document.querySelector('#back-button');
 
     if (backButton) {
-      backButton.onclick = onBackClick;
+      backButton.removeEventListener('click', onBackClick);
+      backButton.addEventListener('click', onBackClick);
     }
 
     if (
@@ -287,7 +290,8 @@
     }
 
     [...document.querySelectorAll('.shuffle button')].forEach((item) => {
-      item.onclick = onShuffleClick;
+      item.removeEventListener('click', onShuffleClick);
+      item.addEventListener('click', onShuffleClick);
     });
 
     initNavbarLinkClick();
