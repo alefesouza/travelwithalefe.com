@@ -1,3 +1,6 @@
+const museums = collectionGroup(db, 'countries');
+const countries = [];
+
 const querySnapshot = await getDocs(museums);
 querySnapshot.forEach((theDoc) => {
   const data = theDoc.data();

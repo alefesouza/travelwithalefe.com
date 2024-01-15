@@ -35,7 +35,16 @@ const cities = {
       continue;
     }
 
-    files.push(f);
+    if (!f.includes('.MP4')) {
+      files.push(f);
+    }
+
+    if (
+      f.includes('.MP4') &&
+      !files.find((a) => a.includes(f.replace('.MP4', '.HEIC')))
+    ) {
+      files.push(f);
+    }
   }
 
   files.sort((a, b) => {
