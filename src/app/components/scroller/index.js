@@ -1,7 +1,6 @@
 import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
 import Link from 'next/link';
-import styles from './index.module.css';
 import { FILE_DOMAIN, FILE_DOMAIN_500 } from '@/app/utils/constants';
 import ShareButton from '../share-button';
 import Hashtags from '../hashtags';
@@ -66,8 +65,8 @@ export default function Scroller({
               textDecoration: 'underline',
               display: 'none',
             }}
-            data-maximize={styles.instagram_highlights_items}
-            data-minimize={styles.scroller_items}
+            data-maximize={'scroller_instagram_highlights_items'}
+            data-minimize={'scroller_scroller_items'}
             data-maxtext={i18n('Maximize')}
             data-mintext={i18n('Minimize')}
           >
@@ -88,12 +87,14 @@ export default function Scroller({
       )}
 
       <div style={{ position: 'relative' }}>
-        <div className={styles.scroller_left_arrow}>‹</div>
+        <div className={'scroller_scroller_left_arrow'}>‹</div>
 
         <div
           className={
-            styles.scroller_items +
-            (is360Photos || isYouTubeVideos ? ' ' + styles.scroller_360 : '')
+            'scroller_scroller_items' +
+            (is360Photos || isYouTubeVideos
+              ? ' ' + 'scroller_scroller_360'
+              : '')
           }
           data-scroller-scroll
         >
@@ -114,10 +115,12 @@ export default function Scroller({
               <div
                 key={originalId}
                 className={[
-                  styles.scroller_item,
-                  is360Photos || isYouTubeVideos ? styles.item_360_photo : '',
-                  isInstagramHighlights ? styles.is_gallery : '',
-                  p.type === 'ad' ? styles.ad + ' scroller-ad' : '',
+                  'scroller_scroller_item',
+                  is360Photos || isYouTubeVideos
+                    ? 'scroller_item_360_photo'
+                    : '',
+                  isInstagramHighlights ? 'scroller_is_gallery' : '',
+                  p.type === 'ad' ? 'scroller_ad' + ' scroller-ad' : '',
                 ]
                   .filter((c) => c)
                   .join(' ')}
@@ -151,7 +154,7 @@ export default function Scroller({
                             )
                       }
                       style={{ display: 'block', position: 'relative' }}
-                      className={is360Photos ? styles.item_360_photo : ''}
+                      className={is360Photos ? 'scroller_item_360_photo' : ''}
                       prefetch={false}
                     >
                       {isStories && p.file.includes('.mp4') ? (
@@ -171,7 +174,7 @@ export default function Scroller({
                                 } ${p.width || 1440}w`
                           }
                           alt={isBR ? p.description_pt : p.description}
-                          className={styles.vertical_content}
+                          className={'scroller_vertical_content'}
                           loading="lazy"
                           itemProp="contentUrl"
                         />
@@ -202,9 +205,9 @@ export default function Scroller({
                           alt={isBR ? p.description_pt : p.description}
                           className={
                             !isYouTubeVideos && !is360Photos
-                              ? styles.vertical_content
+                              ? 'scroller_vertical_content'
                               : isYouTubeVideos
-                              ? styles.youtube_video
+                              ? 'scroller_youtube_video'
                               : ''
                           }
                           loading="lazy"
@@ -221,7 +224,7 @@ export default function Scroller({
                     </Link>
 
                     {isShortVideos && (
-                      <div className={styles.short_video_links}>
+                      <div className={'scroller_short_video_links'}>
                         {['tiktok', 'instagram', 'youtube', 'kwai'].map(
                           (item) =>
                             p[item + '_link'] && (
@@ -255,7 +258,7 @@ export default function Scroller({
                     )}
 
                     {isInstagramHighlights && (
-                      <div className={styles.external_links}>
+                      <div className={'scroller_external_links'}>
                         {
                           <a
                             href={
@@ -289,7 +292,7 @@ export default function Scroller({
                     )}
 
                     {(isStories || isYouTubeVideos || is360Photos) && (
-                      <div className={styles.external_links}>
+                      <div className={'scroller_external_links'}>
                         {isStories && (
                           <a
                             href={
@@ -386,7 +389,7 @@ export default function Scroller({
                       p.location_data.length > 0 && (
                         <div
                           style={{ marginTop: 4 }}
-                          className={styles.location}
+                          className={'scroller_location'}
                         >
                           {i18n(
                             p.location_data.length > 1 ? 'Places' : 'Place'
@@ -440,7 +443,7 @@ export default function Scroller({
           })}
         </div>
 
-        <div className={styles.scroller_right_arrow}>›</div>
+        <div className={'scroller_scroller_right_arrow'}>›</div>
       </div>
     </div>
   );
