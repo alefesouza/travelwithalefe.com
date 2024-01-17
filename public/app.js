@@ -521,24 +521,21 @@
     });
   }
 
-  const elementToObserve = document.querySelector('body');
+  const elementToObserve = document.querySelector('head');
 
-  observer = new MutationObserver(function (e) {
-    if (e.every((i) => i.type === 'attributes')) {
-      if (
-        document.querySelector(
+  observer = new MutationObserver(function () {
+    if (
+      document.querySelector(
+        '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
+      )
+    ) {
+      document
+        .querySelectorAll(
           '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
         )
-      ) {
-        document
-          .querySelectorAll(
-            '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
-          )
-          .forEach((el) => {
-            el.parentElement.style.display = 'none';
-          });
-      }
-      return;
+        .forEach((el) => {
+          el.parentElement.style.display = 'none';
+        });
     }
 
     const panorama = document.querySelector('#panorama');
