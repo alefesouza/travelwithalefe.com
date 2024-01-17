@@ -170,8 +170,7 @@ export default async function Country({ params: { slug }, searchParams }) {
 
   if (
     searchParams.sort == 'random' &&
-    (!searchParams.shuffle || Object.keys(searchParams).length > 2) &&
-    !searchParams.indexes
+    (!searchParams.shuffle || Object.keys(searchParams).length > 2)
   ) {
     redirect('/');
   }
@@ -237,18 +236,10 @@ export default async function Country({ params: { slug }, searchParams }) {
     if (isRandom) {
       sort = 'desc';
 
-      if (searchParams.indexes) {
-        randomArray = searchParams.indexes.split(',').map((i) => parseInt(i));
-
-        if (randomArray.length > 20) {
-          randomArray = [0];
-        }
-      } else {
-        const array = Array.from(Array(totalPhotos).keys());
-        randomArray = arrayShuffle(array).slice(0, ITEMS_PER_PAGE);
-        const arrayMaps = Array.from(Array(totalMapsPhotos).keys());
-        randomArrayMaps = arrayShuffle(arrayMaps).slice(0, ITEMS_PER_PAGE);
-      }
+      const array = Array.from(Array(totalPhotos).keys());
+      randomArray = arrayShuffle(array).slice(0, ITEMS_PER_PAGE);
+      const arrayMaps = Array.from(Array(totalMapsPhotos).keys());
+      randomArrayMaps = arrayShuffle(arrayMaps).slice(0, ITEMS_PER_PAGE);
     }
 
     if (!cache.exists) {
@@ -873,29 +864,24 @@ export default async function Country({ params: { slug }, searchParams }) {
                 />
               )}
 
-              <div className="center_link">
-                <Link
-                  href={
-                    `/countries/${country}${city ? '/cities/' + city : ''}${
-                      page ? '/page/' + page : ''
-                    }${!expandGalleries ? '/expand' : ''}` +
-                    (sort !== 'desc' ? '?sort=' + sort : '') +
-                    (sort === 'random'
-                      ? '&indexes=' +
-                        instagramPhotos
-                          .filter((p) => !p.file_type)
-                          .map((p) => p[index])
-                          .join(',')
-                      : '')
-                  }
-                  scroll={false}
-                  prefetch={false}
-                >
-                  {expandGalleries
-                    ? i18n('Minimize Galleries')
-                    : i18n('Expand Galleries')}
-                </Link>
-              </div>
+              {sort !== 'random' && (
+                <div className="center_link">
+                  <Link
+                    href={
+                      `/countries/${country}${city ? '/cities/' + city : ''}${
+                        page ? '/page/' + page : ''
+                      }${!expandGalleries ? '/expand' : ''}` +
+                      (sort !== 'desc' ? '?sort=' + sort : '')
+                    }
+                    scroll={false}
+                    prefetch={false}
+                  >
+                    {expandGalleries
+                      ? i18n('Minimize Galleries')
+                      : i18n('Expand Galleries')}
+                  </Link>
+                </div>
+              )}
 
               <div className="instagram_highlights_items">
                 {instagramPhotos.map((p, i) => (

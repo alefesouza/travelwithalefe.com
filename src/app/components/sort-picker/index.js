@@ -1,7 +1,13 @@
 import Link from 'next/link';
 import useI18n from '@/app/hooks/use-i18n';
 
-export default function SortPicker({ type, basePath, sort, newShuffle }) {
+export default function SortPicker({
+  type,
+  basePath,
+  sort,
+  newShuffle,
+  isRandom,
+}) {
   const i18n = useI18n();
 
   return (
@@ -40,6 +46,19 @@ export default function SortPicker({ type, basePath, sort, newShuffle }) {
           </Link>
         ))}
       </div>
+
+      {sort === 'random' && (
+        <div style={{ textAlign: 'center', marginTop: 18 }}>
+          <Link
+            href={'?sort=random&shuffle=' + newShuffle}
+            scroll={false}
+            prefetch={false}
+            className="shuffle"
+          >
+            <button className="btn btn-primary">{i18n('Shuffle')}</button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

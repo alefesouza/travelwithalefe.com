@@ -1,7 +1,6 @@
 User-agent: *
 Disallow: /*?*sort=
 Disallow: /*?*shuffle=
-Disallow: /*?*indexes=
 Disallow: /*?*fixer=
 Disallow: /*?*ignore_analytics=
 

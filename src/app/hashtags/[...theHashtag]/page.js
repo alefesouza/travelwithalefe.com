@@ -648,29 +648,24 @@ export default async function Country({
                 />
               )}
 
-              <div className="center_link">
-                <Link
-                  href={
-                    `/hashtags/${currentHashtag}${page ? '/page/' + page : ''}${
-                      !expandGalleries ? '/expand' : ''
-                    }` +
-                    (sort !== 'desc' ? '?sort=' + sort : '') +
-                    (sort === 'random'
-                      ? '&indexes=' +
-                        instagramPhotos
-                          .filter((p) => !p.file_type)
-                          .map((p) => p[index])
-                          .join(',')
-                      : '')
-                  }
-                  scroll={false}
-                  prefetch={false}
-                >
-                  {expandGalleries
-                    ? i18n('Minimize Galleries')
-                    : i18n('Expand Galleries')}
-                </Link>
-              </div>
+              {sort !== 'random' && (
+                <div className="center_link">
+                  <Link
+                    href={
+                      `/hashtags/${currentHashtag}${
+                        page ? '/page/' + page : ''
+                      }${!expandGalleries ? '/expand' : ''}` +
+                      (sort !== 'desc' ? '?sort=' + sort : '')
+                    }
+                    scroll={false}
+                    prefetch={false}
+                  >
+                    {expandGalleries
+                      ? i18n('Minimize Galleries')
+                      : i18n('Expand Galleries')}
+                  </Link>
+                </div>
+              )}
 
               <div className="instagram_highlights_items">
                 {instagramPhotos.map((p) => (
