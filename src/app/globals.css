@@ -173,7 +173,8 @@ body {
 }
 
 .language {
-  padding: 8px;
+  padding: 8px 10px;
+  font-size: 14px;
   border: 1px solid #212529;
   border-radius: 40px;
   color: #212529;
@@ -185,15 +186,17 @@ body {
 
 #portuguese-language-switcher {
   position: absolute;
-  top: 138px;
+  top: 136px;
 }
 
-.sub-page #portuguese-language-switcher {
-  width: 230px;
-  top: 76px;
-  left: 50%;
-  transform: translate(-50%, 0px);
-  text-align: center;
+@media (max-width: 643px) {
+  .sub-page #portuguese-language-switcher {
+    width: 230px;
+    top: 56px;
+    left: 50%;
+    transform: translate(-50%, 0px);
+    text-align: center;
+  }
 }
 
 .sub-page header .profile {
@@ -227,7 +230,7 @@ body {
 @media (min-width: 644px) {
   #portuguese-language-switcher {
     position: absolute;
-    top: 95px;
+    top: 94px;
   }
 }
 

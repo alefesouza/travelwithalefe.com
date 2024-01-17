@@ -538,6 +538,24 @@
         });
     }
 
+    if (
+      navigator.language.startsWith('pt') &&
+      !document.querySelector('#portuguese-language-switcher') &&
+      !window.matchMedia('(display-mode: standalone)').matches &&
+      !window.matchMedia('(display-mode: window-controls-overlay)').matches &&
+      !window.location.origin.includes('viajarcomale.com.br')
+    ) {
+      const portugueseLanguageSwitcher = document.createElement('div');
+      portugueseLanguageSwitcher.id = 'portuguese-language-switcher';
+      const portugueseLanguageSwitcherLink = document.createElement('a');
+      portugueseLanguageSwitcherLink.className = 'language';
+      portugueseLanguageSwitcherLink.href =
+        'https://viajarcomale.com.br' + window.location.pathname;
+      portugueseLanguageSwitcherLink.textContent = 'Clique aqui para português';
+      portugueseLanguageSwitcher.appendChild(portugueseLanguageSwitcherLink);
+      document.querySelector('header').appendChild(portugueseLanguageSwitcher);
+    }
+
     const panorama = document.querySelector('#panorama');
 
     if (panorama) {
@@ -635,23 +653,6 @@
         30
       );
     });
-  }
-
-  if (
-    !window.matchMedia('(display-mode: standalone)').matches &&
-    !window.matchMedia('(display-mode: window-controls-overlay)').matches &&
-    navigator.language.startsWith('pt') &&
-    !window.location.origin.includes('viajarcomale.com.br')
-  ) {
-    const portugueseLanguageSwitcher = document.createElement('div');
-    portugueseLanguageSwitcher.id = 'portuguese-language-switcher';
-    const portugueseLanguageSwitcherLink = document.createElement('a');
-    portugueseLanguageSwitcherLink.className = 'language';
-    portugueseLanguageSwitcherLink.href =
-      'https://viajarcomale.com.br' + window.location.pathname;
-    portugueseLanguageSwitcherLink.textContent = 'Clique aqui para português';
-    portugueseLanguageSwitcher.appendChild(portugueseLanguageSwitcherLink);
-    document.querySelector('header').appendChild(portugueseLanguageSwitcher);
   }
 
   window.addEventListener('pageshow', function () {
