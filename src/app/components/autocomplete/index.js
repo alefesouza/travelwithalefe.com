@@ -96,9 +96,11 @@ export default function Autocomplete() {
       return;
     }
 
-    document.querySelector('#loader-spinner').style.display = 'block';
-
     router.push('/hashtags/' + e.value.replace('#', ''));
+
+    setTimeout(() => {
+      document.querySelector('#loader-spinner').style.display = 'block';
+    }, 100);
   };
 
   const onInputChange = (e) => {
