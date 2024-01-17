@@ -325,7 +325,12 @@ export default async function Country({
     items: mapsPhotos,
   } = getItemsPagination(photos, 'maps', page, isWebStories);
 
-  instagramPhotos = expandPosts(instagramPhotos, expandGalleries, isWebStories);
+  instagramPhotos = expandPosts(
+    instagramPhotos,
+    expandGalleries,
+    isWebStories,
+    location
+  );
 
   if (isWebStories) {
     const title = [
