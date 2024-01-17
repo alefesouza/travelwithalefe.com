@@ -11,10 +11,10 @@ customInitApp();
 
 export async function GET() {
   // const host = (string = '') =>
-  //   new URL(string, 'https://viajarcomale.com.br/').toString();
+  //   new URL(string, 'https://viajarcomale.com/').toString();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const lastmod = '2024-01-13';
+  const lastmod = '2024-01-14';
 
   const db = getFirestore();
   const reference = host('sitemap.xml')
@@ -195,7 +195,9 @@ export async function GET() {
           },
           ...Array.from(
             {
-              length: Math.ceil(c?.totals?.posts / ITEMS_PER_PAGE - 1),
+              length: Math.ceil(
+                Math.max(c?.totals?.posts, c?.totals?.maps) / ITEMS_PER_PAGE - 1
+              ),
             },
             (_, i) => [
               {
@@ -222,7 +224,11 @@ export async function GET() {
               },
               ...Array.from(
                 {
-                  length: Math.ceil(city?.totals?.posts / ITEMS_PER_PAGE - 1),
+                  length: Math.ceil(
+                    Math.max(c?.totals?.posts, c?.totals?.maps) /
+                      ITEMS_PER_PAGE -
+                      1
+                  ),
                 },
                 (_, i) => [
                   {
@@ -256,41 +262,137 @@ export async function GET() {
             '/countries/' + m.country + '/cities/' + m.city + '/stories'
           ),
         })),
-        ...locations.map((m) => ({
-          ...makeLoc(
-            '/countries/' + m.country + '/cities/' + m.city + '/locations/',
-            decodeURIComponent(m.slug)
-          ),
-        })),
+
+        ...locations
+          .flatMap((c) => [
+            {
+              ...makeLoc(
+                '/countries/' + c.country + '/cities/' + c.city + '/locations/',
+                decodeURIComponent(c.slug)
+              ),
+            },
+            c?.totals?.posts
+              ? {
+                  ...makeLoc(
+                    '/countries/' +
+                      c.country +
+                      '/cities/' +
+                      c.city +
+                      '/locations/',
+                    decodeURIComponent(c.slug) + '/expand'
+                  ),
+                }
+              : null,
+            ...Array.from(
+              {
+                length:
+                  Math.ceil(
+                    Math.max(
+                      c?.totals?.posts,
+                      c?.totals?.maps,
+                      c?.totals?.stories,
+                      c?.totals?.photos360,
+                      c?.totals?.shorts,
+                      c?.totals?.videos
+                    ) /
+                      ITEMS_PER_PAGE -
+                      1
+                  ) - 1,
+              },
+              (_, i) => ({
+                ...makeLoc(
+                  '/countries/' +
+                    c.country +
+                    '/cities/' +
+                    c.city +
+                    '/locations/',
+                  decodeURIComponent(c.slug) + '/page/' + (i + 2)
+                ),
+              })
+            ),
+            ...Array.from(
+              {
+                length: Math.ceil(c?.totals?.posts / ITEMS_PER_PAGE - 1),
+              },
+              (_, i) => ({
+                ...makeLoc(
+                  '/countries/' +
+                    c.country +
+                    '/cities/' +
+                    c.city +
+                    '/locations/',
+                  decodeURIComponent(c.slug) + '/page/' + (i + 2) + '/expand'
+                ),
+              })
+            ),
+          ])
+          .filter((c) => c),
+
         ...coupons.map((m) => ({
           ...makeLoc('/coupons/' + m.slug),
         })),
-        ...locations
-          .filter((m) => m?.totals?.posts > 0)
-          .map((m) => ({
-            ...makeLoc(
-              '/countries/' + m.country + '/cities/' + m.city + '/locations/',
-              decodeURIComponent(m.slug) + '/expand'
-            ),
-          })),
-        ...hashtags.map((h) => ({
-          ...makeLoc(
-            '/hashtags/',
-            decodeURIComponent(h.name),
-            h.name,
-            h.name_pt
-          ),
-        })),
+
         ...hashtags
-          .filter((h) => h?.totals?.posts > 0)
-          .map((h) => ({
-            ...makeLoc(
-              '/hashtags/',
-              decodeURIComponent(h.name) + '/expand',
-              h.name,
-              h.name_pt
+          .flatMap((c) => [
+            {
+              ...makeLoc(
+                '/hashtags/',
+                decodeURIComponent(c.name),
+                c.name,
+                c.name_pt
+              ),
+            },
+            c?.totals?.posts
+              ? {
+                  ...makeLoc(
+                    '/hashtags/',
+                    decodeURIComponent(c.name) + '/expand',
+                    c.name,
+                    c.name_pt
+                  ),
+                }
+              : null,
+            ...Array.from(
+              {
+                length:
+                  Math.ceil(
+                    Math.max(
+                      c?.totals?.posts,
+                      c?.totals?.maps,
+                      c?.totals?.stories,
+                      c?.totals?.photos360,
+                      c?.totals?.shorts,
+                      c?.totals?.videos
+                    ) /
+                      ITEMS_PER_PAGE -
+                      1
+                  ) - 1,
+              },
+              (_, i) => ({
+                ...makeLoc(
+                  '/hashtags/',
+                  decodeURIComponent(c.name) + '/page/' + (i + 2),
+                  c.name,
+                  c.name_pt
+                ),
+              })
             ),
-          })),
+            ...Array.from(
+              {
+                length: Math.ceil(c?.totals?.posts / ITEMS_PER_PAGE - 1),
+              },
+              (_, i) => ({
+                ...makeLoc(
+                  '/hashtags/',
+                  decodeURIComponent(c.name) + '/page/' + (i + 2) + '/expand',
+                  c.name,
+                  c.name_pt
+                ),
+              })
+            ),
+          ])
+          .filter((c) => c),
+
         ...medias
           .filter((m) => m.type === 'story')
           .map((m) => {

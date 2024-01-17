@@ -74,7 +74,11 @@ export async function generateMetadata({
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const isWebStories = theLocation[1] === 'webstories';
+
+  let { page, location, isWebStories } = getDataFromRoute(
+    theLocation,
+    searchParams
+  );
 
   // if (
   //   theLocation.length > 2 ||
@@ -103,8 +107,6 @@ export async function generateMetadata({
     redirect('/');
   }
 
-  const location = decodeURIComponent(theLocation[0]);
-
   const db = getFirestore();
   const mediaRef = await db
     .collection('countries')
@@ -129,6 +131,7 @@ export async function generateMetadata({
       (theMedia.alternative_names
         ? ' (' + theMedia.alternative_names.join(', ') + ')'
         : ''),
+    page > 1 ? i18n('Page') + ' ' + page : null,
     finalLocation,
     isWebStories ? 'Web Stories' : '',
     SITE_NAME,
@@ -300,22 +303,22 @@ export default async function Country({
     total: storiesTotal,
     pageNumber: storiesPageNumber,
     items: instagramStories,
-  } = getItemsPagination(photos, 'story', page, isWebStories, true);
+  } = getItemsPagination(photos, 'story', page, isWebStories);
   const {
     total: shortsTotal,
     pageNumber: shortsPageNumber,
     items: shortVideos,
-  } = getItemsPagination(photos, 'short-video', page, isWebStories, true);
+  } = getItemsPagination(photos, 'short-video', page, isWebStories);
   const {
     total: videosTotal,
     pageNumber: videosPageNumber,
     items: youtubeVideos,
-  } = getItemsPagination(photos, 'youtube', page, isWebStories, true);
+  } = getItemsPagination(photos, 'youtube', page, isWebStories);
   const {
     total: _360photosTotal,
     pageNumber: _360photosPageNumber,
     items: _360photos,
-  } = getItemsPagination(photos, '360photos', page, isWebStories, true);
+  } = getItemsPagination(photos, '360photos', page, isWebStories);
   let {
     total: mapsTotal,
     pageNumber: mapsPageNumber,
@@ -356,6 +359,7 @@ export default async function Country({
     countryData,
     theCity,
     theMedia,
+    page,
     expandGalleries,
     isBR
   );
@@ -486,7 +490,6 @@ export default async function Country({
                 total={storiesTotal}
                 textPosition="bottom"
                 label={'stories'}
-                isScroller
               />
             )}
           </Scroller>
@@ -526,7 +529,6 @@ export default async function Country({
                 total={shortsTotal}
                 textPosition="bottom"
                 label={i18n('Short Videos').toLowerCase()}
-                isScroller
               />
             )}
           </Scroller>
@@ -555,7 +557,6 @@ export default async function Country({
                 total={videosTotal}
                 textPosition="bottom"
                 label={i18n('YouTube Videos').toLowerCase()}
-                isScroller
               />
             )}
           </Scroller>
@@ -580,7 +581,6 @@ export default async function Country({
                 total={_360photosTotal}
                 textPosition="bottom"
                 label={i18n('360 Photos').toLowerCase()}
-                isScroller
               />
             )}
           </Scroller>
@@ -623,29 +623,27 @@ export default async function Country({
               )}
 
               <div className="center_link">
-                {!expandGalleries ? (
-                  <Link
-                    href={
-                      `/countries/${country}/cities/${city}/locations/${location}/expand` +
-                      (sort !== 'desc' ? '?sort=' + sort : '')
-                    }
-                    scroll={false}
-                    prefetch={false}
-                  >
-                    {i18n('Expand Galleries')}
-                  </Link>
-                ) : (
-                  <Link
-                    href={
-                      `/countries/${country}/cities/${city}/locations/${location}` +
-                      (sort !== 'desc' ? '?sort=' + sort : '')
-                    }
-                    scroll={false}
-                    prefetch={false}
-                  >
-                    {i18n('Minimize Galleries')}
-                  </Link>
-                )}
+                <Link
+                  href={
+                    `/countries/${country}/cities/${city}/locations/${location}${
+                      page ? '/page/' + page : ''
+                    }${!expandGalleries ? '/expand' : ''}` +
+                    (sort !== 'desc' ? '?sort=' + sort : '') +
+                    (sort === 'random'
+                      ? '&indexes=' +
+                        instagramPhotos
+                          .filter((p) => !p.file_type)
+                          .map((p) => p[index])
+                          .join(',')
+                      : '')
+                  }
+                  scroll={false}
+                  prefetch={false}
+                >
+                  {expandGalleries
+                    ? i18n('Minimize Galleries')
+                    : i18n('Expand Galleries')}
+                </Link>
               </div>
 
               <div className="instagram_highlights_items">
@@ -730,7 +728,14 @@ export default async function Country({
   );
 }
 
-function getBreadcrumbs(countryData, theCity, theMedia, expandGalleries, isBR) {
+function getBreadcrumbs(
+  countryData,
+  theCity,
+  theMedia,
+  page,
+  expandGalleries,
+  isBR
+) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
 
@@ -752,10 +757,20 @@ function getBreadcrumbs(countryData, theCity, theMedia, expandGalleries, isBR) {
     },
   ];
 
+  let currentPath = `/countries/${country}/cities/${city}/locations/${theMedia.slug}`;
+
+  if (page > 0) {
+    currentPath += '/page/' + page;
+    breadcrumbs.push({
+      name: i18n('Page') + ' ' + page,
+      item: currentPath,
+    });
+  }
+
   if (expandGalleries) {
     breadcrumbs.push({
       name: i18n('Expand Galleries'),
-      item: `/countries/${country}/cities/${city}/locations/${theMedia.slug}/expand`,
+      item: `${currentPath}/expand`,
     });
   }
 

@@ -25,7 +25,7 @@ import SortPicker from '@/app/components/sort-picker';
 import Pagination from '@/app/components/pagination';
 
 function getDataFromRoute(slug, searchParams) {
-  const [hashtag, path1, path2, path3, path4] = slug;
+  const [hashtag, path1, path2, path3] = slug;
   // {hashtag}
   // {hashtag}/page/{page}
   // {hashtag}/expand
@@ -57,10 +57,11 @@ export async function generateMetadata({
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const isWebStories = theHashtag[1] === 'webstories';
-  const isExpand = theHashtag[1] === 'expand';
 
-  const hashtag = removeDiacritics(decodeURIComponent(theHashtag[0]));
+  let { hashtag, page, expandGalleries, isWebStories } = getDataFromRoute(
+    theHashtag,
+    searchParams
+  );
 
   // if (
   //   theHashtag.length > 2 ||
@@ -73,6 +74,7 @@ export async function generateMetadata({
 
   const title = [
     '#' + hashtag,
+    page > 1 ? i18n('Page') + ' ' + page : null,
     'Hashtags',
     isWebStories ? 'Web Stories' : '',
     SITE_NAME,
@@ -185,13 +187,13 @@ export async function generateMetadata({
     (isWebStories ? '/webstories' : '') +
     '/hashtags/' +
     finalHashtag.name +
-    (isExpand ? '/expand' : '');
+    (expandGalleries ? '/expand' : '');
   const ptUrl =
     'https://viajarcomale.com.br' +
     (isWebStories ? '/webstories' : '') +
     '/hashtags/' +
     (finalHashtag.name_pt ? finalHashtag.name_pt : finalHashtag.name) +
-    (isExpand ? '/expand' : '');
+    (expandGalleries ? '/expand' : '');
 
   return {
     ...defaultMeta,
@@ -343,22 +345,22 @@ export default async function Country({
     total: storiesTotal,
     pageNumber: storiesPageNumber,
     items: instagramStories,
-  } = getItemsPagination(photos, 'story', page, isWebStories, true);
+  } = getItemsPagination(photos, 'story', page, isWebStories);
   const {
     total: shortsTotal,
     pageNumber: shortsPageNumber,
     items: shortVideos,
-  } = getItemsPagination(photos, 'short-video', page, isWebStories, true);
+  } = getItemsPagination(photos, 'short-video', page, isWebStories);
   const {
     total: videosTotal,
     pageNumber: videosPageNumber,
     items: youtubeVideos,
-  } = getItemsPagination(photos, 'youtube', page, isWebStories, true);
+  } = getItemsPagination(photos, 'youtube', page, isWebStories);
   const {
     total: _360photosTotal,
     pageNumber: _360photosPageNumber,
     items: _360photos,
-  } = getItemsPagination(photos, '360photos', page, isWebStories, true);
+  } = getItemsPagination(photos, '360photos', page, isWebStories);
   let {
     total: mapsTotal,
     pageNumber: mapsPageNumber,
@@ -412,7 +414,12 @@ export default async function Country({
     expandGalleries ? '/expand' : ''
   }`;
 
-  const breadcrumbs = getBreadcrumbs(basePath, currentHashtag, expandGalleries);
+  const breadcrumbs = getBreadcrumbs(
+    basePath,
+    currentHashtag,
+    page,
+    expandGalleries
+  );
 
   const _360photosComponent = (
     <>
@@ -435,7 +442,6 @@ export default async function Country({
               total={_360photosTotal}
               textPosition="bottom"
               label={i18n('360 Photos').toLowerCase()}
-              isScroller
             />
           )}
         </Scroller>
@@ -532,7 +538,6 @@ export default async function Country({
                 total={storiesTotal}
                 textPosition="bottom"
                 label={'stories'}
-                isScroller
               />
             )}
           </Scroller>
@@ -572,7 +577,6 @@ export default async function Country({
                 total={shortsTotal}
                 textPosition="bottom"
                 label={i18n('Short Videos').toLowerCase()}
-                isScroller
               />
             )}
           </Scroller>
@@ -601,7 +605,6 @@ export default async function Country({
                 total={videosTotal}
                 textPosition="bottom"
                 label={i18n('YouTube Videos').toLowerCase()}
-                isScroller
               />
             )}
           </Scroller>
@@ -646,29 +649,27 @@ export default async function Country({
               )}
 
               <div className="center_link">
-                {!expandGalleries ? (
-                  <Link
-                    href={
-                      `/hashtags/${currentHashtag}/expand` +
-                      (sort !== 'desc' ? '?sort=' + sort : '')
-                    }
-                    scroll={false}
-                    prefetch={false}
-                  >
-                    {i18n('Expand Galleries')}
-                  </Link>
-                ) : (
-                  <Link
-                    href={
-                      `/hashtags/${currentHashtag}` +
-                      (sort !== 'desc' ? '?sort=' + sort : '')
-                    }
-                    scroll={false}
-                    prefetch={false}
-                  >
-                    {i18n('Minimize Galleries')}
-                  </Link>
-                )}
+                <Link
+                  href={
+                    `/hashtags/${currentHashtag}${page ? '/page/' + page : ''}${
+                      !expandGalleries ? '/expand' : ''
+                    }` +
+                    (sort !== 'desc' ? '?sort=' + sort : '') +
+                    (sort === 'random'
+                      ? '&indexes=' +
+                        instagramPhotos
+                          .filter((p) => !p.file_type)
+                          .map((p) => p[index])
+                          .join(',')
+                      : '')
+                  }
+                  scroll={false}
+                  prefetch={false}
+                >
+                  {expandGalleries
+                    ? i18n('Minimize Galleries')
+                    : i18n('Expand Galleries')}
+                </Link>
               </div>
 
               <div className="instagram_highlights_items">
@@ -753,25 +754,37 @@ export default async function Country({
   );
 }
 
-function getBreadcrumbs(basePath, currentHashtag, expandGalleries) {
+function getBreadcrumbs(basePath, currentHashtag, page, expandGalleries) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const host = useHost();
+
+  let currentPath = basePath;
 
   const breadcrumbs = [
     {
       name: 'Hashtags',
-      item: '/hashtags',
+      item: host('/hashtags'),
     },
     {
       name: `#${currentHashtag}`,
-      item: basePath,
+      item: host(basePath),
     },
   ];
+
+  if (page > 1) {
+    currentPath += '/page/' + page;
+    breadcrumbs.push({
+      name: i18n('Page') + ' ' + page,
+      item: currentPath,
+    });
+  }
 
   if (expandGalleries) {
     breadcrumbs.push({
       name: i18n('Expand Galleries'),
-      item: basePath + '/expand',
+      item: currentPath + '/expand',
     });
   }
 

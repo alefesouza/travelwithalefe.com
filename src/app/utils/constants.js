@@ -14,4 +14,3 @@ export const FILE_DOMAIN_LANDSCAPE =
 export const FILE_DOMAIN_SQUARE =
   'https://storage.googleapis.com/files.viajarcomale.com/resize/square';
 export const ITEMS_PER_PAGE = 20;
-export const SCROLLER_ITEMS_PER_PAGE = 21;

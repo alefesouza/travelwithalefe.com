@@ -86,7 +86,7 @@ export async function generateMetadata({ params: { slug }, searchParams }) {
     redirect('/');
   }
 
-  let { city } = getDataFromRoute(slug, searchParams);
+  let { city, page } = getDataFromRoute(slug, searchParams);
   let theCity = null;
 
   if (city) {
@@ -99,7 +99,13 @@ export async function generateMetadata({ params: { slug }, searchParams }) {
   ]
     .filter((c) => c)
     .join(' - ');
-  const title = location + ' - ' + SITE_NAME;
+  const title = [
+    location,
+    page > 1 ? i18n('Page') + ' ' + page : null,
+    SITE_NAME,
+  ]
+    .filter((c) => c)
+    .join(' - ');
   const description = i18n(
     'Photos and videos taken by Viajar com Alê in :location:.',
     {

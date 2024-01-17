@@ -1,21 +1,14 @@
-import { ITEMS_PER_PAGE, SCROLLER_ITEMS_PER_PAGE } from './constants';
+import { ITEMS_PER_PAGE } from './constants';
 
-const getItemsPagination = (
-  items,
-  type,
-  page = 1,
-  isWebStories = false,
-  isScroller = false
-) => {
+const getItemsPagination = (items, type, page = 1, isWebStories = false) => {
   const typeItems = items.filter((p) => p.type === type);
-  const pagination = isScroller ? SCROLLER_ITEMS_PER_PAGE : ITEMS_PER_PAGE;
 
   return {
     total: typeItems.length,
-    pageNumber: Math.ceil(typeItems.length / pagination),
+    pageNumber: Math.ceil(typeItems.length / ITEMS_PER_PAGE),
     items: isWebStories
       ? typeItems
-      : typeItems.slice((page - 1) * pagination, page * pagination),
+      : typeItems.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE),
   };
 };
 

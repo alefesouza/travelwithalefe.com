@@ -1,7 +1,11 @@
 import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
 import Link from 'next/link';
-import { FILE_DOMAIN, FILE_DOMAIN_500 } from '@/app/utils/constants';
+import {
+  FILE_DOMAIN,
+  FILE_DOMAIN_500,
+  ITEMS_PER_PAGE,
+} from '@/app/utils/constants';
 import ShareButton from '../share-button';
 import Hashtags from '../hashtags';
 import SchemaData from '../schema-data';
@@ -41,7 +45,10 @@ export default function Scroller({
   });
 
   // @ad
-  if ((items.length - inserted) % 7 === 0) {
+  if (
+    (items.length - inserted) % 7 === 0 ||
+    items.length - inserted === ITEMS_PER_PAGE
+  ) {
     items.push({
       type: 'ad',
       id: 'ad-' + (items.length - 1),
