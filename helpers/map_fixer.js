@@ -1,16 +1,3 @@
-const countries = [];
-
-const theBatch = writeBatch(db);
-
-const museums = collectionGroup(db, 'countries');
-
-const querySnapshot = await getDocs(museums);
-querySnapshot.forEach((theDoc) => {
-  const data = theDoc.data();
-
-  countries.push(data);
-});
-
 const cities = countries.flatMap((c) => c.cities);
 
 const stringToSlug = (str) => {
@@ -49,7 +36,7 @@ const locationsToCreate = [];
 const cityIndexes = {};
 const countryIndexes = {};
 
-items.forEach(function (item) {
+medias.forEach(function (item, i) {
   const country = countries.find((c) => c.slug == item.country);
   const city = cities.find((c) => c.slug == item.city);
 
@@ -86,24 +73,12 @@ items.forEach(function (item) {
     stringToSlug(item.location).replaceAll('-', ''),
   ];
 
-  if (
-    item.location.toLowerCase().includes('ramen') ||
-    item.location.toLowerCase().includes('lamen')
-  ) {
-    item.hashtags.push('ramen');
-    item.hashtags_pt.push('lamen');
+  if (item.location.toLowerCase().includes('praia')) {
+    item.hashtags.push('beach');
+    item.hashtags_pt.push('praia');
   }
 
   item.type = 'maps';
-
-  if (
-    !item.date ||
-    item.date.includes('2023-08') ||
-    item.date.includes('2023-09') ||
-    item.date.includes('2023-10')
-  ) {
-    item.date = city.end + ' 12:00:00';
-  }
 
   if (item.location.includes(' ')) {
     const location = {
@@ -168,11 +143,7 @@ items.forEach(function (item) {
     } else {
       const name = titleCase(item.location.replaceAll('-', ' '));
 
-      if (
-        (item.location !== 'google-brasil' &&
-          item.location !== 'parque-ibirapuera') ||
-        item.latitude
-      ) {
+      if (item.latitude) {
         const location = {
           name: name,
           slug: item.location,
@@ -198,15 +169,38 @@ items.forEach(function (item) {
     }
   }
 
+  const before = medias[i - 1];
+  const after = medias[i + 1];
+
+  if (before && before.city == item.city && before.country == item.country) {
+    item.previous = before.id;
+
+    if (!item.date) {
+      item.date = before.date;
+    }
+  }
+
+  if (after && after.city == item.city && after.country == item.country) {
+    item.next = after.id;
+
+    if (!item.date) {
+      item.date = after.date;
+    }
+  }
+
+  if (!item.date) {
+    item.date = city.end + ' 12:00:00';
+  }
+
   delete item.latitude_span;
   delete item.longitude_span;
 });
 
-items.sort((a, b) => {
+medias.sort((a, b) => {
   return a.original_file.localeCompare(b.original_file);
 });
 
-items.forEach((item) => {
+medias.forEach((item) => {
   if (!cityIndexes[item.city]) {
     cityIndexes[item.city] = 0;
   }
@@ -223,48 +217,49 @@ items.forEach((item) => {
   countryIndexes[item.country]++;
 
   console.log(item);
-  theBatch.set(
-    doc(
-      db,
-      '/countries/' +
-        item.country +
-        '/cities/' +
-        item.city +
-        '/medias/' +
-        item.id
-    ),
-    item,
-    { merge: true }
-  );
+  // theBatch.set(
+  //   doc(
+  //     db,
+  //     '/countries/' +
+  //       item.country +
+  //       '/cities/' +
+  //       item.city +
+  //       '/medias/' +
+  //       item.id
+  //   ),
+  //   item,
+  //   { merge: true }
+  // );
 });
 
-// locationsToCreate.forEach((l) => {
-//   theBatch.set(
-//     doc(
-//       db,
-//       '/countries/' +
-//         l.country +
-//         '/cities/' +
-//         l.city +
-//         '/locations/' +
-//         l.slug
-//     ),
-//     l,
-//     { merge: true }
-//   );
+locationsToCreate.forEach((l) => {
+  console.log(l);
+  // theBatch.set(
+  //   doc(
+  //     db,
+  //     '/countries/' +
+  //       l.country +
+  //       '/cities/' +
+  //       l.city +
+  //       '/locations/' +
+  //       l.slug
+  //   ),
+  //   l,
+  //   { merge: true }
+  // );
 
-//   theBatch.set(
-//     doc(db, '/hashtags/' + item.slug.replaceAll('-', '')),
-//     {
-//       name: item.slug.replaceAll('-', ''),
-//       hide_on_clouse: false,
-//       is_place: true,
-//       is_location: true,
-//       is_city: false,
-//       is_country: false,
-//     },
-//     { merge: true }
-//   );
-// });
+  // theBatch.set(
+  //   doc(db, '/hashtags/' + l.slug.replaceAll('-', '')),
+  //   {
+  //     name: l.slug.replaceAll('-', ''),
+  //     hide_on_clouse: false,
+  //     is_place: true,
+  //     is_location: true,
+  //     is_city: false,
+  //     is_country: false,
+  //   },
+  //   { merge: true }
+  // );
+});
 
 theBatch.commit();
