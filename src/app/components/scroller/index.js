@@ -20,6 +20,7 @@ export default function Scroller({
   isStories,
   webStoriesHref,
   sort,
+  children,
 }) {
   const i18n = useI18n();
   const host = useHost();
@@ -30,7 +31,7 @@ export default function Scroller({
 
   // @ad
   items.forEach((_, i) => {
-    if (i % 8 === 0 && i !== 0) {
+    if (i % 7 === 0 && i !== 0) {
       items.splice(i + inserted, 0, {
         type: 'ad',
         id: 'ad-' + i,
@@ -40,7 +41,7 @@ export default function Scroller({
   });
 
   // @ad
-  if ((items.length - inserted) % 8 === 0 || items.length === 7) {
+  if ((items.length - inserted) % 7 === 0) {
     items.push({
       type: 'ad',
       id: 'ad-' + (items.length - 1),
@@ -85,6 +86,8 @@ export default function Scroller({
           </a>
         </div>
       )}
+
+      {children}
 
       <div style={{ position: 'relative' }}>
         <div className={'scroller_scroller_left_arrow'}>‹</div>

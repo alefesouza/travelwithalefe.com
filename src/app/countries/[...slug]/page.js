@@ -20,6 +20,7 @@ import expandDate from '@/app/utils/expand-date';
 // @ad
 import AdSense from '@/app/components/adsense';
 import LocationsMap from '@/app/components/locations-map';
+import addAds from '@/app/utils/add-ads';
 
 function getDataFromRoute(slug, searchParams) {
   const [country, path1, path2, path3, path4, path5] = slug;
@@ -642,32 +643,10 @@ export default async function Country({ params: { slug }, searchParams }) {
   }
 
   // @ad
-  let inserted = 0;
-  instagramPhotos.forEach((_, i) => {
-    if (
-      i % 8 === 0 &&
-      i !== 0 &&
-      i < instagramPhotos.length - 4 &&
-      !instagramPhotos.find((item) => item.id === 'ad-' + i)
-    ) {
-      instagramPhotos.splice(i + inserted, 0, { type: 'ad', id: 'ad-' + i });
-      inserted++;
-    }
-  });
+  instagramPhotos = addAds(instagramPhotos);
 
   // @ad
-  let insertedMaps = 0;
-  mapsPhotos.forEach((_, i) => {
-    if (
-      i % 8 === 0 &&
-      i !== 0 &&
-      i < mapsPhotos.length - 4 &&
-      !mapsPhotos.find((item) => item.id === 'ad-' + i)
-    ) {
-      mapsPhotos.splice(i + insertedMaps, 0, { type: 'ad', id: 'ad-' + i });
-      insertedMaps++;
-    }
-  });
+  mapsPhotos = addAds(mapsPhotos);
 
   const locationsCacheRef = '/caches/static_pages/static_pages/locations';
   const locationsCache = await db.doc(locationsCacheRef).get();

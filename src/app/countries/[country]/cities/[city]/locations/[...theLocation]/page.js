@@ -19,6 +19,35 @@ import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 // @ad
 import AdSense from '@/app/components/adsense';
+import addAds from '@/app/utils/add-ads';
+import expandPosts from '@/app/utils/expand-posts';
+import getItemsPagination from '@/app/utils/get-posts-pagination';
+import SortPicker from '@/app/components/sort-picker';
+import Pagination from '@/app/components/pagination';
+
+function getDataFromRoute(slug, searchParams) {
+  const [location, path5, path6, path7, path8] = slug;
+  // {country}/cities/{city}/locations/{location}
+  // {country}/cities/{city}/locations/{location}/expand
+  // {country}/cities/{city}/locations/{location}/page/{page}
+  // {country}/cities/{city}/locations/{location}/page/{page}/expand
+
+  let page = path5 === 'page' ? path6 : 1;
+  page = parseInt(page);
+  page = isNaN(page) ? 1 : page;
+
+  const expandGalleries = path5 === 'expand' || path7 === 'expand';
+  const isWebStories = path5 === 'webstories' || path7 === 'webstories';
+  const sort = getSort(searchParams, isWebStories);
+
+  return {
+    page,
+    expandGalleries,
+    sort,
+    isWebStories,
+    location: decodeURIComponent(location),
+  };
+}
 
 async function getCountry(country, city) {
   const db = getFirestore();
@@ -47,16 +76,16 @@ export async function generateMetadata({
   const isBR = host().includes('viajarcomale.com.br');
   const isWebStories = theLocation[1] === 'webstories';
 
-  if (
-    theLocation.length > 2 ||
-    (theLocation[1] &&
-      theLocation[1] !== 'expand' &&
-      theLocation[1] !== 'webstories')
-  ) {
-    redirect(
-      `/countries/${country}/cities/${city}/locations/${theLocation[0]}`
-    );
-  }
+  // if (
+  //   theLocation.length > 2 ||
+  //   (theLocation[1] &&
+  //     theLocation[1] !== 'expand' &&
+  //     theLocation[1] !== 'webstories')
+  // ) {
+  //   redirect(
+  //     `/countries/${country}/cities/${city}/locations/${theLocation[0]}`
+  //   );
+  // }
 
   const countryData = await getCountry(country, city);
 
@@ -169,11 +198,8 @@ export default async function Country({
   const isWindows =
     new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
 
-  const [queryLocation, expand] = theLocation;
-  const location = decodeURIComponent(queryLocation);
-
-  const expandGalleries = expand === 'expand';
-  let sort = getSort(searchParams, theLocation[1] === 'webstories');
+  let { page, expandGalleries, sort, location, isWebStories } =
+    getDataFromRoute(theLocation, searchParams);
 
   const countryData = await getCountry(country, city);
 
@@ -208,8 +234,6 @@ export default async function Country({
     .doc(location)
     .get();
   let theMedia = mediaRef.data();
-
-  const isWebStories = theLocation[1] === 'webstories';
 
   if (!cache.exists || isWebStories) {
     const photosSnapshot = await db
@@ -251,7 +275,7 @@ export default async function Country({
     db,
     host((isWebStories ? '/webstories' : '') + '/locations/') +
       location +
-      (expand ? '/expand' : '') +
+      (expandGalleries ? '/expand' : '') +
       ('?sort=' + sort)
   );
 
@@ -263,97 +287,44 @@ export default async function Country({
 
   const basePath = `/countries/${country}/cities/${city}/locations/${location}`;
 
-  const sortPicker = (type) => (
-    <div className="container-fluid">
-      <div className="sort_picker">
-        <span>{i18n('Sorting')}:</span>
+  const paginationBase = `${basePath}/page/{page}${
+    expandGalleries ? '/expand' : ''
+  }`;
 
-        {[
-          { name: 'Latest', value: 'desc' },
-          { name: 'Oldest', value: 'asc' },
-          { name: 'Random', value: 'random' },
-        ].map((o) => (
-          <Link
-            key={o}
-            href={
-              o.value === 'random'
-                ? sort === 'random'
-                  ? basePath
-                  : basePath + '?sort=random&shuffle=' + newShuffle
-                : o.value !== 'desc'
-                ? '?sort=' + o.value
-                : basePath
-            }
-            scroll={false}
-          >
-            <label>
-              <input
-                type="radio"
-                name={'sort-' + type}
-                value={o.value}
-                checked={sort === o.value}
-                readOnly
-              />
-              {i18n(o.name)}
-            </label>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
+  let {
+    total: postsTotal,
+    pageNumber: postsPageNumber,
+    items: instagramPhotos,
+  } = getItemsPagination(photos, 'post', page, isWebStories);
+  const {
+    total: storiesTotal,
+    pageNumber: storiesPageNumber,
+    items: instagramStories,
+  } = getItemsPagination(photos, 'story', page, isWebStories);
+  const {
+    total: shortsTotal,
+    pageNumber: shortsPageNumber,
+    items: shortVideos,
+  } = getItemsPagination(photos, 'short-video', page, isWebStories);
+  const {
+    total: videosTotal,
+    pageNumber: videosPageNumber,
+    items: youtubeVideos,
+  } = getItemsPagination(photos, 'youtube', page, isWebStories);
+  const {
+    total: _360photosTotal,
+    pageNumber: _360photosPageNumber,
+    items: _360photos,
+  } = getItemsPagination(photos, '360photos', page, isWebStories);
+  let {
+    total: mapsTotal,
+    pageNumber: mapsPageNumber,
+    items: mapsPhotos,
+  } = getItemsPagination(photos, 'maps', page, isWebStories);
 
-  let instagramPhotos = photos.filter(
-    (p) => p.type === 'post' || p.type === 'post-gallery'
-  );
-  const instagramStories = photos.filter((p) => p.type === 'story');
-  const shortVideos = photos.filter((p) => p.type === 'short-video');
-  const youtubeVideos = photos.filter((p) => p.type === 'youtube');
-  const _360photos = photos.filter((p) => p.type === '360photo');
-  const mapsPhotos = photos.filter((p) => p.type === 'maps');
+  instagramPhotos = expandPosts(instagramPhotos, expandGalleries, isWebStories);
 
-  if (sort == 'desc') {
-    instagramStories.sort(function (a, b) {
-      return new Date(b.date) - new Date(a.date);
-    });
-  } else if (sort == 'asc') {
-    instagramStories.sort(function (a, b) {
-      return new Date(a.date) - new Date(b.date);
-    });
-  }
-
-  let expandedList = [];
-
-  instagramPhotos.forEach((item) => {
-    expandedList = [...expandedList, item];
-
-    if (item.gallery && item.gallery.length) {
-      const gallery = item.gallery.map((g, i) => ({
-        ...item,
-        ...g,
-        is_gallery: true,
-        img_index: i + 2,
-      }));
-      const itemWithLocation = gallery.findIndex(
-        (g) => g.item_locations && g.item_locations.includes(location)
-      );
-
-      if (itemWithLocation > -1) {
-        delete gallery[itemWithLocation].is_gallery;
-        expandedList[expandedList.length - 1] = gallery[itemWithLocation];
-
-        item.file_type = 'image';
-        gallery[itemWithLocation] = item;
-      }
-
-      if (expandGalleries || (isWebStories && !item.is_compilation)) {
-        expandedList = [...expandedList, ...gallery];
-      }
-    }
-  });
-
-  instagramPhotos = expandedList;
-
-  if (expand == 'webstories') {
+  if (isWebStories) {
     const title = [
       (isBR && theMedia.name_pt ? theMedia.name_pt : theMedia.name) +
         (theMedia.alternative_names
@@ -381,27 +352,13 @@ export default async function Country({
     );
   }
 
-  const breadcrumbs = [
-    {
-      name: i18n(countryData.name),
-      item: `/countries/${country}`,
-    },
-    {
-      name: isBR && theCity.name_pt ? theCity.name_pt : theCity.name,
-      item: `/countries/${country}/cities/${city}`,
-    },
-    {
-      name: isBR && theMedia.name_pt ? theMedia.name_pt : theMedia.name,
-      item: `/countries/${country}/cities/${city}/locations/${theMedia.slug}`,
-    },
-  ];
-
-  if (expandGalleries) {
-    breadcrumbs.push({
-      name: i18n('Expand Galleries'),
-      item: `/countries/${country}/cities/${city}/locations/${theMedia.slug}/expand`,
-    });
-  }
+  const breadcrumbs = getBreadcrumbs(
+    countryData,
+    theCity,
+    theMedia,
+    expandGalleries,
+    isBR
+  );
 
   const dates = instagramStories.flatMap((c) => c.date);
   const orderedDates = dates.sort(function (a, b) {
@@ -411,32 +368,10 @@ export default async function Country({
   });
 
   // @ad
-  let inserted = 0;
-  instagramPhotos.forEach((_, i) => {
-    if (
-      i % 12 === 0 &&
-      i !== 0 &&
-      i < instagramPhotos.length - 8 &&
-      !instagramPhotos.find((item) => item.id === 'ad-' + i)
-    ) {
-      instagramPhotos.splice(i + inserted, 0, { type: 'ad', id: 'ad-' + i });
-      inserted++;
-    }
-  });
+  instagramPhotos = addAds(instagramPhotos);
 
   // @ad
-  let insertedMaps = 0;
-  mapsPhotos.forEach((_, i) => {
-    if (
-      i % 8 === 0 &&
-      i !== 0 &&
-      i < mapsPhotos.length - 4 &&
-      !mapsPhotos.find((item) => item.id === 'ad-' + i)
-    ) {
-      mapsPhotos.splice(i + insertedMaps, 0, { type: 'ad', id: 'ad-' + i });
-      insertedMaps++;
-    }
-  });
+  mapsPhotos = addAds(mapsPhotos);
 
   const webStoriesHref = host(
     '/webstories/countries/' +
@@ -526,7 +461,14 @@ export default async function Country({
       </div>
 
       <div className={styles.galleries}>
-        {instagramStories.length > 1 && sortPicker('stories')}
+        {instagramStories.length > 1 && (
+          <SortPicker
+            type="stories"
+            basePath={basePath}
+            sort={sort}
+            newShuffle={newShuffle}
+          />
+        )}
 
         {instagramStories.length > 0 && (
           <Scroller
@@ -535,7 +477,18 @@ export default async function Country({
             isStories
             webStoriesHref={webStoriesHref}
             sort={sort}
-          />
+          >
+            {!isRandom && storiesPageNumber > 1 && (
+              <Pagination
+                base={paginationBase}
+                currentPage={Number(page) || 1}
+                pageNumber={storiesPageNumber}
+                total={storiesTotal}
+                textPosition="bottom"
+                label={'stories'}
+              />
+            )}
+          </Scroller>
         )}
 
         {instagramStories.length === 0 && (
@@ -549,30 +502,84 @@ export default async function Country({
           </div>
         )}
 
-        {shortVideos.length > 1 && sortPicker('short')}
+        {shortVideos.length > 1 && (
+          <SortPicker
+            type="short"
+            basePath={basePath}
+            sort={sort}
+            newShuffle={newShuffle}
+          />
+        )}
 
         {shortVideos.length > 0 && (
           <Scroller
             title={i18n('Short Videos')}
             items={shortVideos}
             isShortVideos
-          />
+          >
+            {!isRandom && shortsPageNumber > 1 && (
+              <Pagination
+                base={paginationBase}
+                currentPage={Number(page) || 1}
+                pageNumber={shortsPageNumber}
+                total={shortsTotal}
+                textPosition="bottom"
+                label={i18n('Short Videos').toLowerCase()}
+              />
+            )}
+          </Scroller>
         )}
 
-        {youtubeVideos.length > 1 && sortPicker('youtube')}
+        {youtubeVideos.length > 1 && (
+          <SortPicker
+            type="youtube"
+            basePath={basePath}
+            sort={sort}
+            newShuffle={newShuffle}
+          />
+        )}
 
         {youtubeVideos.length > 0 && (
           <Scroller
             title={i18n('YouTube Videos')}
             items={youtubeVideos}
             isYouTubeVideos
+          >
+            {!isRandom && videosPageNumber > 1 && (
+              <Pagination
+                base={paginationBase}
+                currentPage={Number(page) || 1}
+                pageNumber={videosPageNumber}
+                total={videosTotal}
+                textPosition="bottom"
+                label={i18n('YouTube Videos').toLowerCase()}
+              />
+            )}
+          </Scroller>
+        )}
+
+        {_360photos.length > 1 && (
+          <SortPicker
+            type="360photos"
+            basePath={basePath}
+            sort={sort}
+            newShuffle={newShuffle}
           />
         )}
 
-        {_360photos.length > 1 && sortPicker('360photos')}
-
         {_360photos.length > 0 && (
-          <Scroller title={i18n('360 Photos')} items={_360photos} is360Photos />
+          <Scroller title={i18n('360 Photos')} items={_360photos} is360Photos>
+            {!isRandom && _360photosPageNumber > 1 && (
+              <Pagination
+                base={paginationBase}
+                currentPage={Number(page) || 1}
+                pageNumber={_360photosPageNumber}
+                total={_360photosTotal}
+                textPosition="bottom"
+                label={i18n('360 Photos').toLowerCase()}
+              />
+            )}
+          </Scroller>
         )}
 
         {/* @ad */}
@@ -585,15 +592,106 @@ export default async function Country({
             </div>
           )}
 
-        {mapsPhotos.filter((p) => !p.file_type).length > 1 &&
-          sortPicker('maps')}
+        {instagramPhotos.filter((p) => !p.file_type).length > 1 && (
+          <SortPicker
+            type="photos"
+            basePath={basePath}
+            sort={sort}
+            newShuffle={newShuffle}
+          />
+        )}
 
-        {mapsPhotos.filter((p) => !p.file_type).length > 0 && (
+        {instagramPhotos.filter((p) => !p.file_type).length > 0 && (
+          <div className="container-fluid">
+            <div className={styles.instagram_photos}>
+              <div className={styles.instagram_photos_title}>
+                <h3>{i18n('Posts')}</h3>
+              </div>
+
+              {!isRandom && postsPageNumber > 1 && (
+                <Pagination
+                  base={paginationBase}
+                  currentPage={Number(page) || 1}
+                  pageNumber={postsPageNumber}
+                  total={postsTotal}
+                  textPosition="bottom"
+                />
+              )}
+
+              <div className="center_link">
+                {!expandGalleries ? (
+                  <Link
+                    href={
+                      `/countries/${country}/cities/${city}/locations/${location}/expand` +
+                      (sort !== 'desc' ? '?sort=' + sort : '')
+                    }
+                    scroll={false}
+                    prefetch={false}
+                  >
+                    {i18n('Expand Galleries')}
+                  </Link>
+                ) : (
+                  <Link
+                    href={
+                      `/countries/${country}/cities/${city}/locations/${location}` +
+                      (sort !== 'desc' ? '?sort=' + sort : '')
+                    }
+                    scroll={false}
+                    prefetch={false}
+                  >
+                    {i18n('Minimize Galleries')}
+                  </Link>
+                )}
+              </div>
+
+              <div className="instagram_highlights_items">
+                {instagramPhotos.map((p) => (
+                  <div key={p.id} className={p.type === 'ad' ? 'row-ad' : null}>
+                    {/* @ad */}
+                    {p.type === 'ad' ? (
+                      <AdSense index={p.id} />
+                    ) : (
+                      <Media
+                        key={p.id}
+                        media={p}
+                        isBR={isBR}
+                        expandGalleries={expandGalleries}
+                        isListing
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {mapsPhotos.filter((p) => !p.file_type).length > 1 && (
+          <SortPicker
+            type="maps"
+            basePath={basePath}
+            sort={sort}
+            newShuffle={newShuffle}
+          />
+        )}
+
+        {mapsPhotos.length > 0 && (
           <div className="container-fluid">
             <div className={styles.instagram_photos}>
               <div className={styles.instagram_photos_title}>
                 <h3>{i18n('Place Photos')}</h3>
               </div>
+
+              {!isRandom && mapsPageNumber > 1 && (
+                <Pagination
+                  base={paginationBase}
+                  currentPage={Number(page) || 1}
+                  pageNumber={mapsPageNumber}
+                  total={mapsTotal}
+                  textPosition="bottom"
+                  label={i18n('Places Photos').toLowerCase()}
+                />
+              )}
 
               <div className="instagram_highlights_items">
                 {mapsPhotos.map((p) => (
@@ -626,4 +724,36 @@ export default async function Country({
       <StructuredBreadcrumbs breadcrumbs={breadcrumbs} />
     </div>
   );
+}
+
+function getBreadcrumbs(countryData, theCity, theMedia, expandGalleries, isBR) {
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  const i18n = useI18n();
+
+  const country = countryData.slug;
+  const city = theCity.slug;
+
+  const breadcrumbs = [
+    {
+      name: i18n(countryData.name),
+      item: `/countries/${country}`,
+    },
+    {
+      name: isBR && theCity.name_pt ? theCity.name_pt : theCity.name,
+      item: `/countries/${country}/cities/${city}`,
+    },
+    {
+      name: isBR && theMedia.name_pt ? theMedia.name_pt : theMedia.name,
+      item: `/countries/${country}/cities/${city}/locations/${theMedia.slug}`,
+    },
+  ];
+
+  if (expandGalleries) {
+    breadcrumbs.push({
+      name: i18n('Expand Galleries'),
+      item: `/countries/${country}/cities/${city}/locations/${theMedia.slug}/expand`,
+    });
+  }
+
+  return breadcrumbs;
 }

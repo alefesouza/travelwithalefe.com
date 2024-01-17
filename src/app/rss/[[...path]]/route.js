@@ -192,7 +192,11 @@ export async function GET(req) {
     ...youtubeVideos,
     ..._360photos,
     ...mapsPhotos,
-  ].sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+  ];
+
+  if (!finalHashtag || !finalHashtag.rss_limit) {
+    items.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+  }
 
   let obj = {
     '@': {

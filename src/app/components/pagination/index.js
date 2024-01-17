@@ -1,5 +1,4 @@
 import useI18n from '@/app/hooks/use-i18n';
-import Link from 'next/link';
 import styles from './index.module.css';
 import { ITEMS_PER_PAGE } from '@/app/utils/constants';
 import BasePagination from './base-pagination';

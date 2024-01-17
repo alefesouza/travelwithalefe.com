@@ -21,6 +21,7 @@ import expandDate from '@/app/utils/expand-date';
 import getSort from '@/app/utils/get-sort';
 // @ad
 import AdSense from '@/app/components/adsense';
+import addAds from '@/app/utils/add-ads';
 
 async function getCountry(country, city) {
   const db = getFirestore();
@@ -300,13 +301,7 @@ export default async function Highlight({
   }
 
   // @ad
-  let inserted = 0;
-  instagramStories.forEach((_, i) => {
-    if (i % 8 === 0 && i !== 0 && i <= instagramStories.length - 4) {
-      instagramStories.splice(i + inserted, 0, { type: 'ad', id: 'ad-' + i });
-      inserted++;
-    }
-  });
+  instagramStories = addAds(instagramStories);
 
   let newShuffle = randomIntFromInterval(1, 15);
 
