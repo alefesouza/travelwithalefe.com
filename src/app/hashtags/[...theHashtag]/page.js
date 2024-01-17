@@ -360,7 +360,7 @@ export default async function Country({
     total: _360photosTotal,
     pageNumber: _360photosPageNumber,
     items: _360photos,
-  } = getItemsPagination(photos, '360photos', page, isWebStories);
+  } = getItemsPagination(photos, '360photo', page, isWebStories);
   let {
     total: mapsTotal,
     pageNumber: mapsPageNumber,
