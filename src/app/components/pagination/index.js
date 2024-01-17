@@ -1,6 +1,6 @@
 import useI18n from '@/app/hooks/use-i18n';
 import styles from './index.module.css';
-import { ITEMS_PER_PAGE } from '@/app/utils/constants';
+import { ITEMS_PER_PAGE, SCROLLER_ITEMS_PER_PAGE } from '@/app/utils/constants';
 import BasePagination from './base-pagination';
 
 export default function Pagination({
@@ -11,10 +11,12 @@ export default function Pagination({
   textPosition,
   isGallery,
   label,
+  isScroller,
 }) {
   const i18n = useI18n();
+  const pagination = isScroller ? SCROLLER_ITEMS_PER_PAGE : ITEMS_PER_PAGE;
 
-  const pageTotal = currentPage * ITEMS_PER_PAGE + 1;
+  const pageTotal = currentPage * pagination;
   const totalText = (
     <div
       style={{
@@ -22,7 +24,7 @@ export default function Pagination({
         marginBottom: textPosition === 'top' ? 14 : 0,
       }}
     >
-      {i18n('Showing')} {(currentPage - 1) * ITEMS_PER_PAGE + 1}-
+      {i18n('Showing')} {(currentPage - 1) * pagination + 1}-
       {pageTotal < total ? pageTotal : total} {i18n('of')} {total}{' '}
       {label ? label : 'posts'}
     </div>

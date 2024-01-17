@@ -21,7 +21,7 @@ import expandDate from '@/app/utils/expand-date';
 import AdSense from '@/app/components/adsense';
 import addAds from '@/app/utils/add-ads';
 import expandPosts from '@/app/utils/expand-posts';
-import getItemsPagination from '@/app/utils/get-posts-pagination';
+import getItemsPagination from '@/app/utils/get-items-pagination';
 import SortPicker from '@/app/components/sort-picker';
 import Pagination from '@/app/components/pagination';
 
@@ -300,22 +300,22 @@ export default async function Country({
     total: storiesTotal,
     pageNumber: storiesPageNumber,
     items: instagramStories,
-  } = getItemsPagination(photos, 'story', page, isWebStories);
+  } = getItemsPagination(photos, 'story', page, isWebStories, true);
   const {
     total: shortsTotal,
     pageNumber: shortsPageNumber,
     items: shortVideos,
-  } = getItemsPagination(photos, 'short-video', page, isWebStories);
+  } = getItemsPagination(photos, 'short-video', page, isWebStories, true);
   const {
     total: videosTotal,
     pageNumber: videosPageNumber,
     items: youtubeVideos,
-  } = getItemsPagination(photos, 'youtube', page, isWebStories);
+  } = getItemsPagination(photos, 'youtube', page, isWebStories, true);
   const {
     total: _360photosTotal,
     pageNumber: _360photosPageNumber,
     items: _360photos,
-  } = getItemsPagination(photos, '360photos', page, isWebStories);
+  } = getItemsPagination(photos, '360photos', page, isWebStories, true);
   let {
     total: mapsTotal,
     pageNumber: mapsPageNumber,
@@ -486,6 +486,7 @@ export default async function Country({
                 total={storiesTotal}
                 textPosition="bottom"
                 label={'stories'}
+                isScroller
               />
             )}
           </Scroller>
@@ -525,6 +526,7 @@ export default async function Country({
                 total={shortsTotal}
                 textPosition="bottom"
                 label={i18n('Short Videos').toLowerCase()}
+                isScroller
               />
             )}
           </Scroller>
@@ -553,6 +555,7 @@ export default async function Country({
                 total={videosTotal}
                 textPosition="bottom"
                 label={i18n('YouTube Videos').toLowerCase()}
+                isScroller
               />
             )}
           </Scroller>
@@ -577,6 +580,7 @@ export default async function Country({
                 total={_360photosTotal}
                 textPosition="bottom"
                 label={i18n('360 Photos').toLowerCase()}
+                isScroller
               />
             )}
           </Scroller>
