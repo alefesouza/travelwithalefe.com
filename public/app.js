@@ -220,7 +220,7 @@
       script.id = 'pannellum-loader';
       script.setAttribute('async', '');
       script.onload = initPanorama;
-      document.head.appendChild(script);
+      document.body.appendChild(script);
       return;
     }
 
@@ -395,7 +395,7 @@
           script.src = 'https://www.tiktok.com/embed.js';
           script.id = 'tiktok-loader';
           script.setAttribute('async', '');
-          document.head.appendChild(script);
+          document.body.appendChild(script);
         }
       }
 
@@ -521,23 +521,7 @@
     });
   }
 
-  const elementToObserve = document.querySelector('head');
-
-  observer = new MutationObserver(function () {
-    if (
-      document.querySelector(
-        '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
-      )
-    ) {
-      document
-        .querySelectorAll(
-          '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
-        )
-        .forEach((el) => {
-          el.parentElement.style.display = 'none';
-        });
-    }
-
+  const headObserver = new MutationObserver(function () {
     if (
       navigator.language.startsWith('pt') &&
       !document.querySelector('#portuguese-language-switcher') &&
@@ -584,14 +568,36 @@
     }
   });
 
-  if (elementToObserve) {
-    observer.observe(elementToObserve, {
-      characterData: false,
-      childList: true,
-      attributes: true,
-      subtree: true,
-    });
-  }
+  headObserver.observe(document.querySelector('head'), {
+    characterData: false,
+    childList: true,
+    attributes: true,
+    subtree: true,
+  });
+
+  const bodyObserver = new MutationObserver(function () {
+    if (
+      e.every((i) => i.type === 'attributes') &&
+      document.querySelector(
+        '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
+      )
+    ) {
+      document
+        .querySelectorAll(
+          '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
+        )
+        .forEach((el) => {
+          el.parentElement.style.display = 'none';
+        });
+    }
+  });
+
+  bodyObserver.observe(document.querySelector('body'), {
+    characterData: false,
+    childList: true,
+    attributes: true,
+    subtree: true,
+  });
 
   setupLinks('body');
 
