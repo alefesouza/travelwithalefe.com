@@ -9,6 +9,78 @@ import logAccess from '@/app/utils/log-access';
 import styles from './page.module.css';
 // @ad
 import AdSense from '../components/adsense';
+import addAds from '../utils/add-ads';
+
+const Coupon = ({ item }) => {
+  const i18n = useI18n();
+  const host = useHost();
+  const isBR = host().includes('viajarcomale.com.br');
+
+  return (
+    <div className={'instagram_media_gallery_item ' + styles.coupon}>
+      <div className={styles.coupon_header}>
+        <h3>
+          <Link
+            href={host('/coupons/' + item.slug)}
+            prefetch={false}
+            style={{ color: '#000000' }}
+          >
+            {item.name}
+          </Link>
+        </h3>
+        <ShareButton
+          text={isBR ? item.description_pt : item.description}
+          url={host('/coupons/' + item.slug)}
+        />
+      </div>
+      <div className={styles.coupon_body}>
+        <div className={styles.coupon_body_padding}>
+          {isBR && item.description_pt ? item.description_pt : item.description}
+        </div>
+        <div style={{ textAlign: 'center' }}>
+          {item.link && (
+            <a
+              className="btn"
+              href={item.link}
+              style={{
+                margin: '20px 0',
+                marginBottom: item.code ? 0 : 20,
+              }}
+              target="_blank"
+            >
+              {i18n('Click here to open the referral link')}
+            </a>
+          )}
+          {item.code && (
+            <div className={styles.coupon_code}>
+              {i18n('Code')}: <h4>{item.code}</h4>
+              <button
+                className="btn"
+                data-copy={item.code}
+                style={{ padding: '2px 8px' }}
+              >
+                {i18n('Copy')}
+              </button>
+            </div>
+          )}
+        </div>
+        {item.how_i_use && (
+          <div className={styles.coupon_body_padding}>
+            <b>{i18n('How I Use')}:</b> {!isBR && item.isBR && '(Brazil only) '}
+            {isBR && item.how_i_use_pt ? item.how_i_use_pt : item.how_i_use}
+            {item.regulation && (
+              <div style={{ marginTop: 14, textAlign: 'center' }}>
+                <a href={item.regulation} target="_blank">
+                  {i18n('Regulation')}
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -52,6 +124,7 @@ export default async function Coupons() {
       .get();
     couponsSnapshot.forEach((doc) => {
       const data = doc.data();
+      data.id = data.slug;
       coupons.push(data);
     });
 
@@ -105,77 +178,20 @@ export default async function Coupons() {
           ))}
         </div>
         <div className="instagram_highlights_items">
-          {coupons.map((item) => (
-            <div
-              className={'instagram_media_gallery_item ' + styles.coupon}
-              key={item.slug}
-            >
-              <div className={styles.coupon_header}>
-                <h3>
-                  <Link
-                    href={host('/coupons/' + item.slug)}
-                    prefetch={false}
-                    style={{ color: '#000000' }}
-                  >
-                    {item.name}
-                  </Link>
-                </h3>
-                <ShareButton
-                  text={isBR ? item.description_pt : item.description}
-                  url={host('/coupons/' + item.slug)}
-                />
-              </div>
-              <div className={styles.coupon_body}>
-                <div className={styles.coupon_body_padding}>
-                  {isBR && item.description_pt
-                    ? item.description_pt
-                    : item.description}
-                </div>
-                <div style={{ textAlign: 'center' }}>
-                  {item.link && (
-                    <a
-                      className="btn"
-                      href={item.link}
-                      style={{
-                        margin: '20px 0',
-                        marginBottom: item.code ? 0 : 20,
-                      }}
-                      target="_blank"
-                    >
-                      {i18n('Click here to open the referral link')}
-                    </a>
-                  )}
-                  {item.code && (
-                    <div className={styles.coupon_code}>
-                      {i18n('Code')}: <h4>{item.code}</h4>
-                      <button
-                        className="btn"
-                        data-copy={item.code}
-                        style={{ padding: '2px 8px' }}
-                      >
-                        {i18n('Copy')}
-                      </button>
-                    </div>
-                  )}
-                </div>
-                {item.how_i_use && (
-                  <div className={styles.coupon_body_padding}>
-                    <b>{i18n('How I Use')}:</b>{' '}
-                    {!isBR && item.isBR && '(Brazil only) '}
-                    {isBR && item.how_i_use_pt
-                      ? item.how_i_use_pt
-                      : item.how_i_use}
-                    {item.regulation && (
-                      <div style={{ marginTop: 14, textAlign: 'center' }}>
-                        <a href={item.regulation} target="_blank">
-                          {i18n('Regulation')}
-                        </a>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+          {coupons.slice(0, 8).map((item) => (
+            <Coupon item={item} key={item.slug} />
+          ))}
+        </div>
+      </div>
+
+      <div className="container-fluid ad">
+        <AdSense index={0} />
+      </div>
+
+      <div className="container">
+        <div className="instagram_highlights_items">
+          {coupons.slice(8).map((item) => (
+            <Coupon item={item} key={item.slug} />
           ))}
         </div>
       </div>
