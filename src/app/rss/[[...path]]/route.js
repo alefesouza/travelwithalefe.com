@@ -84,14 +84,29 @@ export async function GET(req) {
       redirect('/hashtags');
     }
 
-    const cacheRef = `/caches/feeds/hashtags-cache/${finalHashtag.name}/sort/desc`;
+    let { searchParams } = new URL(req.url);
+    let type = searchParams.get('type');
+
+    if (type && type !== 'maps') {
+      return;
+    }
+
+    const cacheRef = `/caches/feeds/hashtags-cache/${finalHashtag.name}${
+      type ? '-' + type : ''
+    }/sort/desc`;
 
     let cache = await db.doc(cacheRef).get();
 
     if (!cache.exists) {
-      const photosSnapshot = await db
+      let photosSnapshot = db
         .collectionGroup('medias')
-        .where('hashtags', 'array-contains', finalHashtag.name)
+        .where('hashtags', 'array-contains', finalHashtag.name);
+
+      if (type) {
+        photosSnapshot = photosSnapshot.where('type', '==', type);
+      }
+
+      photosSnapshot = await photosSnapshot
         .limit(finalHashtag.rss_limit ? finalHashtag.rss_limit : ITEMS_PER_PAGE)
         .orderBy('createdAt', 'desc')
         .get();

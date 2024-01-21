@@ -14,7 +14,7 @@ export async function GET() {
   //   new URL(string, 'https://viajarcomale.com/').toString();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const lastmod = '2024-01-14';
+  const lastmod = '2024-01-15';
 
   const db = getFirestore();
   const reference = host('sitemap.xml')
