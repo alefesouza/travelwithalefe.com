@@ -1,5 +1,3 @@
-const countries = [];
-
 const museums = collectionGroup(db, 'medias');
 const querySnapshot = await getDocs(museums);
 
@@ -12,6 +10,8 @@ querySnapshot.forEach((theDoc) => {
 
 const museums2 = collectionGroup(db, 'locations');
 const querySnapshot2 = await getDocs(museums2);
+
+const locations = [];
 
 querySnapshot2.forEach((theDoc) => {
   const data = theDoc.data();
@@ -61,7 +61,7 @@ querySnapshot2.forEach((theDoc) => {
     ).length,
   };
 
-  theBatch.update(doc(db, theDoc.ref.path), {
+  const update = {
     total:
       (totals.stories || 0) +
       (totals.posts || 0) +
@@ -72,11 +72,20 @@ querySnapshot2.forEach((theDoc) => {
     totals: {
       ...totals,
     },
-  });
+  };
+
+  data.total = update.total;
+  data.totals = update.totals;
+
+  locations.push(data);
+
+  theBatch.update(doc(db, theDoc.ref.path), update);
 });
 
 const museums3 = collectionGroup(db, 'hashtags');
 const querySnapshot3 = await getDocs(museums3);
+
+const hashtags = [];
 
 querySnapshot3.forEach((theDoc) => {
   const data = theDoc.data();
@@ -105,7 +114,7 @@ querySnapshot3.forEach((theDoc) => {
     ).length,
   };
 
-  theBatch.update(doc(db, theDoc.ref.path), {
+  const update = {
     total:
       (totals.stories || 0) +
       (totals.posts || 0) +
@@ -116,11 +125,20 @@ querySnapshot3.forEach((theDoc) => {
     totals: {
       ...totals,
     },
-  });
+  };
+
+  data.total = update.total;
+  data.totals = update.totals;
+
+  hashtags.push(data);
+
+  theBatch.update(doc(db, theDoc.ref.path), update);
 });
 
 const museums4 = collectionGroup(db, 'countries');
 const querySnapshot4 = await getDocs(museums4);
+
+const countries = [];
 
 querySnapshot4.forEach((theDoc) => {
   const data = theDoc.data();
@@ -198,7 +216,14 @@ querySnapshot4.forEach((theDoc) => {
 
   data.totals = totals;
 
+  countries.push(data);
+
   theBatch.update(doc(db, theDoc.ref.path), data);
 });
+
+console.log(medias);
+console.log(locations);
+console.log(hashtags);
+console.log(countries);
 
 theBatch.commit();
