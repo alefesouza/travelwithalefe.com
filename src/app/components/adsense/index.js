@@ -1,33 +1,4 @@
-'use client';
-/* @ad */
-import { useEffect, useRef } from 'react';
-
-export default function AdSense({ index, isScroller }) {
-  const loaded = useRef(false);
-
-  useEffect(() => {
-    if (typeof window !== 'undefined' && window.adsbygoogle) {
-      if (loaded.current === index) {
-        return;
-      }
-
-      loaded.current = index;
-      (adsbygoogle = window.adsbygoogle || []).push({});
-    }
-
-    setTimeout(() => {
-      if (
-        typeof window !== 'undefined' &&
-        window.adsbygoogle &&
-        document.querySelector('.adsbygoogle:not([data-ad-status])') &&
-        loaded.current !== index
-      ) {
-        (adsbygoogle = window.adsbygoogle || []).push({});
-        loaded.current = index;
-      }
-    }, 1000);
-  }, []);
-
+export default function AdSense({ isScroller }) {
   return (
     <ins
       className="adsbygoogle"

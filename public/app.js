@@ -522,6 +522,15 @@
   }
 
   const headObserver = new MutationObserver(function () {
+    document
+      .querySelectorAll('ins.adsbygoogle:not(.adsbygoogle-noablate)')
+      .forEach((el) => {
+        if (!el.parentElement.dataset.loaded) {
+          (adsbygoogle = window.adsbygoogle || []).push({});
+          el.parentElement.dataset.loaded = true;
+        }
+      });
+
     if (
       navigator.language.startsWith('pt') &&
       !document.querySelector('#portuguese-language-switcher') &&
@@ -575,7 +584,7 @@
     subtree: true,
   });
 
-  const bodyObserver = new MutationObserver(function () {
+  const bodyObserver = new MutationObserver(function (e) {
     if (
       e.every((i) => i.type === 'attributes') &&
       document.querySelector(
