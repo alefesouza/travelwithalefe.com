@@ -204,7 +204,7 @@ medias.forEach(function (item, i) {
         alternative_names: location.alternative_names || [],
         latitude: item.latitude || location.latitude || null,
         longitude: item.longitude || location.longitude || null,
-        altitude: item.altitude || null,
+        altitude: item.altitude || location.altitude || null,
       },
     ];
 
@@ -221,7 +221,7 @@ medias.forEach(function (item, i) {
           alternative_names: location.alternative_names || [],
           latitude: item.latitude || location.latitude || null,
           longitude: item.longitude || location.longitude || null,
-          altitude: item.altitude || null,
+          altitude: item.altitude || location.altitude || null,
         },
       ];
       item.locations = [item.location];
