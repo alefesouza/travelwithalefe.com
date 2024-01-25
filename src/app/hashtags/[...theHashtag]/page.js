@@ -40,7 +40,7 @@ function getDataFromRoute(slug, searchParams) {
   const sort = getSort(searchParams);
 
   return {
-    hashtag: removeDiacritics(decodeURIComponent(hashtag)),
+    hashtag: removeDiacritics(decodeURIComponent(hashtag)).toLowerCase(),
     page,
     expandGalleries,
     sort,

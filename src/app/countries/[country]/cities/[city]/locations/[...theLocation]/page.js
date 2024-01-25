@@ -45,7 +45,7 @@ function getDataFromRoute(slug, searchParams) {
     expandGalleries,
     sort,
     isWebStories,
-    location: decodeURIComponent(location),
+    location: decodeURIComponent(location).toLowerCase(),
   };
 }
 

@@ -9,7 +9,6 @@ import logAccess from '@/app/utils/log-access';
 import styles from './page.module.css';
 // @ad
 import AdSense from '../components/adsense';
-import addAds from '../utils/add-ads';
 
 const Coupon = ({ item }) => {
   const i18n = useI18n();
