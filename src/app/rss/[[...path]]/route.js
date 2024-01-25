@@ -18,6 +18,8 @@ export async function GET(req) {
   const isBR = host().includes('viajarcomale.com.br');
   let { pathname } = new URL(req.url);
 
+  pathname = pathname.toLowerCase();
+
   let hashtag = null;
   let finalHashtag = null;
 

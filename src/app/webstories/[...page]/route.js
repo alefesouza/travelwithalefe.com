@@ -15,6 +15,8 @@ export async function GET(req) {
   let sort = searchParams.get('sort');
   sort = sort === 'asc' ? 'asc' : 'desc';
 
+  pathname = pathname.toLowerCase();
+
   if (pathname.includes('/highlights/')) {
     const [, , , country, , city] = pathname.split('/');
     pathname =
