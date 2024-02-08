@@ -5,7 +5,7 @@ export default function getTypePath(type, isDb) {
     case 'youtube':
       return isDb ? 'youtube' : 'videos';
     case 'short-video':
-      return isDb ? 'shorts' : 'short-videos';
+      return isDb ? 'short-video' : 'short-videos';
     case '360photo':
       return isDb ? '360photo' : '360-photos';
     case 'maps':
