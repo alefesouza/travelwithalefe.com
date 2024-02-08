@@ -4,7 +4,11 @@ import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
 import { getFirestore } from 'firebase-admin/firestore';
 import styles from '../page.module.css';
-import { ITEMS_PER_PAGE, SITE_NAME } from '@/app/utils/constants';
+import {
+  ITEMS_PER_PAGE,
+  SITE_NAME,
+  WEBSTORIES_ITEMS_PER_PAGE,
+} from '@/app/utils/constants';
 import Pagination from '@/app/components/pagination';
 import StructuredBreadcrumbs from '@/app/components/structured-breadcrumbs';
 import arrayShuffle from '@/app/utils/array-shuffle';
@@ -17,9 +21,9 @@ import defaultMetadata from '@/app/utils/default-metadata';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
+import LocationsMap from '@/app/components/locations-map';
 // @ad
 import AdSense from '@/app/components/adsense';
-import LocationsMap from '@/app/components/locations-map';
 import addAds from '@/app/utils/add-ads';
 
 function getDataFromRoute(slug, searchParams) {
@@ -86,7 +90,7 @@ export async function generateMetadata({ params: { slug }, searchParams }) {
     redirect('/');
   }
 
-  let { city, page } = getDataFromRoute(slug, searchParams);
+  let { city, country, page } = getDataFromRoute(slug, searchParams);
   let theCity = null;
 
   if (city) {
@@ -102,12 +106,12 @@ export async function generateMetadata({ params: { slug }, searchParams }) {
   const title = [
     location,
     page > 1 ? i18n('Page') + ' ' + page : null,
-    SITE_NAME,
+    i18n(SITE_NAME),
   ]
     .filter((c) => c)
     .join(' - ');
   const description = i18n(
-    'Photos and videos taken by Viajar com Alê in :location:.',
+    'Photos and videos taken by Travel with Alefe in :location:.',
     {
       location,
     }
@@ -142,7 +146,33 @@ export async function generateMetadata({ params: { slug }, searchParams }) {
     cover = data;
   });
 
-  return defaultMetadata(title, description, cover);
+  let maxPages = null;
+
+  if (theCity) {
+    maxPages = Math.ceil(theCity.total / WEBSTORIES_ITEMS_PER_PAGE);
+  }
+
+  return {
+    ...defaultMetadata(title, description, cover),
+    ...(city && page <= maxPages
+      ? {
+          icons: {
+            // Why Next.js doesn't just allow us to create custom <link> tags directly...
+            other: {
+              rel: 'amphtml',
+              url: host(
+                '/webstories/countries/' +
+                  country +
+                  '/cities/' +
+                  city +
+                  '/stories' +
+                  (page > 1 ? '/page/' + page : '')
+              ),
+            },
+          },
+        }
+      : null),
+  };
 }
 
 export default async function Country({ params: { slug }, searchParams }) {

@@ -3,7 +3,7 @@ import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
 import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
-import { SITE_NAME } from '@/app/utils/constants';
+import { SITE_NAME, WEBSTORIES_ITEMS_PER_PAGE } from '@/app/utils/constants';
 import Scroller from '@/app/components/scroller';
 import { redirect } from 'next/navigation';
 import Media from '@/app/components/media';
@@ -134,12 +134,12 @@ export async function generateMetadata({
     page > 1 ? i18n('Page') + ' ' + page : null,
     finalLocation,
     isWebStories ? 'Web Stories' : '',
-    SITE_NAME,
+    i18n(SITE_NAME),
   ]
     .filter((c) => c)
     .join(' - ');
   const description = i18n(
-    'Photos and videos taken by Viajar com Alê in :location:',
+    'Photos and videos taken by Travel with Alefe in :location:',
     {
       location: theMedia.name,
     }
@@ -168,9 +168,11 @@ export async function generateMetadata({
     redirect(`/countries/${country}/cities/${city}`);
   }
 
+  const maxPages = Math.ceil(theMedia.total / WEBSTORIES_ITEMS_PER_PAGE);
+
   return {
     ...defaultMetadata(title, description, cover),
-    ...(!isWebStories
+    ...(!isWebStories && page <= maxPages
       ? {
           icons: {
             // Why Next.js doesn't just allow us to create custom <link> tags directly...
@@ -182,7 +184,8 @@ export async function generateMetadata({
                   '/cities/' +
                   city +
                   '/locations/' +
-                  location
+                  location +
+                  (page > 1 ? '/page/' + page : '')
               ),
             },
           },
@@ -333,6 +336,15 @@ export default async function Country({
   );
 
   if (isWebStories) {
+    const allItems = [
+      ...instagramStories,
+      ...instagramPhotos,
+      ..._360photos,
+      ...youtubeVideos,
+      ...shortVideos,
+      ...mapsPhotos,
+    ];
+
     const title = [
       (isBR && theMedia.name_pt ? theMedia.name_pt : theMedia.name) +
         (theMedia.alternative_names
@@ -342,20 +354,35 @@ export default async function Country({
       i18n(countryData.name),
     ].join(' - ');
 
+    const maxPages = Math.max(
+      instagramStories.length,
+      instagramPhotos.length,
+      _360photos.length,
+      youtubeVideos.length,
+      shortVideos.length,
+      mapsPhotos.length
+    );
+
+    const items = allItems.slice(
+      (page - 1) * WEBSTORIES_ITEMS_PER_PAGE,
+      page * WEBSTORIES_ITEMS_PER_PAGE
+    );
+
+    const previousPageItem = allItems[(page - 2) * WEBSTORIES_ITEMS_PER_PAGE];
+    const nextPageItem = allItems[page * WEBSTORIES_ITEMS_PER_PAGE];
+
     return (
       <WebStories
         title={title}
         storyTitle={title}
-        items={[
-          ...instagramStories,
-          ...instagramPhotos,
-          ..._360photos,
-          ...youtubeVideos,
-          ...shortVideos,
-          ...mapsPhotos,
-        ]}
+        items={items}
         countryData={countryData}
         isLocation
+        previousPageItem={previousPageItem}
+        nextPageItem={nextPageItem}
+        page={page}
+        maxPages={maxPages}
+        path={`/webstories/countries/${country}/cities/${city}/locations/${theMedia.slug}`}
       />
     );
   }
@@ -376,6 +403,8 @@ export default async function Country({
     return a > b ? 1 : a < b ? -1 : 0;
   });
 
+  const maxPages = Math.ceil(theMedia.total / WEBSTORIES_ITEMS_PER_PAGE);
+
   // @ad
   instagramPhotos = addAds(instagramPhotos);
 
@@ -388,7 +417,8 @@ export default async function Country({
       '/cities/' +
       city +
       '/locations/' +
-      location
+      location +
+      (page > 1 && page <= maxPages ? '/page/' + page : '')
   );
 
   return (
@@ -501,7 +531,7 @@ export default async function Country({
         )}
 
         {instagramStories.length === 0 && (
-          <div className="center_link">
+          <div className="center_link" style={{ marginTop: 28 }}>
             <a
               href={webStoriesHref + (sort !== 'desc' ? '?sort=' + sort : '')}
               target="_blank"

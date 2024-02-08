@@ -3,7 +3,7 @@ import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
 import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
-import { SITE_NAME } from '@/app/utils/constants';
+import { SITE_NAME, WEBSTORIES_ITEMS_PER_PAGE } from '@/app/utils/constants';
 import Scroller from '@/app/components/scroller';
 import { permanentRedirect, redirect } from 'next/navigation';
 import Media from '@/app/components/media';
@@ -77,12 +77,12 @@ export async function generateMetadata({
     page > 1 ? i18n('Page') + ' ' + page : null,
     'Hashtags',
     isWebStories ? 'Web Stories' : '',
-    SITE_NAME,
+    i18n(SITE_NAME),
   ]
     .filter((c) => c)
     .join(' - ');
   const description = i18n(
-    'Photos and videos taken by Viajar com Alê with the hashtag #:hashtag:.',
+    'Photos and videos taken by Travel with Alefe with the hashtag #:hashtag:.',
     {
       hashtag,
     }
@@ -183,7 +183,7 @@ export async function generateMetadata({
   const defaultMeta = defaultMetadata(title, description, cover);
 
   const enUrl =
-    'https://viajarcomale.com' +
+    'https://travelwithalefe.com' +
     (isWebStories ? '/webstories' : '') +
     '/hashtags/' +
     finalHashtag.name +
@@ -194,6 +194,8 @@ export async function generateMetadata({
     '/hashtags/' +
     (finalHashtag.name_pt ? finalHashtag.name_pt : finalHashtag.name) +
     (expandGalleries ? '/expand' : '');
+
+  const maxPages = Math.ceil(finalHashtag.total / WEBSTORIES_ITEMS_PER_PAGE);
 
   return {
     ...defaultMeta,
@@ -212,13 +214,15 @@ export async function generateMetadata({
         'application/rss+xml': host('/rss/hashtags/' + hashtag),
       },
     },
-    ...(!isWebStories
+    ...(!isWebStories && page <= maxPages
       ? {
           icons: {
             // Why Next.js doesn't just allow us to create custom <link> tags directly...
             other: {
               rel: 'amphtml',
-              url: host('/webstories/hashtags/' + hashtag),
+              url:
+                host('/webstories/hashtags/' + hashtag) +
+                (page > 1 ? '/page/' + page : ''),
             },
           },
         }
@@ -375,14 +379,31 @@ export default async function Country({
   );
 
   if (isWebStories) {
-    let items = [
+    let allItems = [
       ...instagramStories,
       ...instagramPhotos,
       ..._360photos,
       ...youtubeVideos,
       ...shortVideos,
       ...mapsPhotos,
-    ].slice(0, 100);
+    ];
+
+    const maxPages = Math.max(
+      instagramStories.length,
+      instagramPhotos.length,
+      _360photos.length,
+      youtubeVideos.length,
+      shortVideos.length,
+      mapsPhotos.length
+    );
+
+    const items = allItems.slice(
+      (page - 1) * WEBSTORIES_ITEMS_PER_PAGE,
+      page * WEBSTORIES_ITEMS_PER_PAGE
+    );
+
+    const previousPageItem = allItems[(page - 2) * WEBSTORIES_ITEMS_PER_PAGE];
+    const nextPageItem = allItems[page * WEBSTORIES_ITEMS_PER_PAGE];
 
     return (
       <WebStories
@@ -390,6 +411,11 @@ export default async function Country({
         storyTitle={`#${hashtagPt ? hashtagPt.name_pt : hashtag}`}
         items={items}
         hashtag={hashtagPt ? hashtagPt.name_pt : hashtag}
+        previousPageItem={previousPageItem}
+        nextPageItem={nextPageItem}
+        page={page}
+        maxPages={maxPages}
+        path={`/webstories/hashtags/${hashtagPt ? hashtagPt.name_pt : hashtag}`}
       />
     );
   }
@@ -412,7 +438,13 @@ export default async function Country({
     hashtagPt ? hashtagPt.name_pt : hashtag
   );
 
-  const webStoriesHref = host('/webstories/hashtags/' + currentHashtag);
+  const maxPages = Math.ceil(finalHashtag.total / WEBSTORIES_ITEMS_PER_PAGE);
+
+  const webStoriesHref = host(
+    '/webstories/hashtags/' +
+      currentHashtag +
+      (page > 1 && page <= maxPages ? '/page/' + page : '')
+  );
 
   const basePath = '/hashtags/' + currentHashtag;
   const paginationBase = `${basePath}/page/{page}${
@@ -447,6 +479,38 @@ export default async function Country({
               total={_360photosTotal}
               textPosition="bottom"
               label={i18n('360 Photos').toLowerCase()}
+            />
+          )}
+        </Scroller>
+      )}
+    </>
+  );
+
+  const _360videosComponent = (
+    <>
+      {youtubeVideos.length > 1 && (
+        <SortPicker
+          type="youtube"
+          basePath={basePath}
+          sort={sort}
+          newShuffle={newShuffle}
+        />
+      )}
+
+      {youtubeVideos.length > 0 && (
+        <Scroller
+          title={i18n('YouTube Videos')}
+          items={youtubeVideos}
+          isYouTubeVideos
+        >
+          {!isRandom && videosPageNumber > 1 && (
+            <Pagination
+              base={paginationBase}
+              currentPage={Number(page) || 1}
+              pageNumber={videosPageNumber}
+              total={videosTotal}
+              textPosition="bottom"
+              label={i18n('YouTube Videos').toLowerCase()}
             />
           )}
         </Scroller>
@@ -515,6 +579,8 @@ export default async function Country({
         <h2>#{currentHashtag}</h2>
       </div>
 
+      {finalHashtag.name === '360video' && _360videosComponent}
+
       {finalHashtag.name === '360photo' && _360photosComponent}
 
       <div className={styles.galleries}>
@@ -549,7 +615,7 @@ export default async function Country({
         )}
 
         {instagramStories.length === 0 && (
-          <div className="center_link">
+          <div className="center_link" style={{ marginTop: 28 }}>
             <a
               href={webStoriesHref + (sort !== 'desc' ? '?sort=' + sort : '')}
               target="_blank"
@@ -587,33 +653,7 @@ export default async function Country({
           </Scroller>
         )}
 
-        {youtubeVideos.length > 1 && (
-          <SortPicker
-            type="youtube"
-            basePath={basePath}
-            sort={sort}
-            newShuffle={newShuffle}
-          />
-        )}
-
-        {youtubeVideos.length > 0 && (
-          <Scroller
-            title={i18n('YouTube Videos')}
-            items={youtubeVideos}
-            isYouTubeVideos
-          >
-            {!isRandom && videosPageNumber > 1 && (
-              <Pagination
-                base={paginationBase}
-                currentPage={Number(page) || 1}
-                pageNumber={videosPageNumber}
-                total={videosTotal}
-                textPosition="bottom"
-                label={i18n('YouTube Videos').toLowerCase()}
-              />
-            )}
-          </Scroller>
-        )}
+        {finalHashtag.name !== '360video' && _360videosComponent}
 
         {finalHashtag.name !== '360photo' && _360photosComponent}
 

@@ -3,7 +3,7 @@ import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
 import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
-import { SITE_NAME } from '@/app/utils/constants';
+import { SITE_NAME, WEBSTORIES_ITEMS_PER_PAGE } from '@/app/utils/constants';
 import { redirect } from 'next/navigation';
 import Media from '@/app/components/media';
 import ShareButton from '@/app/components/share-button';
@@ -18,7 +18,6 @@ import Country, {
 } from '../../posts/[...media]/page';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
-import getSort from '@/app/utils/get-sort';
 // @ad
 import AdSense from '@/app/components/adsense';
 import addAds from '@/app/utils/add-ads';
@@ -41,7 +40,7 @@ export async function generateMetadata({ params: { country, city, stories } }) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const isWebStories = stories && stories[0] === 'webstories';
+  const isWebStories = stories && stories[stories.length - 1] === 'webstories';
 
   const countryData = await getCountry(country, city);
 
@@ -78,7 +77,7 @@ export async function generateMetadata({ params: { country, city, stories } }) {
     theMedia = data;
   });
 
-  if (stories && stories[0] !== 'webstories') {
+  if (stories && stories[stories.length - 1] !== 'webstories') {
     return generateMediaMetadata({
       params: {
         country,
@@ -88,21 +87,27 @@ export async function generateMetadata({ params: { country, city, stories } }) {
     });
   }
 
-  if (
-    (stories && stories.length > 2) ||
-    (stories && stories[0] !== 'webstories')
-  ) {
-    redirect(`/countries/${country}/cities/${city}/stories`);
+  if (stories) {
+    if (
+      stories.length > 3 ||
+      stories[stories.length - 1] !== 'webstories' ||
+      (stories[0] !== 'webstories' &&
+        stories[0] !== 'page' &&
+        isNaN(stories[0])) ||
+      (stories[0] !== 'webstories' && isNaN(stories[1]))
+    ) {
+      redirect(`/countries/${country}/cities/${city}/stories`);
+    }
   }
 
   const location = [
     isBR && theCity.name_pt ? theCity.name_pt : theCity.name,
     i18n(countryData.name),
   ].join(' - ');
-  const title = [location, isWebStories ? 'Web Stories' : '', SITE_NAME]
+  const title = [location, isWebStories ? 'Web Stories' : '', i18n(SITE_NAME)]
     .filter((c) => c)
     .join(' - ');
-  const description = i18n('Viajar com Alê stories in :location:', {
+  const description = i18n('Travel with Alefe stories in :location:', {
     location: isBR && theCity.name_pt ? theCity.name_pt : theCity.name,
   });
 
@@ -138,7 +143,11 @@ export default async function Highlight({
   const isWindows =
     new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
 
-  let sort = getSort(searchParams, stories && stories[0] === 'webstories');
+  let sort =
+    (searchParams.sort &&
+      ['asc', 'desc', 'random'].includes(searchParams.sort) &&
+      searchParams.sort) ||
+    'asc';
 
   const countryData = await getCountry(country, city);
 
@@ -148,7 +157,7 @@ export default async function Highlight({
 
   let theCity = countryData.cities.find((c) => c.slug === city);
 
-  if (stories && stories[0] !== 'webstories') {
+  if (stories && stories[stories.length - 1] !== 'webstories') {
     return Country({
       params: {
         country,
@@ -167,7 +176,7 @@ export default async function Highlight({
   // const cache = { exists: false };
 
   let isRandom = sort === 'random';
-  const isWebStories = stories && stories[0] === 'webstories';
+  const isWebStories = stories && stories[stories.length - 1] === 'webstories';
 
   if (isRandom) {
     sort = 'desc';
@@ -234,7 +243,7 @@ export default async function Highlight({
 
   let instagramStories = photos.filter((p) => p.type === 'story');
 
-  if (stories && stories[0] === 'webstories') {
+  if (isWebStories) {
     let expandedList = [];
     const posts = photos.filter((p) => p.type === 'post');
 
@@ -260,41 +269,61 @@ export default async function Highlight({
 
         if (posts.length <= 5 || item.is_compilation) {
           expandedList = [...expandedList, ...gallery];
-        } else if (
-          gallery.some(
-            (g) => g.rss_include && g.rss_include.includes(finalHashtag.name)
-          )
-        ) {
+        } else if (gallery.some((g) => g.rss_include)) {
           expandedList = [
             ...expandedList,
-            ...gallery.filter(
-              (g) => g.rss_include && g.rss_include.includes(finalHashtag.name)
-            ),
+            ...gallery.filter((g) => g.rss_include),
           ];
         }
       }
     });
     photos = expandedList;
 
-    const location = [
+    const page =
+      stories[0] === 'page' && !isNaN(stories[1]) ? Number(stories[1]) : 1;
+
+    const storyTitle = [
       isBR && theCity.name_pt ? theCity.name_pt : theCity.name,
       i18n(countryData.name),
     ].join(' - ');
 
-    let items = [
+    const _360photos = photos.filter((p) => p.type === '360photo');
+    const shortVideos = photos.filter((p) => p.type === 'short-video');
+    const videos = photos.filter((p) => p.type === 'youtube');
+    const maps = photos.filter((p) => p.type === 'maps');
+
+    const allItems = [
       ...instagramStories,
-      ...photos.filter((p) => p.type === 'post'),
-      ...photos.filter((p) => p.type === '360photo'),
-      ...photos.filter((p) => p.type === 'short-video'),
-      ...photos.filter((p) => p.type === 'youtube'),
-      ...photos.filter((p) => p.type === 'maps'),
-    ].slice(0, 100);
+      ...posts,
+      ..._360photos,
+      ...shortVideos,
+      ...videos,
+      ...maps,
+    ];
+
+    const maxPages = Math.max(posts.length, maps.length);
+
+    let items = [];
+
+    items = allItems.slice(
+      (page - 1) * WEBSTORIES_ITEMS_PER_PAGE,
+      page * WEBSTORIES_ITEMS_PER_PAGE
+    );
+
+    const previousPageItem = allItems[(page - 2) * WEBSTORIES_ITEMS_PER_PAGE];
+    const nextPageItem = allItems[page * WEBSTORIES_ITEMS_PER_PAGE];
 
     return (
       <WebStories
-        title={location}
-        storyTitle={location}
+        title={storyTitle}
+        storyTitle={storyTitle}
         items={items.filter((c) => !c.rss_ignore)}
+        previousPageItem={previousPageItem}
+        nextPageItem={nextPageItem}
+        page={page}
+        maxPages={maxPages}
+        path={`/webstories/countries/${country}/cities/${city}`}
+        firstPagePath={`/webstories/countries/${country}/cities/${city}/stories`}
         countryData={countryData}
       />
     );
@@ -343,7 +372,7 @@ export default async function Highlight({
                 ? sort === 'random'
                   ? basePath
                   : basePath + '?sort=random&shuffle=' + newShuffle
-                : o.value !== 'desc'
+                : o.value !== 'asc'
                 ? '?sort=' + o.value
                 : basePath
             }
@@ -387,7 +416,7 @@ export default async function Highlight({
                     '/cities/' +
                     city +
                     '/stories' +
-                    (sort !== 'desc' ? '?sort=' + sort : '')
+                    (sort !== 'asc' ? '?sort=' + sort : '')
                 )}
                 target="_blank"
                 title={i18n('Play')}
@@ -452,7 +481,7 @@ export default async function Highlight({
               '/cities/' +
               city +
               '/stories' +
-              (sort !== 'desc' ? '?sort=' + sort : '')
+              (sort !== 'asc' ? '?sort=' + sort : '')
           )}
           target="_blank"
         >

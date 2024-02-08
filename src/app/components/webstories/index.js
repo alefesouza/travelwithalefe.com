@@ -5,6 +5,7 @@ import {
   FILE_DOMAIN_LANDSCAPE,
   FILE_DOMAIN_PORTRAIT,
   FILE_DOMAIN_SQUARE,
+  ITEMS_PER_PAGE,
   SITE_NAME,
 } from '@/app/utils/constants';
 import SchemaData from '../schema-data';
@@ -21,6 +22,12 @@ export default async function WebStories({
   countryData,
   hashtag,
   isLocation,
+  previousPageItem,
+  nextPageItem,
+  page,
+  path,
+  maxPages,
+  firstPagePath,
 }) {
   const i18n = useI18n();
   const host = useHost();
@@ -48,6 +55,20 @@ export default async function WebStories({
   const needSplit = storyTitle.split(' ').length == 1;
 
   const { description } = getMetadata(firstItem, isBR);
+
+  let nextPageItemDescription = null;
+
+  if (nextPageItem) {
+    const { description } = getMetadata(nextPageItem, isBR);
+    nextPageItemDescription = description;
+  }
+
+  let previousPageItemDescription = null;
+
+  if (previousPageItem) {
+    const { description } = getMetadata(previousPageItem, isBR);
+    previousPageItemDescription = description;
+  }
 
   let firstLandscape = items.find((i) => i.width > i.height);
   const firstPortrait = items.find((i) => i.height > i.width);
@@ -87,11 +108,11 @@ export default async function WebStories({
     <amp-story
       standalone
       title={title}
-      publisher={SITE_NAME}
+      publisher={i18n(SITE_NAME)}
       publisher-logo-src={host('/icons/96x96.png')}
-      poster-portrait-src={portraitPhoto}
-      poster-landscape-src={portraitPhoto || squarePhoto || landscapePhoto}
-      poster-square-src={squarePhoto}
+      poster-portrait-src={portraitPhoto || squarePhoto || landscapePhoto}
+      poster-landscape-src={landscapePhoto || squarePhoto || portraitPhoto}
+      poster-square-src={squarePhoto || landscapePhoto || portraitPhoto}
     >
       <amp-story-page id="cover" auto-advance-after="2s">
         <amp-story-grid-layer template="fill">
@@ -143,10 +164,43 @@ export default async function WebStories({
                 )
               ) : null}
             </div>
+
+            {page > 1 && (
+              <div
+                style={{
+                  paddingBottom: 0,
+                  paddingTop: 0,
+                  display: 'flex',
+                  justifyContent: 'center',
+                  marginTop: countryData ? 0 : 20,
+                }}
+              >
+                <h2
+                  className="common-text story-title"
+                  style={{
+                    fontSize: 24,
+                    lineHeight: '32px',
+                  }}
+                >
+                  {i18n('Page') + ' ' + page}
+                </h2>
+              </div>
+            )}
           </div>
         </amp-story-grid-layer>
         <amp-story-page-outlink layout="nodisplay">
-          <a href="" className="cover-link">
+          <a
+            href={
+              page === 1 && firstPagePath
+                ? host(firstPagePath.replace('/webstories', ''))
+                : host(
+                    path.replace('/webstories', '') +
+                      (page > 1 && page <= Math.ceil(maxPages / ITEMS_PER_PAGE)
+                        ? '/page/' + page
+                        : '')
+                  )
+            }
+          >
             {i18n('Open')}
           </a>
         </amp-story-page-outlink>
@@ -255,7 +309,9 @@ export default async function WebStories({
               }
             >
               <div className="common-text username">
-                <span className="username-text">@viajarcomale</span>{' '}
+                <span className="username-text">
+                  {isBR ? '@viajarcomale' : '@ASExplore'}
+                </span>{' '}
                 {!(
                   item.city === 'sao-paulo' &&
                   (item.date.startsWith('2023-09') ||
@@ -297,7 +353,7 @@ export default async function WebStories({
                     )}
                     {item.type === 'youtube' && <br />}
                     {item.type === 'youtube'
-                      ? isBR & item.title_pt
+                      ? isBR && item.title_pt
                         ? item.title_pt
                         : item.title
                       : null}
@@ -369,6 +425,89 @@ export default async function WebStories({
           </amp-story-page>
         );
       })}
+      {nextPageItem && (
+        <amp-story-page id="pagination-next" auto-advance-after="5s">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+              src={
+                nextPageItem.type === 'youtube'
+                  ? nextPageItem.file
+                  : FILE_DOMAIN +
+                    nextPageItem.file.replace('.mp4', '-thumb.png')
+              }
+              width={nextPageItem.width}
+              height={nextPageItem.height}
+              layout="responsive"
+              alt={nextPageItemDescription}
+              className="darker"
+            ></amp-img>
+            <SchemaData media={nextPageItem} isWebStories={true} />
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="vertical">
+            <amp-img
+              src={host('/icons/96x96.png')}
+              srcSet={host('/icons/192x192.png') + ' 2x'}
+              width={96}
+              height={96}
+              justify-self="center"
+            ></amp-img>
+            <div className="end-text-container" justify-self="center">
+              <h1 className="common-text end-text">
+                {i18n('Swipe up to go to the next page')}
+              </h1>
+            </div>
+          </amp-story-grid-layer>
+          <amp-story-page-outlink layout="nodisplay">
+            <a href={host((firstPagePath || path) + '/page/' + (page + 1))}>
+              {i18n('Swipe up')}
+            </a>
+          </amp-story-page-outlink>
+        </amp-story-page>
+      )}
+      {previousPageItem && (
+        <amp-story-page id="pagination-previous" auto-advance-after="5s">
+          <amp-story-grid-layer template="fill">
+            <amp-img
+              src={
+                previousPageItem.type === 'youtube'
+                  ? previousPageItem.file
+                  : FILE_DOMAIN +
+                    previousPageItem.file.replace('.mp4', '-thumb.png')
+              }
+              width={previousPageItem.width}
+              height={previousPageItem.height}
+              layout="responsive"
+              alt={previousPageItemDescription}
+              className="darker"
+            ></amp-img>
+            <SchemaData media={previousPageItem} isWebStories={true} />
+          </amp-story-grid-layer>
+          <amp-story-grid-layer template="vertical">
+            <amp-img
+              src={host('/icons/96x96.png')}
+              srcSet={host('/icons/192x192.png') + ' 2x'}
+              width={96}
+              height={96}
+              justify-self="center"
+            ></amp-img>
+            <div className="end-text-container" justify-self="center">
+              <h1 className="common-text end-text">
+                {i18n('Swipe up to go to the previous page')}
+              </h1>
+            </div>
+          </amp-story-grid-layer>
+          <amp-story-page-outlink layout="nodisplay">
+            <a
+              href={host(
+                (firstPagePath || path) +
+                  (page - 1 !== 1 ? '/page/' + (page - 1) : '')
+              )}
+            >
+              {i18n('Swipe up')}
+            </a>
+          </amp-story-page-outlink>
+        </amp-story-page>
+      )}
       <amp-story-page id="end">
         <amp-story-grid-layer template="fill">
           <amp-img
