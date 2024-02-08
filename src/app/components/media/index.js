@@ -19,6 +19,7 @@ export default function Media({
   fullQuality,
   isMain,
   isListing,
+  showMapIcon,
 }) {
   const host = useHost();
   const i18n = useI18n();
@@ -101,6 +102,14 @@ export default function Media({
       (isMain && !media.img_index && media.type === 'post' ? '/1' : '') +
       (media.img_index ? '/' + media.img_index : '')
   );
+
+  const withMapIcon =
+    showMapIcon &&
+    media.location_data &&
+    media.location_data.length === 1 &&
+    media.location_data[0].name &&
+    (media.latitude || media.location_data[0].latitude) &&
+    (media.longitude || media.location_data[0].longitude);
 
   return (
     <div
@@ -217,36 +226,61 @@ export default function Media({
           media.location_data &&
           media.location_data[0] && (
             <div
-              style={{ marginTop: 4 }}
-              className={'instagram_media_location'}
+              style={{
+                marginTop: 4,
+              }}
+              className={
+                'instagram_media_location' +
+                (withMapIcon ? ' instagram_media_map_icon' : '')
+              }
             >
-              {i18n(media.location_data.length > 1 ? 'Places' : 'Place')}:{' '}
               <span>
-                {media.location_data.map((location, i) => (
-                  <>
-                    <Link
-                      href={
-                        '/countries/' +
-                        media.country +
-                        '/cities/' +
-                        media.city +
-                        '/locations/' +
-                        location.slug
-                      }
-                      key={location.slug}
-                      prefetch={false}
-                    >
-                      {isBR && location.name_pt
-                        ? location.name_pt
-                        : location.name}
-                      {location.alternative_names &&
-                        location.alternative_names.length > 0 &&
-                        ' (' + location.alternative_names.join(', ') + ')'}
-                    </Link>
-                    {i < media.location_data.length - 1 ? ', ' : ''}
-                  </>
-                ))}
+                {i18n(media.location_data.length > 1 ? 'Places' : 'Place')}:{' '}
+                <span>
+                  {media.location_data.map((location, i) => (
+                    <>
+                      <Link
+                        href={
+                          '/countries/' +
+                          media.country +
+                          '/cities/' +
+                          media.city +
+                          '/locations/' +
+                          location.slug
+                        }
+                        key={location.slug}
+                        prefetch={false}
+                      >
+                        {isBR && location.name_pt
+                          ? location.name_pt
+                          : location.name}
+                        {location.alternative_names &&
+                          location.alternative_names.length > 0 &&
+                          ' (' + location.alternative_names.join(', ') + ')'}
+                      </Link>
+                      {i < media.location_data.length - 1 ? ', ' : ''}
+                    </>
+                  ))}
+                </span>
               </span>
+              {withMapIcon && (
+                <a
+                  href={`https://www.google.com/maps/search/${
+                    media.location_data[0].name
+                  }/@${media.latitude || media.location_data[0].latitude},${
+                    media.longitude || media.location_data[0].longitude
+                  },13z`}
+                  target="_blank"
+                  title={i18n('Open in Google Maps')}
+                >
+                  <img
+                    src={host('/images/google-maps.svg')}
+                    width={16}
+                    height={16}
+                    alt={i18n('Google Maps logo')}
+                  />
+                </a>
+              )}
             </div>
           )}
 

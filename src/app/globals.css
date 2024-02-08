@@ -600,10 +600,6 @@ button:not(:disabled) {
   .navbar .site-name {
     display: inline;
   }
-
-  .navbar-brand {
-    margin-right: 1rem;
-  }
 }
 
 .instagram_highlights_items {
@@ -730,6 +726,13 @@ button:not(:disabled) {
   opacity: 0.7;
   transform: translate(-50%, -50%);
   pointer-events: none;
+}
+
+.instagram_media_map_icon {
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+  align-items: center;
 }
 
 .windows-header {

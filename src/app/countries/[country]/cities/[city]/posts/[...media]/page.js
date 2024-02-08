@@ -227,26 +227,8 @@ export default async function Country({ params: { country, city, media } }) {
   );
   theMedia = selectedMedia;
 
-  const description =
-    (isBR && theMedia.description_pt
-      ? theMedia.description_pt
-      : theMedia.description) || '';
-  const shortDescription =
-    description.split(' ').length > 10
-      ? description.split(' ').slice(0, 10).join(' ') + '…'
-      : description;
-  const location =
-    theMedia.location_data &&
-    theMedia.location_data
-      .slice(0, 2)
-      .map(
-        (c) =>
-          (isBR && c.name_pt ? c.name_pt : c.name) +
-          (c.alternative_names
-            ? ' (' + c.alternative_names.join(', ') + ')'
-            : '')
-      )
-      .join(', ') + (theMedia.location_data.length > 2 ? '...' : '');
+  const { shortDescription, locationDescription, cityDescription } =
+    getMetadata(theMedia);
 
   const breadcrumbs = [
     {
@@ -280,7 +262,9 @@ export default async function Country({ params: { country, city, media } }) {
   const basePath = mainPath + mediaId;
 
   breadcrumbs.push({
-    name: [shortDescription, location].filter((c) => c).join(' - '),
+    name:
+      [shortDescription, locationDescription].filter((c) => c).join(' - ') ||
+      cityDescription,
     item: basePath,
   });
 
@@ -414,6 +398,7 @@ export default async function Country({ params: { country, city, media } }) {
           expandGalleries
           fullQuality
           isMain
+          showMapIcon
         />
       </div>
 
