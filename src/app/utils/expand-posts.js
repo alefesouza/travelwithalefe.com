@@ -24,7 +24,10 @@ const expandPosts = (items, expandGalleries, isWebStories, name) => {
         gallery[itemWithHashtag] = item;
       }
 
-      if (expandGalleries || (isWebStories && !item.is_compilation)) {
+      if (
+        (expandGalleries || (isWebStories && !item.is_compilation)) &&
+        itemWithHashtag === -1
+      ) {
         expandedList = [...expandedList, ...gallery];
       }
     }
