@@ -12,7 +12,10 @@ export default function YouTubeEmbed({ media }) {
   }
 
   return (
-    <div className={!media.is_photos ? styles.video_container : null}>
+    <div
+      className={!media.is_photos ? styles.video_container : null}
+      data-youtube-id={id}
+    >
       <iframe
         width={media.is_photos ? 325 : 560}
         height={media.is_photos ? 578 : 315}
