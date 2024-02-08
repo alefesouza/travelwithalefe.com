@@ -16,7 +16,9 @@ export async function GET(req) {
   const i18n = useI18n();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  let { pathname } = new URL(req.url);
+  let { pathname, searchParams } = new URL(req.url);
+
+  let type = searchParams.get('type');
 
   pathname = pathname.toLowerCase();
 
@@ -28,16 +30,25 @@ export async function GET(req) {
   const db = getFirestore();
 
   if (pathname === '/rss') {
-    const cacheRef = `/caches/feeds/pages/home`;
+    if (type && type !== 'short-video') {
+      return;
+    }
+
+    const cacheRef = `/caches/feeds/pages/home${type ? '-' + type : ''}`;
 
     let cache = await db.doc(cacheRef).get();
 
     if (!cache.exists) {
-      const photosSnapshot = await db
+      let photosSnapshot = db
         .collectionGroup('medias')
         .limit(ITEMS_PER_PAGE)
-        .orderBy('createdAt', 'desc')
-        .get();
+        .orderBy('createdAt', 'desc');
+
+      if (type) {
+        photosSnapshot = photosSnapshot.where('type', '==', type);
+      }
+
+      photosSnapshot = await photosSnapshot.get();
 
       photosSnapshot.forEach((doc) => {
         const data = doc.data();
@@ -86,10 +97,7 @@ export async function GET(req) {
       redirect('/hashtags');
     }
 
-    let { searchParams } = new URL(req.url);
-    let type = searchParams.get('type');
-
-    if (type && type !== 'maps') {
+    if (type && type !== 'maps' && type !== 'youtube') {
       return;
     }
 
@@ -191,12 +199,12 @@ export async function GET(req) {
   instagramPhotos = expandedList;
 
   const title = hashtag
-    ? '#' + hashtag + ' - Hashtags - ' + SITE_NAME
-    : SITE_NAME + ' - ' + i18n('Main Feed');
+    ? '#' + hashtag + ' - Hashtags - ' + i18n(SITE_NAME)
+    : i18n(SITE_NAME) + ' - ' + i18n('Main Feed');
   const description = i18n(
     hashtag
-      ? 'Photos and videos taken by Viajar com Alê with the hashtag #:hashtag:.'
-      : 'Main feed with the most recent photos and videos by Viajar com Alê.',
+      ? 'Photos and videos taken by Travel with Alefe with the hashtag #:hashtag:.'
+      : 'Main feed with the most recent photos and videos by Travel with Alefe.',
     {
       hashtag,
     }
@@ -209,11 +217,7 @@ export async function GET(req) {
     ...youtubeVideos,
     ..._360photos,
     ...mapsPhotos,
-  ];
-
-  if (!finalHashtag || !finalHashtag.rss_limit) {
-    items.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
-  }
+  ].sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
 
   let obj = {
     '@': {
@@ -226,10 +230,10 @@ export async function GET(req) {
       title,
       link: host(pathname.replace('/rss', '')),
       description,
-      copyright: SITE_NAME + ' - @viajarcomale',
+      copyright: i18n(SITE_NAME) + ' - @viajarcomale',
       language: isBR ? 'pt-BR' : 'en-US',
       category: 'Travel',
-      editor: 'contato@viajarcomale.com (Viajar com Alê)',
+      editor: 'contato@viajarcomale.com (' + i18n(SITE_NAME) + ')',
       webMaster: 'contact@alefesouza.com (Alefe Souza)',
       ['atom:link']: {
         '@': {
@@ -273,7 +277,7 @@ export async function GET(req) {
 
           const media = {
             '@': {
-              url: FILE_DOMAIN + p.file,
+              url: p.type === 'youtube' ? p.image : FILE_DOMAIN + p.file,
               medium: p.file.includes('.mp4') ? 'video' : 'image',
               width: p.width,
               height: p.height,
