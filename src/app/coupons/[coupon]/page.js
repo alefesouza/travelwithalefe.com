@@ -32,7 +32,7 @@ export async function generateMetadata({ params: { coupon } }) {
     ' - ' +
     i18n('Coupons') +
     ' - ' +
-    SITE_NAME;
+    i18n(SITE_NAME);
   const description =
     isBR && couponData.description_pt
       ? couponData.description_pt

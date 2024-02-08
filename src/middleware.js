@@ -7,6 +7,16 @@ export default function middleware(req) {
 
   const searchParams = req.nextUrl.searchParams;
 
+  if (origin && origin === 'viajarcomale.com') {
+    return NextResponse.redirect(
+      new URL(
+        pathname,
+        `https://${origin.replace('viajarcomale', 'travelwithalefe')}`
+      ),
+      { status: 301 }
+    );
+  }
+
   if (
     pathname.endsWith('/webstories') &&
     searchParams.get('fixer') !== 'true'
@@ -17,7 +27,15 @@ export default function middleware(req) {
         origin
           ? `https://${origin.replace('www.', '')}`
           : process.env.NEXT_PUBLIC_SITE_URL
-      )
+      ),
+      { status: 301 }
+    );
+  }
+
+  if (origin && origin.includes('www.travelwithalefe.com')) {
+    return NextResponse.redirect(
+      new URL(pathname, `https://${origin.replace('www.', '')}`),
+      { status: 301 }
     );
   }
 

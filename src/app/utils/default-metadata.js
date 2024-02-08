@@ -16,14 +16,14 @@ export default function defaultMetadata(title, description, media, isSingle) {
     (isWebStories ? '/webstories' : '') +
     headersList.get('x-pathname').replace('/webstories', '');
 
-  const defaultTitle = SITE_NAME;
+  const defaultTitle = i18n(SITE_NAME);
   const defaultDescription = i18n(
-    'Travel photos and links to Viajar com Alê social networks.'
+    'Travel photos and links to Travel with Alefe social networks.'
   );
 
   const canonical = new URL(
     pathname,
-    isBR ? 'https://viajarcomale.com.br' : 'https://viajarcomale.com'
+    isBR ? 'https://viajarcomale.com.br' : 'https://travelwithalefe.com'
   ).toString();
 
   let images = [];
@@ -98,7 +98,7 @@ export default function defaultMetadata(title, description, media, isSingle) {
         ? {
             duration: media.duration ? Math.ceil(media.duration) : null,
             releaseDate: media.date.replace(' ', 'T') + '+03:00',
-            directors: ['Alefe Souza - ' + SITE_NAME],
+            directors: ['Alefe Souza - ' + i18n(SITE_NAME)],
             tags:
               isBR && media.hashtags_pt
                 ? media.hashtags_pt
@@ -118,8 +118,8 @@ export default function defaultMetadata(title, description, media, isSingle) {
     alternates: {
       canonical,
       languages: {
-        'x-default': 'https://viajarcomale.com' + pathname,
-        en: 'https://viajarcomale.com' + pathname,
+        'x-default': 'https://travelwithalefe.com' + pathname,
+        en: 'https://travelwithalefe.com' + pathname,
         pt: 'https://viajarcomale.com.br' + pathname,
       },
     },

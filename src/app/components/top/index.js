@@ -26,7 +26,7 @@ export default function Top() {
       </Link>
 
       <Link href={host('/')}>
-        <span className="profile_name">{SITE_NAME}</span>
+        <span className="profile_name">{i18n(SITE_NAME)}</span>
       </Link>
 
       <span className="profile_description">

@@ -1,5 +1,9 @@
+import { SITE_NAME } from './constants';
+
 const langs = {
   'pt-BR': {
+    [SITE_NAME]: 'Viajar com Alê',
+
     // Home
     Home: 'Início',
     Albums: 'Álbuns',
@@ -31,11 +35,11 @@ const langs = {
     'Short Videos': 'Vídeos curtos',
     'YouTube Videos': 'Vídeos do YouTube',
     '360 Photos': 'Fotos 360',
-    'Choose which country to travel with me.':
+    'Choose which country to travel with Alefe.':
       'Escolha qual país para Viajar com Alê.',
-    'Photos and videos taken by Viajar com Alê in :location:.':
+    'Photos and videos taken by Travel with Alefe in :location:.':
       'Fotos e vídeos tirados por Viajar com Alê em :location:.',
-    'Photos and videos taken by Viajar com Alê with the hashtag #:hashtag:.':
+    'Photos and videos taken by Travel with Alefe with the hashtag #:hashtag:.':
       'Fotos e vídeos tirados por Viajar com Alê com a hashtag #:hashtag:.',
     'Link copied to clipboard.': 'Link copiado para a área de transferência.',
     Share: 'Compartilhar',
@@ -50,6 +54,10 @@ const langs = {
     Contact: 'Contato',
     'Swipe up for more travel photos and videos':
       'Arraste para cima para mais fotos e vídeos de viagem',
+    'Swipe up to go to the next page':
+      'Arraste para cima para ir para a próxima página',
+    'Swipe up to go to the previous page':
+      'Arraste para cima para ir para a página anterior',
     'Swipe up': 'Arraste para cima',
     '360 Photo': 'Foto 360',
     'Short Video': 'Vídeo curto',
@@ -59,8 +67,6 @@ const langs = {
     items: 'itens',
     'Main visited places': 'Principais locais visitados',
     Coupons: 'Cupons',
-    'Use Viajar com Alê to get discounts on products and services.':
-      'Use os cupons do Viajar com Alê para ganhar descontos em produtos e serviços.',
     'Click here to open the referral link':
       'Clique para abrir o link de indicação',
     Code: 'Código',
@@ -99,11 +105,11 @@ const langs = {
 
     // About
     About: 'Sobre',
-    'About Viajar com Alê website.': 'Sobre o site do Viajar com Alê.',
+    'About Travel with Alefe website.': 'Sobre o site do Viajar com Alê.',
 
     // Privacy Policy
     'Privacy Policy': 'Política de Privacidade',
-    "Viajar com Alê's website privacy policy.":
+    "Travel with Alefe's website privacy policy.":
       'Política de Privacidade o site do Viajar com Alê.',
 
     // Hashtags
@@ -115,7 +121,7 @@ const langs = {
       'Clique em uma hashtag para ver meu conteúdo sobre isso.',
 
     // Alt
-    'Viajar com Alê Icon': 'Ícone do Viajar com Alê',
+    'Travel with Alefe Icon': 'Ícone do Viajar com Alê',
     'Instagram Icon': 'Ícone do Instagram',
     'TikTok Icon': 'Ícone do TikTok',
     'YouTube Icon': 'Ícone do YouTube',
@@ -127,13 +133,12 @@ const langs = {
     'Profile Photo': 'Foto do perfil',
 
     // Meta
-    'Travel photos and links to Viajar com Alê social networks.':
+    'Travel photos and links to Travel with Alefe social networks.':
       'Fotos de viagens e links para as redes sociais do Viajar com Alê.',
-    'Travel with Alefe': 'Viajar com Alefe',
 
     // Feed
     'Main Feed': 'Feed principal',
-    'Main feed with the most recent photos and videos by Viajar com Alê.':
+    'Main feed with the most recent photos and videos by Travel with Alefe.':
       'Feed principal com as fotos e vídeos mais recentes do Viajar com Alê',
 
     // Countries
@@ -154,12 +159,13 @@ const langs = {
     'United Kingdom': 'Reino Unido',
 
     // Manifest
-    'Access Viajar com Alê Albums': 'Acessar os álbuns do Viajar com Alê',
-    'Access Viajar com Alê YouTube channel':
+    'Access Travel with Alefe Albums': 'Acessar os álbuns do Viajar com Alê',
+    'Access Travel with Alefe YouTube channel':
       'Acessar o canal do YouTube do Viajar com Alê',
-    'Access Viajar com Alê Instagram': 'Acessar o Instagram do Viajar com Alê',
-    'Access Viajar com Alê TikTok': 'Acessar o TikTok do Viajar com Alê',
-    'Access Viajar com Alê Kwai': 'Acessar o Kwai do Viajar com Alê',
+    'Access Travel with Alefe Instagram':
+      'Acessar o Instagram do Viajar com Alê',
+    'Access Travel with Alefe TikTok': 'Acessar o TikTok do Viajar com Alê',
+    'Access Travel with Alefe Kwai': 'Acessar o Kwai do Viajar com Alê',
 
     // Code
     en: 'pt',

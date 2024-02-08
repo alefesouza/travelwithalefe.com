@@ -13,7 +13,7 @@ export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
 
-  const title = i18n('Map') + ' - ' + SITE_NAME;
+  const title = i18n('Map') + ' - ' + i18n(SITE_NAME);
   const description = i18n('The map of the places I have been.');
 
   return defaultMetadata(title, description);

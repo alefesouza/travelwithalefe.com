@@ -9,10 +9,10 @@ export async function GET() {
   const icons = [36, 48, 72, 96, 144, 192, 288, 512];
 
   const obj = {
-    name: SITE_NAME,
-    short_name: SITE_NAME,
+    name: i18n(SITE_NAME),
+    short_name: i18n(SITE_NAME),
     description: i18n(
-      'Travel photos and links to Viajar com Alê social networks.'
+      'Travel photos and links to Travel with Alefe social networks.'
     ),
     categories: ['travel'],
     lang: i18n('en-US'),
@@ -59,7 +59,7 @@ export async function GET() {
       {
         name: i18n('Albums'),
         short_name: i18n('Albums'),
-        description: i18n('Access Viajar com Alê Albums'),
+        description: i18n('Access Travel with Alefe Albums'),
         url: '/countries?source=pwa',
         icons: [
           {
@@ -71,7 +71,7 @@ export async function GET() {
       {
         name: 'Instagram',
         short_name: 'Instagram',
-        description: i18n('Access Viajar com Alê Instagram'),
+        description: i18n('Access Travel with Alefe Instagram'),
         url: '/instagram?source=pwa',
         icons: [
           {
@@ -83,7 +83,7 @@ export async function GET() {
       {
         name: 'TikTok',
         short_name: 'TikTok',
-        description: i18n('Access Viajar com Alê TikTok'),
+        description: i18n('Access Travel with Alefe TikTok'),
         url: '/tiktok?source=pwa',
         icons: [
           {
@@ -95,7 +95,7 @@ export async function GET() {
       {
         name: 'YouTube',
         short_name: 'YouTube',
-        description: i18n('Access Viajar com Alê YouTube channel'),
+        description: i18n('Access Travel with Alefe YouTube channel'),
         url: '/youtube?source=pwa',
         icons: [
           {

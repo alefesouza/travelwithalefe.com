@@ -11,8 +11,8 @@ export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
 
-  const title = i18n('Privacy Policy') + ' - ' + SITE_NAME;
-  const description = i18n("Viajar com Alê's website privacy policy.");
+  const title = i18n('Privacy Policy') + ' - ' + i18n(SITE_NAME);
+  const description = i18n("Travel with Alefe's website privacy policy.");
 
   return defaultMetadata(title, description);
 }

@@ -6,9 +6,16 @@ export async function GET(req) {
 
   if (
     url &&
-    (url.includes('web+viajarcomale://') || url.includes('web+vca://'))
+    (url.includes('web+viajarcomale://') ||
+      url.includes('web+travelwithalefe://') ||
+      url.includes('web+vca://'))
   ) {
-    redirect(url.replace('web+viajarcomale:/', '').replace('web+vca:/', ''));
+    redirect(
+      url
+        .replace('web+viajarcomale:/', '')
+        .replace('web+travelwithalefe:/', '')
+        .replace('web+vca:/', '')
+    );
   }
 
   redirect('/');

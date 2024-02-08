@@ -3,16 +3,16 @@ const withPWA = require('next-pwa')({
   sw: 'serviceworker.js',
   register: false,
   runtimeCaching: require('./src/cache'),
-})
+});
 
 /** @type {import('next').NextConfig} */
-const nextConfig =  withPWA({
+const nextConfig = withPWA({
   images: {
     unoptimized: true,
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'viajarcomale.com',
+        hostname: 'travelwithalefe.com',
         port: '',
         pathname: '/**',
       },
@@ -39,4 +39,4 @@ const nextConfig =  withPWA({
   },
 });
 
-module.exports = nextConfig
+module.exports = nextConfig;

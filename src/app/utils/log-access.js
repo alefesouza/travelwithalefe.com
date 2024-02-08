@@ -23,7 +23,12 @@ export default function logAccess(db, path) {
   db.collection('accesses')
     .doc('accesses')
     .collection(new Date().toISOString().split('T')[0])
-    .doc(path.replace('https://viajarcomale', '').replaceAll('/', '-'))
+    .doc(
+      path
+        .replace('https://viajarcomale', '')
+        .replace('https://travelwithalefe', '')
+        .replaceAll('/', '-')
+    )
     .set(
       {
         accesses: FieldValue.increment(1),

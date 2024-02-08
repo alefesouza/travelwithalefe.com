@@ -20,9 +20,9 @@
 
       deferredPrompt.userChoice.then((choiceResult) => {
         if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted to install Viajar com Alê');
+          console.log('User accepted to install Travel with Alefe');
         } else {
-          console.log('User dismissed to install Viajar com Alê');
+          console.log('User dismissed to install Travel with Alefe');
         }
         deferredPrompt = null;
       });
@@ -260,14 +260,15 @@
     });
 
     const languageSwitcherLink = currentUrl.includes('viajarcomale.com.br')
-      ? currentUrl.replace('viajarcomale.com.br', 'viajarcomale.com')
-      : currentUrl.replace('viajarcomale.com', 'viajarcomale.com.br');
+      ? currentUrl.replace('viajarcomale.com.br', 'travelwithalefe.com')
+      : currentUrl.replace('travelwithalefe.com', 'viajarcomale.com.br');
     document.querySelector('#language-switcher').href = languageSwitcherLink;
     if (document.querySelector('#portuguese-language-switcher a')) {
       document.querySelector('#portuguese-language-switcher a').href =
         languageSwitcherLink;
     }
 
+    console.log(languageSwitcherLink);
     const backButton = document.querySelector('#back-button');
 
     if (backButton) {
@@ -406,6 +407,23 @@
           setTimeout(() => {
             initPanorama();
           }, 1000);
+        }
+      }
+
+      if (paths[5] === 'videos') {
+        const userAgent = navigator.userAgent;
+
+        if (/android/i.test(userAgent) || /iPad|iPhone|iPod/.test(userAgent)) {
+          const { youtubeId } =
+            document.querySelector('[data-youtube-id]').dataset;
+
+          if (youtubeId) {
+            window.location.replace(
+              'vnd.youtube://www.youtube.com/watch?v=' +
+                youtubeId +
+                '&sub_confirmation=1'
+            );
+          }
         }
       }
 

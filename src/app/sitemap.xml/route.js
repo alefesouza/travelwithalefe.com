@@ -11,10 +11,12 @@ customInitApp();
 
 export async function GET() {
   // const host = (string = '') =>
-  //   new URL(string, 'https://viajarcomale.com/').toString();
+  //   new URL(string, 'https://viajarcomale.com.br/').toString();
+  // const host = (string = '') =>
+  //   new URL(string, 'https://travelwithalefe.com/').toString();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const lastmod = '2024-01-15';
+  const lastmod = '2024-01-28';
 
   const db = getFirestore();
   const reference = host('sitemap.xml')
@@ -139,7 +141,7 @@ export async function GET() {
             '@': {
               rel: 'alternate',
               hreflang: 'en',
-              href: 'https://viajarcomale.com' + loc + extra,
+              href: 'https://travelwithalefe.com' + loc + extra,
             },
           },
           {
@@ -538,7 +540,12 @@ export async function GET() {
     obj = contents;
   }
 
-  logAccess(db, host('/sitemap.xml').replace('https://viajarcomale', ''));
+  logAccess(
+    db,
+    host('/sitemap.xml')
+      .replace('https://viajarcomale', '')
+      .replace('https://travelwithalefe', '')
+  );
 
   return new Response(obj, {
     headers: { 'Content-Type': 'application/xml' },

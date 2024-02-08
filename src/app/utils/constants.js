@@ -1,4 +1,4 @@
-export const SITE_NAME = 'Viajar com Alê';
+export const SITE_NAME = 'Travel with Alefe';
 export const FILE_DOMAIN =
   'https://storage.googleapis.com/files.viajarcomale.com';
 export const FILE_DOMAIN_500 =

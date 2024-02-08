@@ -1,6 +1,10 @@
 [
   {
-    "origin": ["https://viajarcomale.com", "https://viajarcomale.com.br"],
+    "origin": [
+      "https://viajarcomale.com",
+      "https://viajarcomale.com.br",
+      "https://travelwithalefe.com"
+    ],
     "responseHeader": ["Content-Type"],
     "method": ["GET", "HEAD"],
     "maxAgeSeconds": 3600

@@ -16,7 +16,7 @@ export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
 
-  const title = 'Hashtags - ' + SITE_NAME;
+  const title = 'Hashtags - ' + i18n(SITE_NAME);
   const description = i18n(
     'Navigate through my website with main and random hashtags.'
   );

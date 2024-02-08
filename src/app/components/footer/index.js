@@ -53,7 +53,7 @@ export default function Footer() {
             srcSet={host('icons/any.svg')}
             width={144}
             height={144}
-            alt={i18n('Viajar com Alê Icon')}
+            alt={i18n('Travel with Alefe Icon')}
           />
           <img
             src={host('images/asexplore-144.png')}
@@ -75,7 +75,7 @@ export default function Footer() {
             <a
               href={
                 (isBR
-                  ? 'https://viajarcomale.com'
+                  ? 'https://travelwithalefe.com'
                   : 'https://viajarcomale.com.br') +
                 headersList.get('x-pathname')
               }

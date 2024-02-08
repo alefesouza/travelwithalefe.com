@@ -93,7 +93,7 @@ export async function generateMetadata() {
   const couponsPageRef = await db.doc('/pages/coupons').get();
   const couponsPageData = couponsPageRef.data();
 
-  const title = i18n('Coupons') + ' - ' + SITE_NAME;
+  const title = i18n('Coupons') + ' - ' + i18n(SITE_NAME);
   const description = isBR
     ? couponsPageData.description_pt
     : couponsPageData.description;

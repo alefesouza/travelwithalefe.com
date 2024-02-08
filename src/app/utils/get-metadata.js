@@ -6,12 +6,14 @@ export default function getMetadata(media, isBR, position) {
   const i18n = useI18n();
 
   const locationCity = [
-    isBR && media.cityData.name_pt
-      ? media.cityData.name_pt
-      : media.cityData.name,
-    isBR && media.countryData.name_pt
-      ? media.countryData.name_pt
-      : media.countryData.name,
+    media.cityData &&
+      (isBR && media.cityData.name_pt
+        ? media.cityData.name_pt
+        : media.cityData.name),
+    media.countryData &&
+      (isBR && media.countryData.name_pt
+        ? media.countryData.name_pt
+        : media.countryData.name),
   ].join(' - ');
   const locationTitle =
     media.location_data &&
@@ -58,7 +60,7 @@ export default function getMetadata(media, isBR, position) {
     media.img_index || position ? 'Item ' + (media.img_index || position) : '',
     locationTitle,
     locationCity,
-    SITE_NAME,
+    i18n(SITE_NAME),
   ]
     .filter((c) => c)
     .join(' - ');
@@ -82,6 +84,14 @@ export default function getMetadata(media, isBR, position) {
     image = 'https://img.youtube.com/vi/' + id + '/0.jpg';
   }
 
+  const cityDescription =
+    i18n('City') +
+    ': ' +
+    (media.cityData &&
+      (isBR && media.cityData.name_pt
+        ? media.cityData.name_pt
+        : media.cityData.name));
+
   const theDescription = [
     description,
     media.img_index ? 'Item ' + media.img_index : null,
@@ -89,11 +99,7 @@ export default function getMetadata(media, isBR, position) {
       ? i18n(media.location_data.length > 1 ? 'Places' : 'Place') +
         ': ' +
         locationDescription
-      : i18n('City') +
-        ': ' +
-        (isBR && media.cityData.name_pt
-          ? media.cityData.name_pt
-          : media.cityData.name),
+      : cityDescription,
   ]
     .filter((c) => c)
     .join(' - ');
@@ -104,6 +110,7 @@ export default function getMetadata(media, isBR, position) {
     shortDescription,
     hashtags,
     locationDescription,
+    cityDescription,
     embedVideo,
     image,
   };

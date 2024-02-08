@@ -60,7 +60,7 @@ export default function RootLayout({ children }) {
       <link rel="manifest" href={host('manifest.json')} />
       <link rel="image_src" href={host('profile-photo-2x.jpg')} />
 
-      <meta name="apple-mobile-web-app-title" content={SITE_NAME} />
+      <meta name="apple-mobile-web-app-title" content={i18n(SITE_NAME)} />
       <meta name="apple-mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <link
@@ -95,7 +95,7 @@ export default function RootLayout({ children }) {
       />
 
       <meta property="og:locale" content={i18n('en_US')} />
-      <meta property="og:site_name" content={SITE_NAME} />
+      <meta property="og:site_name" content={i18n(SITE_NAME)} />
       <meta property="fb:app_id" content="2951171431683266" />
       <meta property="fb:page_id" content="61550287721638" />
       <meta name="twitter:card" content="summary_large_image" />
@@ -171,16 +171,16 @@ export default function RootLayout({ children }) {
                     '@type': 'WebSite',
                     url: host(''),
                     author: 'Alefe Souza',
-                    name: SITE_NAME,
+                    name: i18n(SITE_NAME),
                     alternateName: [
-                      SITE_NAME,
+                      i18n(SITE_NAME),
                       '@ViajarComAlê',
                       'viajarcomale',
                       'VCA',
-                      i18n('Travel with Alefe'),
+                      'Viajar com Alefe',
                     ],
                     description: i18n(
-                      'Travel photos and links to Viajar com Alê social networks.'
+                      'Travel photos and links to Travel with Alefe social networks.'
                     ),
                     potentialAction: {
                       '@type': 'SearchAction',
@@ -336,9 +336,9 @@ export default function RootLayout({ children }) {
                   src="/icons/96x96.png"
                   width={48}
                   height={48}
-                  alt={i18n('Viajar com Alê Icon')}
+                  alt={i18n('Travel with Alefe Icon')}
                 />
-                <span className="site-name">{SITE_NAME}</span>
+                <span className="site-name">{i18n(SITE_NAME)}</span>
               </Link>
 
               <NavbarLinks />
@@ -349,12 +349,12 @@ export default function RootLayout({ children }) {
             <div id="title-bar">
               <img
                 src={host('/icons/72x72.png')}
-                alt={i18n('Viajar com Alê Icon')}
+                alt={i18n('Travel with Alefe Icon')}
                 width={36}
                 height={36}
               />
 
-              <span>{SITE_NAME}</span>
+              <span>{i18n(SITE_NAME)}</span>
 
               <NavbarLinks />
             </div>

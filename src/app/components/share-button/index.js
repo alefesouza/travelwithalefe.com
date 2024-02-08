@@ -9,7 +9,7 @@ export default function ShareButton({ text, url }) {
   const onShareClick = () => {
     if ('share' in navigator) {
       const shareData = {
-        title: SITE_NAME,
+        title: i18n(SITE_NAME),
         text: text || document.title,
         url: url || window.location.href,
       };

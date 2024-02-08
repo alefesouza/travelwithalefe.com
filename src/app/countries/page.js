@@ -15,8 +15,8 @@ export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
 
-  const title = i18n('Albums') + ' - ' + SITE_NAME;
-  const description = i18n('Choose which country to travel with me.');
+  const title = i18n('Albums') + ' - ' + i18n(SITE_NAME);
+  const description = i18n('Choose which country to Travel with Alefe.');
 
   return defaultMetadata(title, description);
 }
