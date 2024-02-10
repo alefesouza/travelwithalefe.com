@@ -268,7 +268,6 @@
         languageSwitcherLink;
     }
 
-    console.log(languageSwitcherLink);
     const backButton = document.querySelector('#back-button');
 
     if (backButton) {
