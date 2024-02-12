@@ -67,6 +67,25 @@ export async function generateMetadata({ params: { country, city, media } }) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
+  const headerList = headers();
+
+  const cityPath = '/countries/' + country + '/cities/' + city;
+
+  if (
+    headerList.get('x-pathname').includes('/posts/') &&
+    media[0].includes(city + '-')
+  ) {
+    const split = media[0].split('-');
+    let type = split[1];
+
+    if (type === 'short') {
+      type = 'short-video';
+    }
+
+    const typePath = getTypePath(type);
+
+    redirect(cityPath + '/' + typePath + '/' + split[split.length - 1]);
+  }
 
   const countryData = await getCountry(country, city);
 
@@ -96,7 +115,7 @@ export async function generateMetadata({ params: { country, city, media } }) {
   let theMedia = mediaRef.data();
 
   if (!theMedia) {
-    redirect('/countries/' + country + '/cities/' + city);
+    redirect(cityPath);
   }
 
   if (theMedia.gallery && theMedia.gallery.length) {
