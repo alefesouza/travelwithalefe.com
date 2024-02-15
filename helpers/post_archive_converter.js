@@ -1,6 +1,17 @@
-// fixedLat = [...$0.children].map((item) => ({ files: [...item.querySelectorAll('img,video')].map(f => f.src), date: item.querySelector('._3-94').textContent, latitude: [...item.querySelectorAll('div')].find(el => el.textContent == 'Latitude')?.nextElementSibling?.textContent, longitude: [...item.querySelectorAll('div')].find(el => el.textContent == 'Longitude')?.nextElementSibling?.textContent, description: item.querySelector('._2pim') && item.querySelector('._2pim').textContent }))
+// fixedLat = [...$0.children].map((item) => ({
+//   files: [...item.querySelectorAll('img,video')].map((f) => f.src),
+//   date: item.querySelector('._3-94').textContent,
+//   latitude: [...item.querySelectorAll('div')].find(
+//     (el) => el.textContent == 'Latitude'
+//   )?.nextElementSibling?.textContent,
+//   longitude: [...item.querySelectorAll('div')].find(
+//     (el) => el.textContent == 'Longitude'
+//   )?.nextElementSibling?.textContent,
+//   description:
+//     item.querySelector('._2pim') && item.querySelector('._2pim').textContent,
+// }));
 
-const items = require('./items.json');
+const items = require('./fixedLat.json');
 const fs = require('fs');
 const { getVideoDurationInSeconds } = require('get-video-duration');
 const sizeOf = require('image-size');
@@ -9,44 +20,83 @@ const { translate } = require('bing-translate-api');
 const mt = require('media-thumbnail');
 const getDimensions = require('get-video-dimensions');
 
-const instagramPosts = [
-  'https://www.instagram.com/p/C0D_rjuNFp6/',
-  'https://www.instagram.com/p/C0D80lrtCTf/',
-  'https://www.instagram.com/p/C0D8EyPtPNA/',
-  'https://www.instagram.com/p/C0D67kGNP6m/',
-  'https://www.instagram.com/p/C0D52g3NOxc/',
-  'https://www.instagram.com/p/C0D5AD1N_BY/',
-  'https://www.instagram.com/p/C0D31vAN-mc/',
-  'https://www.instagram.com/p/Cz599-VNtba/',
-  'https://www.instagram.com/p/Cz4apgiKCZb/',
-  'https://www.instagram.com/p/Cz4aRy9KBaW/',
-  'https://www.instagram.com/p/Cz4VyTzKV8j/',
-  'https://www.instagram.com/p/Czc9MNbNAwn/',
-  'https://www.instagram.com/p/CzcE7nWPAnp/',
-  'https://www.instagram.com/p/CzcCgrfPdd6/',
-  'https://www.instagram.com/p/CzcCF9Wv25d/',
-  'https://www.instagram.com/p/CzcBmhpP0Jg/',
-  'https://www.instagram.com/p/CzcArmbv_GU/',
-  'https://www.instagram.com/p/Czb-GNIvo3s/',
-  'https://www.instagram.com/p/Czb8Qe4vVBo/',
+const posts = [
+  {
+    link: 'https://www.instagram.com/p/C3Vqf67uz-2/',
+    city: 'london',
+    country: 'united-kingdom',
+  },
+  {
+    link: 'https://www.instagram.com/p/C3S5tPCu0Xb/',
+    city: 'brussels',
+    country: 'belgium',
+  },
+  {
+    link: 'https://www.instagram.com/p/C3QRv3AumD8/',
+    city: 'luxembourg',
+    country: 'luxembourg',
+  },
+  {
+    link: 'https://www.instagram.com/p/C3N568XuV6G/',
+    city: 'paris',
+    country: 'france',
+  },
+  {
+    link: 'https://www.instagram.com/p/C3N5DL1Onmh/',
+    city: 'paris',
+    country: 'france',
+  },
+  {
+    link: 'https://www.instagram.com/p/C2-ZseqOQAb/',
+    city: 'ushuaia',
+    country: 'argentina',
+  },
+  {
+    link: 'https://www.instagram.com/p/C2-YZz_OAfJ/',
+    city: 'ushuaia',
+    country: 'argentina',
+  },
+  {
+    link: 'https://www.instagram.com/p/C27nbnjuob1/',
+    city: 'buenos-aires',
+    country: 'argentina',
+  },
+  {
+    link: 'https://www.instagram.com/p/C27loGpuO-c/',
+    city: 'salta',
+    country: 'argentina',
+  },
+  {
+    link: 'https://www.instagram.com/p/C25MJUruqrg/',
+    city: 'foz-do-iguacu',
+    country: 'brazil',
+  },
+  {
+    link: 'https://www.instagram.com/p/C25KtUOuqqD/',
+    city: 'puerto-iguazu',
+    country: 'argentina',
+  },
+  {
+    link: 'https://www.instagram.com/p/C25KAdQuXwi/',
+    city: 'foz-do-iguacu',
+    country: 'brazil',
+  },
+  {
+    link: 'https://www.instagram.com/p/C25JNAluYGd/',
+    city: 'puerto-iguazu',
+    country: 'argentina',
+  },
 ];
 
-const city = 'seoul';
-const country = 'south-korea';
-const photosFolder = '/Users/alefesouza/Projects/viajarcomale.com/photos/korea';
-const destFolder = '/Users/alefesouza/Projects/viajarcomale.com/photos/to_send';
-
 items.reverse();
-instagramPosts.reverse();
+posts.reverse();
+
+const storiesLocations = {};
 
 const main = async () => {
   let i = 0;
 
   for (const item of items) {
-    const id = instagramPosts[i]
-      .replace('https://www.instagram.com/p/', 'media-')
-      .slice(0, -1);
-
     item.files = item.files.map((f) => {
       const split = f.split('/');
       const file = split[split.length - 1];
@@ -54,29 +104,45 @@ const main = async () => {
       return file;
     });
 
-    item.cityData = {
-      name: 'Seoul',
-      name_pt: 'Seul',
-      end: '2022-10-20',
-    };
+    const city = posts[i].city;
+    const country = posts[i].country;
 
-    item.countryData = {
-      name: 'South Korea',
-    };
+    if (!storiesLocations[city]) {
+      storiesLocations[city] = 0;
+    }
+
+    storiesLocations[city]++;
+
+    const order = storiesLocations[city];
+
+    const id = city + '-post-' + order;
 
     item.original_file = item.files[0];
     item.id = id;
-    item.order = 55 + i;
+    item.order = order;
     item.city = city;
     item.country = country;
-    item.city_index = 55 + i;
-    item.country_index = 55 + i;
-    item.city_location_id = 1;
-    item.date = item.cityData.end + ' 12:00:00';
-    item.link = instagramPosts[i];
-    item.type = 'instagram';
+    item.city_index = order;
+    item.country_index = order;
+    item.link = posts[i].link;
+    item.type = 'post';
+
+    if (!fs.existsSync('./to_send/' + item.country + '/' + item.city)) {
+      fs.mkdirSync('./to_send/' + item.country + '/' + item.city, {
+        recursive: true,
+      });
+    }
+
+    if (!fs.existsSync('./to_send/500/' + item.country + '/' + item.city)) {
+      fs.mkdirSync('./to_send/500/' + item.country + '/' + item.city, {
+        recursive: true,
+      });
+    }
 
     const isVideo = !item.original_file.includes('.jpg');
+
+    const photosFolder = './posts';
+    const destFolder = `./to_send/${country}/${city}`;
 
     const fileName = `${item.id}.jpg`;
     item.file = `/medias/${country}/${city}/${fileName}`;
@@ -147,13 +213,13 @@ const main = async () => {
     }
 
     const [theDescription, hashtags] = item.description.split('\n.\n.\n.\n');
-    item.description_pt = theDescription;
+    item.description = theDescription;
     item.hashtags = hashtags.split(' #');
 
-    const description = await translate(item.description_pt, 'pt', 'en');
+    // const description = await translate(item.description_pt, 'en', 'pt');
 
-    item.description = description.translation;
-    console.log(item.description);
+    // item.description_pt = description.translation;
+    // console.log(item.description);
 
     delete item.files;
 

@@ -30,28 +30,31 @@
 
 // temp1.map((c, i) => ({...c, ...items[i]}))
 
-// const stories = require('./the-stories.json')
-// const fixed = require('./fixedLat.json')
+// const stories = require('./the-stories.json');
+// const fixed = require('./fixedLat.json');
 
 // const fs = require('fs');
 
-// stories.forEach(c => {
-//   const lt = fixed.find(f => f.file.includes(c.file.split('.')[0]))
-// if (!lt) {return};
+// stories.forEach((c) => {
+//   const lt = fixed.find((f) => f.file.includes(c.original_file.split('.')[0]));
+//   if (!lt) {
+//     return;
+//   }
 //   c.latitude = lt.latitude;
 //   c.longitude = lt.longitude;
-//   console.log(c)
-//   delete c.latitute;
-// })
+//   c.date = lt.date;
+//   c.description = lt.description;
+//   const split = c.original_file.split('/');
+//   const file = split[split.length - 1];
 
-// fs.writeFileSync('./test.json', JSON.stringify(stories, null, 4))
+//   c.original_file = file + (!file.includes('.') ? '.mp4' : '');
+//   c.file = file + (!file.includes('.') ? '.mp4' : '');
+// });
 
-// const stories = require('./the-stories.json')
-
-// const fs = require('fs');
+// fs.writeFileSync('./test.json', JSON.stringify(stories, null, 4));
 
 const fs = require('fs');
-const items = require('./the-stories.json');
+const items = require('./test.json');
 const sizeOf = require('image-size');
 const sharp = require('sharp');
 const mt = require('media-thumbnail');
@@ -84,10 +87,14 @@ function string_to_slug(str) {
 
 const imageMagick = gm.subClass({ imageMagick: true });
 
-const theHighlights = {};
-const main = async () => {
-  let i = 0;
+const storiesLocations = {
+  paris: 66,
+  luxembourg: 39,
+  brussels: 32,
+  london: 77,
+};
 
+const main = async () => {
   for (const item of items) {
     if (!fs.existsSync('./to_send/' + item.country + '/' + item.city)) {
       fs.mkdirSync('./to_send/' + item.country + '/' + item.city, {
@@ -123,29 +130,22 @@ const main = async () => {
       });
     }
 
-    if (!theHighlights[item.highlight]) {
-      theHighlights[item.highlight] = 0;
-    }
+    storiesLocations[item.city]++;
 
-    theHighlights[item.highlight]++;
-
-    item.original_file = item.file;
-    item.id =
-      item.highlight.replace('media-highlight', 'story') +
-      '-' +
-      theHighlights[item.highlight];
-    item.order = parseInt(theHighlights[item.highlight]);
+    item.id = item.city + '-story-' + storiesLocations[item.city];
+    item.order = parseInt(storiesLocations[item.city]);
     item.mode = 'portrait';
 
     const date = new Date(item.date);
-    date.addHours(2);
     item.date = date.toISOString().replace('T', ' ').substring(0, 19);
 
     let file = './stories/' + item.country + '/' + item.city + '/' + item.file;
 
     if (!fs.existsSync(file)) {
-      file = './stories/' + item.file;
+      file = './stories/' + item.original_file;
     }
+
+    item.file = file;
 
     if (item.file.includes('.mp4') || !item.file.includes('.')) {
       item.width = 720;
@@ -157,6 +157,7 @@ const main = async () => {
       item.height = dimensions.height;
     }
     item.mode = 'portrait';
+    item.type = 'story';
 
     const fileToSend =
       './to_send/' +
