@@ -245,9 +245,9 @@ export default async function Highlight({
 
   if (isWebStories) {
     let expandedList = [];
-    const posts = photos.filter((p) => p.type === 'post');
+    let posts = photos.filter((p) => p.type === 'post');
 
-    photos.forEach((item) => {
+    posts.forEach((item) => {
       expandedList = [...expandedList, item];
 
       if (item.gallery && item.gallery.length) {
@@ -277,7 +277,6 @@ export default async function Highlight({
         }
       }
     });
-    photos = expandedList;
 
     const page =
       stories[0] === 'page' && !isNaN(stories[1]) ? Number(stories[1]) : 1;
@@ -294,7 +293,7 @@ export default async function Highlight({
 
     const allItems = [
       ...instagramStories,
-      ...posts,
+      ...expandedList,
       ..._360photos,
       ...shortVideos,
       ...videos,
