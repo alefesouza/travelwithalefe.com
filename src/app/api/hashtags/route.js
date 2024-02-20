@@ -18,7 +18,7 @@ export async function GET() {
   const allHashtags = allHashtagsRef.data();
   let theHashtags = [];
 
-  if (allHashtags.a_should_update) {
+  if (!allHashtags || allHashtags.a_should_update) {
     const snapshot = await db.collection('hashtags').get();
     const hashtagDocs = [];
 
