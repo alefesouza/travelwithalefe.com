@@ -14,9 +14,9 @@ export default function logAccess(db, path) {
     (headersList.get('x-pathname').includes('/webstories') &&
       headersList.get('x-searchparams').includes('ignore_analytics=true'));
 
-  if (ignoreAnalytics) {
-    return;
-  }
+  // if (ignoreAnalytics) {
+  return;
+  // }
 
   const random = Math.floor(Math.random() * 1000);
 
