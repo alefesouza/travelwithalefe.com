@@ -172,7 +172,10 @@ export async function GET(req) {
         img_index: i + 2,
       }));
       const itemWithHashtag = gallery.findIndex(
-        (g) => g.item_hashtags && g.item_hashtags.includes(finalHashtag.name)
+        (g) =>
+          g.item_hashtags &&
+          finalHashtag &&
+          g.item_hashtags.includes(finalHashtag.name)
       );
 
       if (itemWithHashtag > -1) {
