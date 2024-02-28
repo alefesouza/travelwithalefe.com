@@ -19,7 +19,7 @@ const links = [
   {
     text: '360 Photos',
     url: '/hashtags/360photo',
-    url_pt: '/hashtags/foto',
+    url_pt: '/hashtags/foto360',
     image: 'images/360.jpeg',
     subpage: true,
   },
