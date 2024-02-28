@@ -751,37 +751,37 @@ export default async function Country({ params: { slug }, searchParams }) {
               ' - ' +
               expandDate(orderedDates[orderedDates.length - 1], isBR)}
         </div>
-
-        <ul className="nav nav-tabs">
-          <Link
-            className={`nav-link${!city ? ' active' : ''}`}
-            aria-current="page"
-            href={
-              `/countries/${country}${expandGalleries ? '/expand' : ''}` +
-              (sort !== 'desc' ? '?sort=' + sort : '')
-            }
-          >
-            {i18n('All')}
-          </Link>
-          {countryData.cities.map((c) => (
-            <li key={c.slug} className="nav-item">
-              <Link
-                className={`nav-link${city === c.slug ? ' active' : ''}`}
-                aria-current="page"
-                href={
-                  `/countries/${country}/cities/${c.slug}${
-                    expandGalleries ? '/expand' : ''
-                  }` +
-                  (sort !== 'desc' && sort !== 'random' ? '?sort=' + sort : '')
-                }
-                prefetch={false}
-              >
-                {isBR && c.name_pt ? c.name_pt : c.name}
-              </Link>
-            </li>
-          ))}
-        </ul>
       </div>
+
+      <ul className="nav nav-tabs">
+        <Link
+          className={`nav-link${!city ? ' active' : ''}`}
+          aria-current="page"
+          href={
+            `/countries/${country}${expandGalleries ? '/expand' : ''}` +
+            (sort !== 'desc' ? '?sort=' + sort : '')
+          }
+        >
+          {i18n('All')}
+        </Link>
+        {countryData.cities.map((c) => (
+          <li key={c.slug} className="nav-item">
+            <Link
+              className={`nav-link${city === c.slug ? ' active' : ''}`}
+              aria-current="page"
+              href={
+                `/countries/${country}/cities/${c.slug}${
+                  expandGalleries ? '/expand' : ''
+                }` +
+                (sort !== 'desc' && sort !== 'random' ? '?sort=' + sort : '')
+              }
+              prefetch={false}
+            >
+              {isBR && c.name_pt ? c.name_pt : c.name}
+            </Link>
+          </li>
+        ))}
+      </ul>
 
       {mainLocations.length > 0 && (
         <div className="container-fluid" style={{ marginTop: 16 }}>

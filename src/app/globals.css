@@ -1086,3 +1086,8 @@ body:not(.sub-page) .mobile-autocomplete {
 .window-controls-overlay .mobile-autocomplete .autocomplete {
   display: block !important;
 }
+
+.nav-tabs {
+  padding-right: calc(1.5rem * 0.5);
+  padding-left: calc(1.5rem * 0.5);
+}

@@ -65,11 +65,13 @@ export default function LocationsMap({
     mapRef.state.map.setZoom(
       defaultZoom
         ? defaultZoom
-        : window.innerWidth < 493
+        : window.innerWidth <= 860
         ? 1
+        : window.innerWidth <= 1024
+        ? 1.6
         : window.innerWidth <= 1440
         ? 2
-        : 3
+        : 2.6
     );
 
     if (centerPosition) {
@@ -99,18 +101,20 @@ export default function LocationsMap({
           mapContainerStyle
             ? mapContainerStyle
             : {
-                width: '100vw',
+                width: '100%',
                 height: window.innerWidth < 493 ? '40vh' : '90vh',
               }
         }
         zoom={
           defaultZoom
             ? defaultZoom
-            : window.innerWidth < 493
+            : window.innerWidth <= 860
             ? 1
+            : window.innerWidth <= 1024
+            ? 1.6
             : window.innerWidth <= 1440
             ? 2
-            : 3
+            : 2.6
         }
         center={center}
         mapContainerClassName="map-container"
