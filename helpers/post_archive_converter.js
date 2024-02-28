@@ -160,8 +160,8 @@ const main = async () => {
         .rotate()
         .resize(500)
         .jpeg({ mozjpeg: true })
-        .toFile(destFolder + '/500/' + fileName, (err, info) => {
-          // console.log(err);
+        .toFile(`./to_send/500/${country}/${city}/` + fileName, (err, info) => {
+          console.log(err);
         });
     } else {
       console.log('Video: ' + item.id);
@@ -200,9 +200,10 @@ const main = async () => {
             .resize(500)
             .jpeg({ mozjpeg: true })
             .toFile(
-              destFolder + '/500/' + fileName.replace('.mp4', '-thumb.png'),
+              `./to_send/500/${country}/${city}/` +
+                fileName.replace('.mp4', '-thumb.png'),
               (err, info) => {
-                // console.log(err);
+                console.log(err);
               }
             );
 
