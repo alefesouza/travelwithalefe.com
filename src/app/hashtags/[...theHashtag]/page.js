@@ -5,7 +5,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
 import { SITE_NAME, WEBSTORIES_ITEMS_PER_PAGE } from '@/app/utils/constants';
 import Scroller from '@/app/components/scroller';
-import { permanentRedirect, redirect } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import Media from '@/app/components/media';
 import ShareButton from '@/app/components/share-button';
 import randomIntFromInterval from '@/app/utils/random-int';
@@ -127,7 +127,7 @@ export async function generateMetadata({
             : hashtagAlternate.name)
       );
     } else {
-      redirect('/hashtags');
+      return notFound();
     }
   }
 
@@ -177,7 +177,7 @@ export async function generateMetadata({
   });
 
   if (!cover) {
-    redirect('/hashtags');
+    return notFound();
   }
 
   const defaultMeta = defaultMetadata(title, description, cover);
@@ -262,6 +262,10 @@ export default async function Country({
 
   const finalHashtag = hashtagPt || hashtagEn;
 
+  if (!finalHashtag) {
+    return notFound();
+  }
+
   hashtag = finalHashtag.name;
 
   const cacheRef = `/caches/hashtags/hashtags-cache/${hashtag}/sort/${
@@ -312,7 +316,7 @@ export default async function Country({
               : hashtagAlternate.name)
         );
       } else {
-        redirect('/hashtags');
+        return notFound();
       }
     }
 
@@ -378,16 +382,20 @@ export default async function Country({
     finalHashtag.name
   );
 
-  if (isWebStories) {
-    let allItems = [
-      ...instagramStories,
-      ...instagramPhotos,
-      ..._360photos,
-      ...youtubeVideos,
-      ...shortVideos,
-      ...mapsPhotos,
-    ];
+  let allItems = [
+    ...instagramStories,
+    ...instagramPhotos,
+    ..._360photos,
+    ...youtubeVideos,
+    ...shortVideos,
+    ...mapsPhotos,
+  ];
 
+  if (allItems.length === 0) {
+    return notFound();
+  }
+
+  if (isWebStories) {
     const maxPages = Math.max(
       instagramStories.length,
       instagramPhotos.length,

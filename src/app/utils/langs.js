@@ -172,6 +172,8 @@ const langs = {
     en_US: 'pt_BR',
     'en-US': 'pt-BR',
     'Developed by AS.dev': 'Desenvolvido por AS.dev',
+
+    'Not Found': 'Página não encontrada',
   },
 };
 

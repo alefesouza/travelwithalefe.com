@@ -1,3 +1,5 @@
+console.log(`dsfsdf`);
+
 (() => {
   let deferredPrompt;
   const addToHomeBtn = document.querySelector('#add-to-home');

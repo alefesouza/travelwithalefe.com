@@ -1,10 +1,10 @@
-import { redirect } from 'next/navigation';
+import { permanentRedirect } from 'next/navigation';
 
 export async function GET(req) {
   const { pathname } = new URL(req.url);
   let [, , country, , city] = pathname.split('/');
 
-  redirect(
+  permanentRedirect(
     (pathname.includes('/webstories') ? '/webstories' : '') +
       '/countries/' +
       country +

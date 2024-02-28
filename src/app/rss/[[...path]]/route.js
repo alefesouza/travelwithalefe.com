@@ -72,7 +72,7 @@ export async function GET(req) {
     }
 
     if (!hashtag) {
-      redirect('/hashtags');
+      return notFound();
     }
 
     const hashtagPtSnapshot = await db
@@ -129,7 +129,7 @@ export async function GET(req) {
       });
 
       if (photos.length === 0) {
-        redirect('/');
+        return notFound();
       }
 
       db.doc(cacheRef).set({

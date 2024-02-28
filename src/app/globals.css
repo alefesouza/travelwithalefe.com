@@ -980,7 +980,7 @@ ins.adsbygoogle[data-ad-status='unfilled'] {
   display: none;
 }
 
-@media (max-width: 970px) {
+@media (max-width: 969px) {
   .main-container {
     display: flex;
     flex-direction: column-reverse;

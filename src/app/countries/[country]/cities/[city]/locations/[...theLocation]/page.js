@@ -5,7 +5,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
 import { SITE_NAME, WEBSTORIES_ITEMS_PER_PAGE } from '@/app/utils/constants';
 import Scroller from '@/app/components/scroller';
-import { redirect } from 'next/navigation';
+import { notFound } from 'next/navigation';
 import Media from '@/app/components/media';
 import ShareButton from '@/app/components/share-button';
 import randomIntFromInterval from '@/app/utils/random-int';
@@ -55,7 +55,7 @@ async function getCountry(country, city) {
   const countryData = countryDoc.data();
 
   if (!countryData) {
-    redirect('/');
+    return notFound();
   }
 
   if (city && !countryData.cities.find((c) => c.slug === city)) {
@@ -94,7 +94,7 @@ export async function generateMetadata({
   const countryData = await getCountry(country, city);
 
   if (!countryData) {
-    redirect('/');
+    return notFound();
   }
 
   let theCity = null;
@@ -104,7 +104,7 @@ export async function generateMetadata({
   }
 
   if (!theCity) {
-    redirect('/');
+    return notFound();
   }
 
   const db = getFirestore();
@@ -119,7 +119,7 @@ export async function generateMetadata({
   const theMedia = mediaRef.data();
 
   if (!theMedia) {
-    redirect(`/countries/${country}/cities/${city}`);
+    return notFound();
   }
 
   const finalLocation = [
@@ -165,7 +165,7 @@ export async function generateMetadata({
   });
 
   if (!cover) {
-    redirect(`/countries/${country}/cities/${city}`);
+    return notFound();
   }
 
   const maxPages = Math.ceil(theMedia.total / WEBSTORIES_ITEMS_PER_PAGE);
@@ -210,7 +210,7 @@ export default async function Country({
   const countryData = await getCountry(country, city);
 
   if (!countryData) {
-    redirect('/');
+    return notFound();
   }
 
   let theCity = countryData.cities.find((c) => c.slug === city);
@@ -256,7 +256,7 @@ export default async function Country({
     });
 
     if (!photos.length) {
-      redirect(`/countries/${country}/cities/${city}`);
+      return notFound();
     }
 
     if (!isRandom && !cache.exists && !isWebStories) {
@@ -335,16 +335,20 @@ export default async function Country({
     location
   );
 
-  if (isWebStories) {
-    const allItems = [
-      ...instagramStories,
-      ...instagramPhotos,
-      ..._360photos,
-      ...youtubeVideos,
-      ...shortVideos,
-      ...mapsPhotos,
-    ];
+  const allItems = [
+    ...instagramStories,
+    ...instagramPhotos,
+    ..._360photos,
+    ...youtubeVideos,
+    ...shortVideos,
+    ...mapsPhotos,
+  ];
 
+  if (allItems.length === 0) {
+    return notFound();
+  }
+
+  if (isWebStories) {
     const title = [
       (isBR && theMedia.name_pt ? theMedia.name_pt : theMedia.name) +
         (theMedia.alternative_names

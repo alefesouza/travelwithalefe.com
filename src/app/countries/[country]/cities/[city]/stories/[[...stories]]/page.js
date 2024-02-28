@@ -45,7 +45,7 @@ export async function generateMetadata({ params: { country, city, stories } }) {
   const countryData = await getCountry(country, city);
 
   if (!countryData) {
-    redirect('/');
+    return notFound();
   }
 
   let theCity = null;
@@ -55,7 +55,7 @@ export async function generateMetadata({ params: { country, city, stories } }) {
   }
 
   if (!theCity) {
-    redirect('/');
+    return notFound();
   }
 
   let theMedia = null;
@@ -152,7 +152,7 @@ export default async function Highlight({
   const countryData = await getCountry(country, city);
 
   if (!countryData) {
-    redirect('/');
+    return notFound();
   }
 
   let theCity = countryData.cities.find((c) => c.slug === city);
@@ -213,7 +213,7 @@ export default async function Highlight({
     });
 
     if (!photos.length) {
-      redirect('/');
+      return notFound();
     }
 
     if (!isRandom && !isWebStories && !cache.exists) {

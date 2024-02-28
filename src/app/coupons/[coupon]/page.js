@@ -22,7 +22,7 @@ export async function generateMetadata({ params: { coupon } }) {
   const couponRef = await db.collection('coupons').doc(coupon).get();
 
   if (!couponRef.exists) {
-    redirect('/coupons');
+    return notFound();
   }
 
   const couponData = couponRef.data();
@@ -50,7 +50,7 @@ export default async function Coupons({ params: { coupon } }) {
   const couponRef = await db.collection('coupons').doc(coupon).get();
 
   if (!couponRef.exists) {
-    redirect('/coupons');
+    return notFound();
   }
 
   const couponData = couponRef.data();

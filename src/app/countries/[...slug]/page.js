@@ -1,5 +1,4 @@
 import useI18n from '../../hooks/use-i18n';
-import { redirect } from 'next/navigation';
 import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -25,6 +24,7 @@ import LocationsMap from '@/app/components/locations-map';
 // @ad
 import AdSense from '@/app/components/adsense';
 import addAds from '@/app/utils/add-ads';
+import { notFound } from 'next/navigation';
 
 function getDataFromRoute(slug, searchParams) {
   const [country, path1, path2, path3, path4, path5] = slug;
@@ -87,7 +87,7 @@ export async function generateMetadata({ params: { slug }, searchParams }) {
   const countryData = await getCountry(db, slug, searchParams);
 
   if (!countryData) {
-    redirect('/');
+    return notFound();
   }
 
   let { city, country, page } = getDataFromRoute(slug, searchParams);
@@ -183,7 +183,7 @@ export default async function Country({ params: { slug }, searchParams }) {
     new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
 
   if (slug.length > 6) {
-    redirect(`/countries/${slug[0]}`);
+    return notFound();
   }
 
   if (searchParams.shuffle) {
@@ -194,7 +194,7 @@ export default async function Country({ params: { slug }, searchParams }) {
       theShuffle < 1 ||
       theShuffle > 15
     ) {
-      redirect('/');
+      return notFound();
     }
   }
 
@@ -202,14 +202,14 @@ export default async function Country({ params: { slug }, searchParams }) {
     searchParams.sort == 'random' &&
     (!searchParams.shuffle || Object.keys(searchParams).length > 2)
   ) {
-    redirect('/');
+    return notFound();
   }
 
   const db = getFirestore();
   const countryData = await getCountry(db, slug, searchParams);
 
   if (!countryData) {
-    redirect('/');
+    return notFound();
   }
 
   let { country, city, page, sort, expandGalleries } = getDataFromRoute(
@@ -502,6 +502,19 @@ export default async function Country({ params: { slug }, searchParams }) {
       instagramPhotos = cacheData.instagramPhotos;
       mapsPhotos = cacheData.mapsPhotos;
     }
+  }
+
+  if (
+    [
+      ...instagramHighLights,
+      ...shortVideos,
+      ...youtubeVideos,
+      ..._360photos,
+      ...instagramPhotos,
+      ...mapsPhotos,
+    ].length === 0
+  ) {
+    return notFound();
   }
 
   const index = city ? 'city_index' : 'country_index';

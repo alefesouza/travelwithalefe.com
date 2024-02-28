@@ -90,7 +90,7 @@ export async function generateMetadata({ params: { country, city, media } }) {
   const countryData = await getCountry(country, city);
 
   if (!countryData) {
-    redirect('/');
+    return notFound();
   }
 
   let theCity = null;
@@ -100,7 +100,7 @@ export async function generateMetadata({ params: { country, city, media } }) {
   }
 
   if (!theCity) {
-    redirect('/');
+    return notFound();
   }
 
   const db = getFirestore();
@@ -115,7 +115,7 @@ export async function generateMetadata({ params: { country, city, media } }) {
   let theMedia = mediaRef.data();
 
   if (!theMedia) {
-    redirect(cityPath);
+    return notFound();
   }
 
   if (theMedia.gallery && theMedia.gallery.length) {
@@ -181,7 +181,7 @@ export default async function Country({ params: { country, city, media } }) {
       .get();
 
     if (mediaSnapshot.size == 0) {
-      redirect(base);
+      return notFound();
     }
 
     mediaSnapshot.forEach((doc) => {
@@ -201,13 +201,13 @@ export default async function Country({ params: { country, city, media } }) {
   const countryData = await getCountry(country, city);
 
   if (!countryData) {
-    redirect('/');
+    return notFound();
   }
 
   let theCity = countryData.cities.find((c) => c.slug === city);
 
   if (!theCity) {
-    redirect('/');
+    return notFound();
   }
 
   const mediaRef = await db
@@ -221,7 +221,7 @@ export default async function Country({ params: { country, city, media } }) {
   let theMedia = mediaRef.data();
 
   if (!theMedia) {
-    redirect('/countries/' + country + '/cities/' + city);
+    return notFound();
   }
 
   theMedia.path = mediaRef.ref.path;
