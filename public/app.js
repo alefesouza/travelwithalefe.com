@@ -311,12 +311,18 @@
       document
         .querySelector('#title-bar .nav-item:nth-child(1)')
         .classList.add('active');
+      document
+        .querySelector('main .navbar .nav-item:nth-child(1)')
+        .classList.add('active');
     } else if (window.location.pathname == '/map') {
       document
         .querySelector('.navbar .nav-item:nth-child(2)')
         .classList.add('active');
       document
         .querySelector('#title-bar .nav-item:nth-child(2)')
+        .classList.add('active');
+      document
+        .querySelector('.sidebar .navbar .nav-item:nth-child(2)')
         .classList.add('active');
     } else if (window.location.pathname == '/hashtags') {
       document
@@ -325,6 +331,9 @@
       document
         .querySelector('#title-bar .nav-item:nth-child(3)')
         .classList.add('active');
+      document
+        .querySelector('.sidebar .navbar .nav-item:nth-child(3)')
+        .classList.add('active');
     } else if (window.location.pathname == '/coupons') {
       document
         .querySelector('.navbar .nav-item:nth-child(4)')
@@ -332,12 +341,18 @@
       document
         .querySelector('#title-bar .nav-item:nth-child(4)')
         .classList.add('active');
+      document
+        .querySelector('.sidebar .navbar .nav-item:nth-child(4)')
+        .classList.add('active');
     } else if (window.location.pathname == '/about') {
       document
         .querySelector('.navbar .nav-item:nth-child(5)')
         .classList.add('active');
       document
         .querySelector('#title-bar .nav-item:nth-child(5)')
+        .classList.add('active');
+      document
+        .querySelector('.sidebar .navbar .nav-item:nth-child(5)')
         .classList.add('active');
     }
 
