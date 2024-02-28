@@ -25,17 +25,3 @@
 .hide_mobile {
   display: none;
 }
-
-@media (min-width: 465px) {
-  .footer_links {
-    flex-direction: row;
-  }
-
-  .footer_links div {
-    justify-content: flex-start;
-  }
-
-  .hide_mobile {
-    display: inline;
-  }
-}

@@ -377,8 +377,14 @@
 
     if (pathname !== '/') {
       document.querySelector('body').classList.add('sub-page');
+      document.querySelector('.main').classList.remove('home-page');
+      document.querySelector('.sidebar').classList.remove('home-page');
+      document.querySelector('.site-name').style.display = 'none';
     } else {
       document.querySelector('body').classList.remove('sub-page');
+      document.querySelector('.main').classList.add('home-page');
+      document.querySelector('.sidebar').classList.add('home-page');
+      document.querySelector('.site-name').style.display = 'block';
     }
 
     if (isMediaSingle) {

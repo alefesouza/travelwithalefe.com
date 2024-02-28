@@ -1,6 +1,5 @@
 import useHost from '@/app/hooks/use-host';
 import { headers } from 'next/headers';
-import VisitedCountries from '../visited-countries';
 import useI18n from '@/app/hooks/use-i18n';
 import { UAParser } from 'ua-parser-js';
 import styles from './index.module.css';
@@ -63,10 +62,6 @@ export default function Footer() {
             alt={i18n('ASExplore Icon')}
           />
         </div>
-      </div>
-
-      <div className="container-fluid">
-        <VisitedCountries />
       </div>
 
       <div className={styles.footer + ' container'}>

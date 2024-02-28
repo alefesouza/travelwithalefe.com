@@ -6,13 +6,12 @@ import useHost from './hooks/use-host';
 import useI18n from './hooks/use-i18n';
 import { SITE_NAME } from './utils/constants';
 import { headers } from 'next/headers';
-import Top from './components/top';
-import Footer from './components/footer';
-import Autocomplete from './components/autocomplete';
-import Link from 'next/link';
 import NavbarLinks from './components/navbar-links';
 import defaultMetadata from './utils/default-metadata';
 import getCookie from './utils/get-cookies';
+import Sidebar from './components/sidebar';
+import Link from 'next/link';
+import Autocomplete from './components/autocomplete';
 
 export async function generateMetadata() {
   return defaultMetadata();
@@ -321,7 +320,7 @@ export default function RootLayout({ children }) {
             <span className="loader"></span>
           </div>
 
-          <nav className="navbar">
+          <nav className="navbar mobile-navbar">
             <div
               className="container"
               style={{
@@ -359,24 +358,21 @@ export default function RootLayout({ children }) {
               <NavbarLinks />
             </div>
 
-            <Autocomplete />
-
-            <Top />
+            <div className="mobile-autocomplete">
+              <Autocomplete />
+            </div>
           </header>
 
-          <main>{children}</main>
-
-          <div
-            style={{ marginTop: 8 }}
-            className="container"
-            id="bottom-profile"
-          >
-            <Autocomplete />
-
-            <Top />
+          <div className="main-container">
+            <aside
+              className={'sidebar' + (pathname === '/' ? ' home-page' : '')}
+            >
+              <Sidebar />
+            </aside>
+            <main className={'main' + (pathname === '/' ? ' home-page' : '')}>
+              {children}
+            </main>
           </div>
-
-          <Footer />
 
           {/* eslint-disable-next-line @next/next/no-sync-scripts */}
           <script id="app" src={host('app.js')} />
