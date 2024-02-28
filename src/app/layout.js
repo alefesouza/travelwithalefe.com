@@ -374,8 +374,7 @@ export default function RootLayout({ children }) {
             </main>
           </div>
 
-          {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-          <script id="app" src={host('app.js')} />
+          <Script id="app" src={host('app.js')} />
 
           {!ignoreAnalytics && (
             <>

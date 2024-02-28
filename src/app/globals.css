@@ -461,6 +461,7 @@ button:not(:disabled) {
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
+  padding: 0rem 0.5rem;
   background: linear-gradient(
     to right,
     rgba(248, 249, 250, 0),
@@ -573,7 +574,7 @@ button:not(:disabled) {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
   gap: 10px;
-  max-width: 1539px;
+  max-width: 1280px;
   margin: 0 auto;
 }
 
@@ -616,6 +617,12 @@ button:not(:disabled) {
 @media (min-width: 1254px) {
   .instagram_highlights_items {
     grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  }
+}
+
+@media (min-width: 1478px) {
+  .instagram_highlights_items {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   }
 }
 
@@ -1028,10 +1035,6 @@ body:not(.sub-page) .mobile-autocomplete {
   .sidebar {
     display: block;
     width: 390px;
-  }
-
-  .navbar {
-    padding: 0rem 0.5rem;
   }
 
   .main {
