@@ -1,5 +1,3 @@
-console.log(`dsfsdf`);
-
 (() => {
   let deferredPrompt;
   const addToHomeBtn = document.querySelector('#add-to-home');
@@ -563,7 +561,7 @@ console.log(`dsfsdf`);
     });
   }
 
-  const headObserver = new MutationObserver(function () {
+  function headObserverFn() {
     document
       .querySelectorAll('ins.adsbygoogle:not(.adsbygoogle-noablate)')
       .forEach((el) => {
@@ -617,7 +615,9 @@ console.log(`dsfsdf`);
     ) {
       setupScroller();
     }
-  });
+  }
+
+  const headObserver = new MutationObserver(headObserverFn);
 
   headObserver.observe(document.querySelector('head'), {
     characterData: false,
@@ -717,4 +717,6 @@ console.log(`dsfsdf`);
   });
 
   initNavbarLinkClick();
+
+  headObserverFn();
 })();

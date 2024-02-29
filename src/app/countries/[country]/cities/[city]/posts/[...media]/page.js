@@ -2,7 +2,7 @@ import useI18n from '@/app/hooks/use-i18n';
 import useHost from '@/app/hooks/use-host';
 import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
-import { permanentRedirect, redirect } from 'next/navigation';
+import { notFound, permanentRedirect, redirect } from 'next/navigation';
 import Media from '@/app/components/media';
 import Link from 'next/link';
 import ShareButton from '@/app/components/share-button';

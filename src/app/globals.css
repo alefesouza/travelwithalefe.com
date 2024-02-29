@@ -954,6 +954,7 @@ ins.adsbygoogle[data-ad-status='unfilled'] {
 }
 
 [lang='pt'] .row-ad::before,
+[lang='pt'] .scroller-ad::before,
 [lang='pt'] .ad::before {
   content: 'Publicidade';
 }
