@@ -221,7 +221,9 @@ console.log(`dsfsdf`);
         'https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js';
       script.id = 'pannellum-loader';
       script.setAttribute('async', '');
-      script.onload = initPanorama;
+      script.onload = () => {
+        initPanorama();
+      };
       document.body.appendChild(script);
       return;
     }
