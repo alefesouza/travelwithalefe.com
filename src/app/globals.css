@@ -552,7 +552,6 @@ button:not(:disabled) {
 .media_navigation {
   display: flex;
   justify-content: space-between;
-  margin-top: 16px;
 }
 
 .window-controls-overlay .media_navigation {
