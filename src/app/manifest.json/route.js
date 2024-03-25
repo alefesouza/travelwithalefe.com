@@ -31,22 +31,10 @@ export async function GET() {
         purpose: 'any',
       })),
       {
-        src: host('icons/maskable-192.png'),
-        sizes: '192x192',
-        type: 'image/png',
-        purpose: 'maskable',
-      },
-      {
         src: host('icons/any.svg'),
         sizes: 'any',
         type: 'image/svg+xml',
         purpose: 'any',
-      },
-      {
-        src: host('icons/maskable.png'),
-        sizes: '512x512',
-        type: 'image/png',
-        purpose: 'maskable',
       },
       {
         src: host('icons/any-maskable.svg'),
