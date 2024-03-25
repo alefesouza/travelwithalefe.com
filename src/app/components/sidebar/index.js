@@ -22,6 +22,13 @@ export default async function Sidebar() {
 
   return (
     <>
+      <div
+        dangerouslySetInnerHTML={{
+          __html: `<!-- ${isWindows ? 's' : 'n'}---
+        ${headers().get('user-agent')}---
+        ${new UAParser(headers().get('user-agent')).getOS().name} -->`,
+        }}
+      ></div>
       <nav className="navbar">
         <div
           className="container"
@@ -45,13 +52,10 @@ export default async function Sidebar() {
           <NavbarLinks />
         </div>
       </nav>
-
       <div className="container">
         <Autocomplete />
       </div>
-
       <Top />
-
       <div className="container">
         <h2 className={styles.headline}>
           {i18n('My photos and videos by country')}
@@ -100,7 +104,6 @@ export default async function Sidebar() {
           </a>
         </div>
       </div>
-
       <Footer />
     </>
   );
