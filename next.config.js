@@ -1,3 +1,4 @@
+const fs = require('fs');
 const withPWA = require('next-pwa')({
   dest: 'public',
   sw: 'serviceworker.js',
@@ -37,6 +38,9 @@ const nextConfig = withPWA({
         ],
       },
     ];
+  },
+  env: {
+    rawAppJsFile: fs.readFileSync('./public/app.js').toString(),
   },
 });
 

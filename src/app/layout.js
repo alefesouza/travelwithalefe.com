@@ -374,9 +374,6 @@ export default function RootLayout({ children }) {
             </main>
           </div>
 
-          {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-          <Script id="app" src={host('app.js')} />
-
           {!ignoreAnalytics && (
             <>
               <script
@@ -408,6 +405,13 @@ export default function RootLayout({ children }) {
           )}
         </body>
       )}
+
+      {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: process.env.rawAppJsFile,
+        }}
+      />
     </html>
   );
 }
