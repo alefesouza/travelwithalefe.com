@@ -30,22 +30,25 @@ export default function Top() {
       </Link>
 
       <span className="profile_description">
-        {countries.map((c) => (
-          <Link href={'/countries/' + c.slug} key={c.name} prefetch={false}>
-            {isWindows ? (
-              <>
-                <img
-                  src={host('/flags/' + c.slug + '.png')}
-                  alt={i18n(c.name)}
-                  width={18}
-                  height={18}
-                />
-                &nbsp;
-              </>
-            ) : (
-              c.flag
-            )}
-          </Link>
+        {countries.map((c, i) => (
+          <>
+            <Link href={'/countries/' + c.slug} key={c.name} prefetch={false}>
+              {isWindows ? (
+                <>
+                  <img
+                    src={host('/flags/' + c.slug + '.png')}
+                    alt={i18n(c.name)}
+                    width={18}
+                    height={18}
+                  />
+                  &nbsp;
+                </>
+              ) : (
+                c.flag
+              )}
+            </Link>
+            {i % 14 === 0 && i > 0 && <br />}
+          </>
         ))}
       </span>
     </div>

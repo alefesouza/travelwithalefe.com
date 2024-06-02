@@ -263,6 +263,31 @@ items.forEach((item, i) => {
   );
 });
 
+const theHashtags = [
+  ...new Set(items.map((h) => h.hashtags.split(' ')).flat()),
+];
+console.log(theHashtags);
+
+theHashtags.forEach((h, i) => {
+  // if (item.locations) {
+  //   item.location_data = locations.filter((l) =>
+  //     item.locations.includes(l.slug)
+  //   );
+  // }
+
+  if (!h) {
+    return;
+  }
+  console.log('/caches/hashtags/hashtags-cache/' + h + '/sort/desc');
+
+  theBatch.delete(
+    doc(db, '/caches/hashtags/hashtags-cache/' + h + '/sort/desc')
+  );
+  theBatch.delete(
+    doc(db, '/caches/hashtags/hashtags-cache/' + h + '/sort/asc')
+  );
+});
+
 console.log(items);
 
 theBatch.commit();

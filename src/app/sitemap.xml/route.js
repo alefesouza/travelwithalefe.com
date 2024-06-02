@@ -16,7 +16,7 @@ export async function GET() {
   //   new URL(string, 'https://travelwithalefe.com/').toString();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const lastmod = '2024-02-14';
+  const lastmod = '2024-06-02';
 
   const db = getFirestore();
   const reference = host('sitemap.xml')
