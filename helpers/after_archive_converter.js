@@ -156,8 +156,6 @@ items.forEach((item, i) => {
     newHashtags.forEach((hashtag) => {
       let hashtagsPt = null;
 
-      item.hashtags_pt = item.hashtags_pt.filter((h) => h !== hashtag);
-
       if (hashtag === 'establishments') {
         hashtagsPt = 'estabelecimentos';
         item.hashtags_pt.push('estabelecimentos');
@@ -226,6 +224,10 @@ items.forEach((item, i) => {
       if (hashtag === 'working') {
         hashtagsPt = 'trabalhando';
         item.hashtags_pt.push('trabalhando');
+      }
+
+      if (hashtagsPt) {
+        item.hashtags_pt = item.hashtags_pt.filter((h) => h !== hashtag);
       }
 
       theBatch.set(
