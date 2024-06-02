@@ -157,6 +157,7 @@ const langs = {
     Luxembourg: 'Luxemburgo',
     Belgium: 'Bélgica',
     'United Kingdom': 'Reino Unido',
+    'Dominican Republic': 'República Dominicana',
 
     // Manifest
     'Access Travel with Alefe Albums': 'Acessar os álbuns do Viajar com Alê',
