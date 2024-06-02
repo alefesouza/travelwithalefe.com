@@ -84,6 +84,21 @@ const countries = [
     name: 'United Kingdom',
     slug: 'united-kingdom',
   },
+  {
+    flag: '🇵🇷',
+    name: 'Puerto Rico',
+    slug: 'puerto-rico',
+  },
+  {
+    flag: '🇯🇲',
+    name: 'Jamaica',
+    slug: 'jamaica',
+  },
+  {
+    flag: '🇩🇴',
+    name: 'Dominican Republic',
+    slug: 'dominican-republic',
+  },
 ];
 
 export default countries;

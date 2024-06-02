@@ -8,13 +8,13 @@
 
 //         const hashtags = prompt('Hashtags');
 //         const location = prompt('Location');
-//         const newHashtags = prompt('New Hashtags');
+//         const description = prompt('Description');
 
 //         items.push({
 //             original_file: m.src,
 //             location,
 //             hashtags,
-//             newHashtags,
+//             description,
 //             city,
 //         })
 //     }
@@ -47,8 +47,8 @@
 //   const split = c.original_file.split('/');
 //   const file = split[split.length - 1];
 
-//   c.original_file = file + (!file.includes('.') ? '.mp4' : '');
-//   c.file = file + (!file.includes('.') ? '.mp4' : '');
+//   c.original_file = file;
+//   c.file = file;
 // });
 
 // fs.writeFileSync('./test.json', JSON.stringify(stories, null, 4));
@@ -87,12 +87,7 @@ function string_to_slug(str) {
 
 const imageMagick = gm.subClass({ imageMagick: true });
 
-const storiesLocations = {
-  paris: 66,
-  luxembourg: 39,
-  brussels: 32,
-  london: 77,
-};
+const storiesLocations = {};
 
 const main = async () => {
   for (const item of items) {
@@ -130,6 +125,10 @@ const main = async () => {
       });
     }
 
+    if (!storiesLocations[item.city]) {
+      storiesLocations[item.city] = 0;
+    }
+
     storiesLocations[item.city]++;
 
     item.id = item.city + '-story-' + storiesLocations[item.city];
@@ -137,6 +136,7 @@ const main = async () => {
     item.mode = 'portrait';
 
     const date = new Date(item.date);
+    console.log(item.date, date);
     item.date = date.toISOString().replace('T', ' ').substring(0, 19);
 
     let file = './stories/' + item.country + '/' + item.city + '/' + item.file;
@@ -147,7 +147,7 @@ const main = async () => {
 
     item.file = file;
 
-    if (item.file.includes('.mp4') || !item.file.includes('.')) {
+    if (item.file.includes('.mp4') || !item.file.substring(2).includes('.')) {
       item.width = 720;
       item.height = 1280;
     } else {
@@ -166,13 +166,13 @@ const main = async () => {
       item.city +
       '/' +
       item.id +
-      (item.file.includes('.mp4') || !item.file.includes('.')
+      (item.file.includes('.mp4') || !item.file.substring(2).includes('.')
         ? '.mp4'
         : '.jpg');
 
     fs.copyFileSync(file, fileToSend);
 
-    if (item.file.includes('.mp4') || !item.file.includes('.')) {
+    if (item.file.includes('.mp4') || !item.file.substring(2).includes('.')) {
       await mt.forVideo(fileToSend, fileToSend.replace('.mp4', '-thumb.png'), {
         width: 720,
       });
@@ -253,7 +253,7 @@ const main = async () => {
       item.city +
       '/' +
       item.id +
-      (item.file.includes('.mp4') || !item.file.includes('.')
+      (item.file.includes('.mp4') || !item.file.substring(2).includes('.')
         ? '.mp4'
         : '.jpg');
     console.log(item.file);

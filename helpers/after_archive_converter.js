@@ -17,10 +17,40 @@ function string_to_slug(str) {
   return str;
 }
 
-items.forEach((item) => {
-  if (item.locations) {
-    item.location_data = locations.filter((l) =>
-      item.locations.includes(l.slug)
+const allHashtags = hashtags.map((h) => h.name);
+
+items.forEach((item, i) => {
+  // if (item.locations) {
+  //   item.location_data = locations.filter((l) =>
+  //     item.locations.includes(l.slug)
+  //   );
+  // }
+
+  if (item.location_data && item.location_data[0]) {
+    let name = item.location_data[0].name;
+
+    if (name.includes(' $ ')) {
+      const split = name.split(' $ ');
+      item.location_data[0].name = split[0];
+      item.location_data[0].name_pt = split[1];
+    }
+
+    theBatch.set(
+      doc(
+        db,
+        '/countries/' +
+          item.country +
+          '/cities/' +
+          item.city +
+          '/locations/' +
+          item.location_data[0].slug
+      ),
+      {
+        ...item.location_data[0],
+      },
+      {
+        merge: true,
+      }
     );
   }
 
@@ -117,7 +147,106 @@ items.forEach((item) => {
     item.hashtags_pt = [...new Set(item.hashtags_pt)].filter((h) => h);
   }
 
-  delete item.newHashtags;
+  const newHashtags = item.hashtags.filter((h) => !allHashtags.includes(h));
+
+  newHashtags.pop();
+  newHashtags.pop();
+
+  if (newHashtags.length) {
+    newHashtags.forEach((hashtag) => {
+      let hashtagsPt = null;
+
+      item.hashtags_pt = item.hashtags_pt.filter((h) => h !== hashtag);
+
+      if (hashtag === 'establishments') {
+        hashtagsPt = 'estabelecimentos';
+        item.hashtags_pt.push('estabelecimentos');
+      }
+
+      if (hashtag === 'filming') {
+        hashtagsPt = 'filmando';
+        item.hashtags_pt.push('filmando');
+      }
+
+      if (hashtag === 'lizard') {
+        hashtagsPt = 'iguana';
+        item.hashtags_pt.push('iguana');
+      }
+
+      if (hashtag === 'sunset') {
+        hashtagsPt = 'pordosol';
+        item.hashtags_pt.push('pordosol');
+      }
+
+      if (hashtag === 'breakfast') {
+        hashtagsPt = 'cafedamanha';
+        item.hashtags_pt.push('cafedamanha');
+      }
+
+      if (hashtag === 'naturalmonuments') {
+        hashtagsPt = 'monumentosnaturais';
+        item.hashtags_pt.push('monumentosnaturais');
+      }
+
+      if (hashtag === 'rooster') {
+        hashtagsPt = 'galo';
+        item.hashtags_pt.push('galo');
+      }
+
+      if (hashtag === 'graffiti') {
+        hashtagsPt = 'grafite';
+        item.hashtags_pt.push('grafite');
+      }
+
+      if (hashtag === 'funny') {
+        hashtagsPt = 'divertido';
+        item.hashtags_pt.push('divertido');
+      }
+
+      if (hashtag === 'eating') {
+        hashtagsPt = 'comendo';
+        item.hashtags_pt.push('comendo');
+      }
+
+      if (hashtag === 'roadway') {
+        hashtagsPt = 'estrada';
+        item.hashtags_pt.push('estrada');
+      }
+
+      if (hashtag === 'coins') {
+        hashtagsPt = 'moedas';
+        item.hashtags_pt.push('moedas');
+      }
+
+      if (hashtag === 'ocean') {
+        hashtagsPt = 'oceano';
+        item.hashtags_pt.push('oceano');
+      }
+
+      if (hashtag === 'working') {
+        hashtagsPt = 'trabalhando';
+        item.hashtags_pt.push('trabalhando');
+      }
+
+      theBatch.set(
+        doc(db, '/hashtags/' + hashtag),
+        {
+          name: hashtag,
+          name_pt: hashtagsPt,
+          hide_on_cloud: false,
+          is_city: false,
+          is_country: false,
+          is_location: false,
+          is_place: false,
+        },
+        {
+          merge: true,
+        }
+      );
+    });
+  }
+
+  console.log(item);
 
   theBatch.set(
     doc(
