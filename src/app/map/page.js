@@ -27,6 +27,7 @@ export default async function MapPage() {
 
   const db = getFirestore();
   const cache = await db.doc(cacheRef).get();
+  // const cache = { exists: false };
 
   let locations = [];
 

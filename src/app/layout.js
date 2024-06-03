@@ -403,15 +403,15 @@ export default function RootLayout({ children }) {
               />
             </>
           )}
+
+          {/* eslint-disable-next-line @next/next/no-sync-scripts */}
+          <script
+            dangerouslySetInnerHTML={{
+              __html: process.env.rawAppJsFile,
+            }}
+          />
         </body>
       )}
-
-      {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-      <script
-        dangerouslySetInnerHTML={{
-          __html: process.env.rawAppJsFile,
-        }}
-      />
     </html>
   );
 }
