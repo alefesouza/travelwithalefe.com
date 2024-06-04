@@ -4,6 +4,7 @@ const querySnapshot = await getDocs(museums);
 const medias = [];
 querySnapshot.forEach((theDoc) => {
   const data = theDoc.data();
+  data.path = theDoc.ref.path;
 
   medias.push(data);
 });

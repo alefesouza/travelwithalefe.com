@@ -147,25 +147,26 @@ export default function Media({
 
       <div className={withoutLink ? 'container' : null}>
         <div className="instagram_media_external_links">
-          {(media.type === 'post' || media.type === 'story') && (
-            <a
-              href={
-                media.type === 'story'
-                  ? 'https://www.instagram.com/stories/highlights/' +
-                    media.original_id +
-                    '/'
-                  : 'https://www.instagram.com/p/' +
-                    media.original_id +
-                    (media.img_index ? '?img_index=' + media.img_index : '')
-              }
-              target="_blank"
-            >
-              <img
-                src={host('/logos/instagram.png')}
-                alt={i18n('Instagram Icon')}
-              />
-            </a>
-          )}
+          {media.original_id &&
+            (media.type === 'post' || media.type === 'story') && (
+              <a
+                href={
+                  media.type === 'story'
+                    ? 'https://www.instagram.com/stories/highlights/' +
+                      media.original_id +
+                      '/'
+                    : 'https://www.instagram.com/p/' +
+                      media.original_id +
+                      (media.img_index ? '?img_index=' + media.img_index : '')
+                }
+                target="_blank"
+              >
+                <img
+                  src={host('/logos/instagram.png')}
+                  alt={i18n('Instagram Icon')}
+                />
+              </a>
+            )}
 
           {media.type === 'youtube' && (
             <a href={media.link} target="_blank">
