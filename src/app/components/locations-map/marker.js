@@ -35,7 +35,10 @@ export default function Marker({
               <a
                 href={
                   location.is_placeholder
-                    ? `https://www.google.com/maps/search/${location.name}/@${location.latitude},${location.longitude},13z`
+                    ? '/countries/' +
+                      location.country +
+                      '/cities/' +
+                      location.city
                     : '/countries/' +
                       location.country +
                       '/cities/' +

@@ -719,4 +719,8 @@
   initNavbarLinkClick();
 
   headObserverFn();
+
+  setTimeout(() => {
+    document.querySelector('.main-container').click();
+  }, 500);
 })();
