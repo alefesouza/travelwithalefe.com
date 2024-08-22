@@ -367,7 +367,7 @@ export default function RootLayout({ children }) {
             <aside
               className={'sidebar' + (pathname === '/' ? ' home-page' : '')}
             >
-              <Sidebar />
+              <Sidebar isSubPage={isSubPage} />
             </aside>
             <main className={'main' + (pathname === '/' ? ' home-page' : '')}>
               {children}

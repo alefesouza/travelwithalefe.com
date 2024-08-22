@@ -142,7 +142,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding-top: 48px;
+  padding-top: 32px;
   margin-bottom: 32px;
 }
 
@@ -1005,6 +1005,14 @@ ins.adsbygoogle[data-ad-status='unfilled'] {
   .sidebar .navbar {
     display: none;
   }
+
+  .single-media-page .sidebar .autocomplete {
+    display: flex;
+  }
+
+  .single-media-page .main {
+    padding-top: 10px;
+  }
 }
 
 .main {
@@ -1097,4 +1105,39 @@ body:not(.sub-page) .mobile-autocomplete {
 .nav-tabs {
   padding-right: calc(1.5rem * 0.5);
   padding-left: calc(1.5rem * 0.5);
+}
+
+.sidebar_ad {
+  width: 320px;
+  height: 50px;
+  margin: 0 auto;
+  margin-top: 32px;
+}
+
+.top_banner_ad {
+  width: 320px;
+  height: 50px;
+  margin: 0 auto;
+  margin-top: 32px;
+}
+
+@media (min-width: 500px) {
+  .top_banner_ad {
+    width: 468px;
+    height: 60px;
+  }
+}
+
+@media (min-width: 800px) {
+  .top_banner_ad {
+    width: 728px;
+    height: 90px;
+  }
+}
+
+@media (min-width: 1080px) {
+  .top_banner_ad {
+    width: 728px;
+    height: 90px;
+  }
 }

@@ -12,8 +12,9 @@ import Footer from '@/app/components/footer';
 import Autocomplete from '@/app/components/autocomplete';
 import NavbarLinks from '@/app/components/navbar-links';
 import { SITE_NAME } from '@/app/utils/constants';
+import AdSense from '@/app/components/adsense';
 
-export default async function Sidebar() {
+export default async function Sidebar({ isSubPage }) {
   const host = useHost();
   const i18n = useI18n();
   const isBR = host().includes('viajarcomale.com.br');
@@ -55,6 +56,15 @@ export default async function Sidebar() {
       <div className="container">
         <Autocomplete />
       </div>
+
+      <div>
+        {isSubPage ? (
+          <AdSense index="sidebar" isTopBanner isSidebar />
+        ) : (
+          <AdSense index="main" isTopBanner />
+        )}
+      </div>
+
       <Top />
       <div className="container">
         <h2 className={styles.headline}>
