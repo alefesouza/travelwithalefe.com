@@ -30,13 +30,14 @@ export async function GET(req) {
   const db = getFirestore();
 
   if (pathname === '/rss') {
-    if (type && type !== 'short-video') {
+    if (type && type !== 'short-video' && type !== '360photo') {
       return;
     }
 
     const cacheRef = `/caches/feeds/pages/home${type ? '-' + type : ''}`;
 
     let cache = await db.doc(cacheRef).get();
+    // let cache = { exists: false };
 
     if (!cache.exists) {
       let photosSnapshot = db
@@ -106,6 +107,7 @@ export async function GET(req) {
     }/sort/desc`;
 
     let cache = await db.doc(cacheRef).get();
+    // let cache = { exists: false };
 
     if (!cache.exists) {
       let photosSnapshot = db
@@ -186,15 +188,19 @@ export async function GET(req) {
         gallery[itemWithHashtag] = item;
       }
 
-      if (item.rss && item.rss.includes(finalHashtag.name)) {
+      if (finalHashtag.rss_limit === 2000) {
         expandedList = [...expandedList, ...gallery];
       } else {
-        expandedList = [
-          ...expandedList,
-          ...gallery.filter(
-            (g) => g.rss_include && g.rss_include.includes(finalHashtag.name)
-          ),
-        ];
+        if (item.rss && item.rss.includes(finalHashtag.name)) {
+          expandedList = [...expandedList, ...gallery];
+        } else {
+          expandedList = [
+            ...expandedList,
+            ...gallery.filter(
+              (g) => g.rss_include && g.rss_include.includes(finalHashtag.name)
+            ),
+          ];
+        }
       }
     }
   });
