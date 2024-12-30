@@ -10,6 +10,8 @@ import styles from '../page.module.css';
 import { redirect } from 'next/navigation';
 // @ad
 import AdSense from '@/app/components/adsense';
+import Editable from '@/app/components/editable/editable';
+import useEditMode from '@/app/utils/use-edit-mode';
 
 export async function generateMetadata({ params: { coupon } }) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -41,10 +43,11 @@ export async function generateMetadata({ params: { coupon } }) {
   return defaultMetadata(title, description);
 }
 
-export default async function Coupons({ params: { coupon } }) {
+export default async function Coupons({ params: { coupon }, searchParams }) {
   const i18n = useI18n();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
+  const editMode = useEditMode(searchParams);
 
   const db = getFirestore();
   const couponRef = await db.collection('coupons').doc(coupon).get();
@@ -76,6 +79,15 @@ export default async function Coupons({ params: { coupon } }) {
         <h2>
           {isBR && couponData.title_pt ? couponData.title_pt : couponData.title}
         </h2>
+
+        {editMode.editMode && (
+          <Editable
+            item={JSON.stringify(couponData, null, 2)}
+            path={couponData.path}
+            {...editMode}
+          />
+        )}
+
         <div className={'instagram_media_gallery_item ' + styles.coupon}>
           <div className={styles.coupon_body}>
             <div className={styles.coupon_body_padding}>

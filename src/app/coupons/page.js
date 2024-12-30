@@ -9,8 +9,10 @@ import logAccess from '@/app/utils/log-access';
 import styles from './page.module.css';
 // @ad
 import AdSense from '../components/adsense';
+import Editable from '../components/editable/editable';
+import useEditMode from '../utils/use-edit-mode';
 
-const Coupon = ({ item }) => {
+const Coupon = ({ item, editMode }) => {
   const i18n = useI18n();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
@@ -77,6 +79,14 @@ const Coupon = ({ item }) => {
           </div>
         )}
       </div>
+
+      {editMode.editMode && (
+        <Editable
+          item={JSON.stringify(item, null, 2)}
+          path={item.path}
+          {...editMode}
+        />
+      )}
     </div>
   );
 };
@@ -101,10 +111,11 @@ export async function generateMetadata() {
   return defaultMetadata(title, description);
 }
 
-export default async function Coupons() {
+export default async function Coupons({ searchParams }) {
   const i18n = useI18n();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
+  const editMode = useEditMode(searchParams);
 
   const cacheRef = '/caches/static_pages/static_pages/coupons';
 
@@ -178,7 +189,7 @@ export default async function Coupons() {
         </div>
         <div className="instagram_highlights_items">
           {coupons.slice(0, 8).map((item) => (
-            <Coupon item={item} key={item.slug} />
+            <Coupon item={item} key={item.slug} editMode={editMode} />
           ))}
         </div>
       </div>
@@ -190,7 +201,7 @@ export default async function Coupons() {
       <div className="container">
         <div className="instagram_highlights_items">
           {coupons.slice(8).map((item) => (
-            <Coupon item={item} key={item.slug} />
+            <Coupon item={item} key={item.slug} editMode={editMode} />
           ))}
         </div>
       </div>

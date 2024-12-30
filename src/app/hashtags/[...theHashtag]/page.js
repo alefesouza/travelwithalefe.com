@@ -24,6 +24,7 @@ import expandPosts from '@/app/utils/expand-posts';
 import SortPicker from '@/app/components/sort-picker';
 import Pagination from '@/app/components/pagination';
 import useEditMode from '@/app/utils/use-edit-mode';
+import Editable from '@/app/components/editable/editable';
 
 function getDataFromRoute(slug, searchParams) {
   const [hashtag, path1, path2, path3] = slug;
@@ -594,6 +595,14 @@ export default async function Country({
       <div className="container-fluid">
         <h2>#{currentHashtag}</h2>
       </div>
+
+      {editMode.editMode && (
+        <Editable
+          item={JSON.stringify(finalHashtag, null, 2)}
+          path={finalHashtag.path}
+          {...editMode}
+        />
+      )}
 
       {finalHashtag.name === '360video' && _360videosComponent}
 

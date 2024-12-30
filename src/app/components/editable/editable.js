@@ -41,12 +41,18 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
   };
 
   if (!isEditMode) {
-    return <button onClick={() => setIsEditMode(true)}>Edit</button>;
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <button onClick={() => setIsEditMode(true)}>Edit</button>
+      </div>
+    );
   }
 
   return (
-    <div>
-      <div style={{ width: '100%', height: 400, overflow: 'auto' }}>
+    <div
+      style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}
+    >
+      <div style={{ width: 500, overflow: 'auto' }}>
         <JsonEditor
           data={media}
           setData={setMedia}
@@ -55,25 +61,34 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
         />
       </div>
 
-      {isEditTextMode ? (
-        <textarea
-          style={{ width: '100%', height: 400 }}
-          value={JSON.stringify(media, null, 2)}
-          onChange={(e) => setMedia(JSON.parse(e.target.value))}
-        />
-      ) : (
-        <button onClick={() => setIsEditTextMode(true)} disabled={isLoading}>
-          Text Mode
-        </button>
-      )}
+      <div>
+        {isEditTextMode && (
+          <textarea
+            style={{ width: 500, height: 400 }}
+            value={JSON.stringify(media, null, 2)}
+            onChange={(e) => setMedia(JSON.parse(e.target.value))}
+          />
+        )}
 
-      <button onClick={onSave} disabled={isLoading}>
-        Save
-      </button>
+        <div style={{ textAlign: 'center' }}>
+          {!isEditTextMode && (
+            <button
+              onClick={() => setIsEditTextMode(true)}
+              disabled={isLoading}
+            >
+              Text Mode
+            </button>
+          )}
 
-      <button onClick={() => setIsEditMode(false)} disabled={isLoading}>
-        Cancel
-      </button>
+          <button onClick={onSave} disabled={isLoading}>
+            Save
+          </button>
+
+          <button onClick={() => setIsEditMode(false)} disabled={isLoading}>
+            Cancel
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

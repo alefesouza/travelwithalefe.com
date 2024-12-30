@@ -25,6 +25,7 @@ import getItemsPagination from '@/app/utils/get-items-pagination';
 import SortPicker from '@/app/components/sort-picker';
 import Pagination from '@/app/components/pagination';
 import useEditMode from '@/app/utils/use-edit-mode';
+import Editable from '@/app/components/editable/editable';
 
 function getDataFromRoute(slug, searchParams) {
   const [location, path5, path6, path7, path8] = slug;
@@ -504,6 +505,14 @@ export default async function Country({
               expandDate(theCity.end, isBR)}
         </div>
       </div>
+
+      {editMode.editMode && (
+        <Editable
+          item={JSON.stringify(theMedia, null, 2)}
+          path={theMedia.path}
+          {...editMode}
+        />
+      )}
 
       <div className={styles.galleries}>
         {instagramStories.length > 1 && (
