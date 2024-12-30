@@ -21,6 +21,7 @@ import expandDate from '@/app/utils/expand-date';
 // @ad
 import AdSense from '@/app/components/adsense';
 import addAds from '@/app/utils/add-ads';
+import useEditMode from '@/app/utils/use-edit-mode';
 
 async function getCountry(country, city) {
   const db = getFirestore();
@@ -142,6 +143,7 @@ export default async function Highlight({
   const isBR = host().includes('viajarcomale.com.br');
   const isWindows =
     new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
+  const editMode = useEditMode(searchParams);
 
   let sort =
     (searchParams.sort &&
@@ -164,6 +166,7 @@ export default async function Highlight({
         city,
         media: [city + '-story-' + stories[0]],
       },
+      searchParams,
     });
   }
 
@@ -512,6 +515,7 @@ export default async function Highlight({
                         key={p.id}
                         hasPoster
                         isListing
+                        editMode={editMode}
                       />
                     )}
                   </div>

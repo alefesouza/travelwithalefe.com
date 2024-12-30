@@ -25,6 +25,7 @@ import LocationsMap from '@/app/components/locations-map';
 import AdSense from '@/app/components/adsense';
 import addAds from '@/app/utils/add-ads';
 import { notFound } from 'next/navigation';
+import useEditMode from '@/app/utils/use-edit-mode';
 
 function getDataFromRoute(slug, searchParams) {
   const [country, path1, path2, path3, path4, path5] = slug;
@@ -181,6 +182,7 @@ export default async function Country({ params: { slug }, searchParams }) {
   const isBR = host().includes('viajarcomale.com.br');
   const isWindows =
     new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
+  const editMode = useEditMode(searchParams);
 
   if (slug.length > 6) {
     return notFound();
@@ -847,6 +849,7 @@ export default async function Country({ params: { slug }, searchParams }) {
             isInstagramHighlights
             cityData={cityData}
             sort={sort}
+            editMode={editMode}
           />
         )}
 
@@ -857,6 +860,7 @@ export default async function Country({ params: { slug }, searchParams }) {
             title={i18n('Short Videos')}
             items={shortVideos}
             isShortVideos
+            editMode={editMode}
           />
         )}
 
@@ -867,13 +871,19 @@ export default async function Country({ params: { slug }, searchParams }) {
             title={i18n('YouTube Videos')}
             items={youtubeVideos}
             isYouTubeVideos
+            editMode={editMode}
           />
         )}
 
         {_360photos.length > 1 && sortPicker('360photos')}
 
         {_360photos.length > 0 && (
-          <Scroller title={i18n('360 Photos')} items={_360photos} is360Photos />
+          <Scroller
+            title={i18n('360 Photos')}
+            items={_360photos}
+            is360Photos
+            editMode={editMode}
+          />
         )}
 
         {/* @ad */}
@@ -939,6 +949,7 @@ export default async function Country({ params: { slug }, searchParams }) {
                         isBR={isBR}
                         expandGalleries={expandGalleries}
                         isListing
+                        editMode={editMode}
                       />
                     )}
                   </div>
@@ -1016,6 +1027,7 @@ export default async function Country({ params: { slug }, searchParams }) {
                         isBR={isBR}
                         expandGalleries={expandGalleries}
                         isListing
+                        editMode={editMode}
                       />
                     )}
                   </div>

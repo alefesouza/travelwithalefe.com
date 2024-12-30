@@ -10,6 +10,7 @@ import YouTubeEmbed from './youtube-embed';
 import TikTokEmbed from './tiktok-embed';
 import getTypePath from '@/app/utils/get-type-path';
 import Photo360 from '../photo-360';
+import Editable from '../editable/editable';
 
 export default function Media({
   media,
@@ -20,6 +21,7 @@ export default function Media({
   isMain,
   isListing,
   showMapIcon,
+  editMode,
 }) {
   const host = useHost();
   const i18n = useI18n();
@@ -294,6 +296,14 @@ export default function Media({
           isExpand={expandGalleries && !isMain}
           includeVideoTags={isVideo && !isListing}
         />
+
+        {editMode.editMode && (
+          <Editable
+            item={JSON.stringify(media, null, 2)}
+            path={media.path}
+            {...editMode}
+          />
+        )}
       </div>
     </div>
   );

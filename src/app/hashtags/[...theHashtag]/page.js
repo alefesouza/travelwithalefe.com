@@ -23,6 +23,7 @@ import getItemsPagination from '@/app/utils/get-items-pagination';
 import expandPosts from '@/app/utils/expand-posts';
 import SortPicker from '@/app/components/sort-picker';
 import Pagination from '@/app/components/pagination';
+import useEditMode from '@/app/utils/use-edit-mode';
 
 function getDataFromRoute(slug, searchParams) {
   const [hashtag, path1, path2, path3] = slug;
@@ -237,6 +238,7 @@ export default async function Country({
   const i18n = useI18n();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
+  const editMode = useEditMode(searchParams);
 
   let { hashtag, page, expandGalleries, isWebStories, sort } = getDataFromRoute(
     theHashtag,
@@ -478,7 +480,12 @@ export default async function Country({
       )}
 
       {_360photos.length > 0 && (
-        <Scroller title={i18n('360 Photos')} items={_360photos} is360Photos>
+        <Scroller
+          title={i18n('360 Photos')}
+          items={_360photos}
+          is360Photos
+          editMode={editMode}
+        >
           {!isRandom && _360photosPageNumber > 1 && (
             <Pagination
               base={paginationBase}
@@ -510,6 +517,7 @@ export default async function Country({
           title={i18n('YouTube Videos')}
           items={youtubeVideos}
           isYouTubeVideos
+          editMode={editMode}
         >
           {!isRandom && videosPageNumber > 1 && (
             <Pagination
@@ -608,6 +616,7 @@ export default async function Country({
             isStories
             webStoriesHref={webStoriesHref}
             sort={sort}
+            editMode={editMode}
           >
             {!isRandom && storiesPageNumber > 1 && (
               <Pagination
@@ -647,6 +656,7 @@ export default async function Country({
             title={i18n('Short Videos')}
             items={shortVideos}
             isShortVideos
+            editMode={editMode}
           >
             {!isRandom && shortsPageNumber > 1 && (
               <Pagination
@@ -733,6 +743,7 @@ export default async function Country({
                         isBR={isBR}
                         expandGalleries={expandGalleries}
                         isListing
+                        editMode={editMode}
                       />
                     )}
                   </div>
@@ -782,6 +793,7 @@ export default async function Country({
                         isBR={isBR}
                         expandGalleries={expandGalleries}
                         isListing
+                        editMode={editMode}
                       />
                     )}
                   </div>

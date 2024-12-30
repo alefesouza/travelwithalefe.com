@@ -12,12 +12,16 @@ export async function generateMetadata({ params: { country, city, photo } }) {
   });
 }
 
-export default async function Video({ params: { country, city, photo } }) {
+export default async function Video({
+  params: { country, city, photo },
+  searchParams,
+}) {
   return Country({
     params: {
       country,
       city,
       media: [city + '-360photo-' + [photo]],
     },
+    searchParams,
   });
 }

@@ -19,6 +19,7 @@ import getTypePath from '@/app/utils/get-type-path';
 /* @ad */
 import AdSense from '@/app/components/adsense';
 import getTypeLabel from '@/app/utils/get-type-label';
+import useEditMode from '@/app/utils/use-edit-mode';
 
 async function getCountry(country, city) {
   const db = getFirestore();
@@ -146,12 +147,16 @@ export async function generateMetadata({ params: { country, city, media } }) {
   );
 }
 
-export default async function Country({ params: { country, city, media } }) {
+export default async function Country({
+  params: { country, city, media },
+  searchParams,
+}) {
   const i18n = useI18n();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const isWindows =
     new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
+  const editMode = useEditMode(searchParams);
 
   if (media.length > 2) {
     redirect(
@@ -418,6 +423,7 @@ export default async function Country({ params: { country, city, media } }) {
           fullQuality
           isMain
           showMapIcon
+          editMode={editMode}
         />
       </div>
 
@@ -454,6 +460,7 @@ export default async function Country({ params: { country, city, media } }) {
                 expandGalleries
                 fullQuality
                 isListing
+                editMode={editMode}
               />
             </div>
           </div>

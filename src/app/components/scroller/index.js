@@ -13,6 +13,7 @@ import expandDate from '@/app/utils/expand-date';
 import getTypePath from '@/app/utils/get-type-path';
 // @ad
 import AdSense from '../adsense';
+import Editable from '../editable/editable';
 
 export default function Scroller({
   title,
@@ -25,6 +26,7 @@ export default function Scroller({
   webStoriesHref,
   sort,
   children,
+  editMode,
 }) {
   const i18n = useI18n();
   const host = useHost();
@@ -447,6 +449,14 @@ export default function Scroller({
                       withOptional={isInstagramHighlights}
                     />
                   </>
+                )}
+
+                {editMode.editMode && (
+                  <Editable
+                    item={JSON.stringify(p, null, 2)}
+                    path={p.path}
+                    {...editMode}
+                  />
                 )}
               </div>
             );
