@@ -57,7 +57,7 @@ export default async function Sidebar({ isSubPage }) {
         <Autocomplete />
       </div>
 
-      <div>
+      <div style={{ marginTop: 36 }}>
         {isSubPage ? (
           <AdSense index="sidebar" isTopBanner isSidebar />
         ) : (

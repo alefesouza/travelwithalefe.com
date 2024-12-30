@@ -1111,14 +1111,12 @@ body:not(.sub-page) .mobile-autocomplete {
   width: 320px;
   height: 50px;
   margin: 0 auto;
-  margin-top: 32px;
 }
 
 .top_banner_ad {
   width: 320px;
   height: 50px;
   margin: 0 auto;
-  margin-top: 32px;
 }
 
 @media (min-width: 500px) {
