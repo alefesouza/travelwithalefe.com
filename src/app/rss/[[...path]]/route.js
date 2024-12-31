@@ -36,8 +36,13 @@ export async function GET(req) {
 
     const cacheRef = `/caches/feeds/pages/home${type ? '-' + type : ''}`;
 
-    let cache = await db.doc(cacheRef).get();
-    // let cache = { exists: false };
+    let cache = null;
+
+    if (process.env.USER === 'alefesouza') {
+      cache = { exists: false };
+    } else {
+      cache = await db.doc(cacheRef).get();
+    }
 
     if (!cache.exists) {
       let photosSnapshot = db
@@ -106,8 +111,13 @@ export async function GET(req) {
       type ? '-' + type : ''
     }/sort/desc`;
 
-    let cache = await db.doc(cacheRef).get();
-    // let cache = { exists: false };
+    let cache = null;
+
+    if (process.env.USER === 'alefesouza') {
+      cache = { exists: false };
+    } else {
+      cache = await db.doc(cacheRef).get();
+    }
 
     if (!cache.exists) {
       let photosSnapshot = db

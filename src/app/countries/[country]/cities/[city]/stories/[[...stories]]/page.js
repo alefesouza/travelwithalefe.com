@@ -175,8 +175,14 @@ export default async function Highlight({
   }`;
 
   const db = getFirestore();
-  const cache = await db.doc(cacheRef).get();
-  // const cache = { exists: false };
+
+  let cache = null;
+
+  if (process.env.USER === 'alefesouza') {
+    cache = { exists: false };
+  } else {
+    cache = await db.doc(cacheRef).get();
+  }
 
   let isRandom = sort === 'random';
   const isWebStories = stories && stories[stories.length - 1] === 'webstories';

@@ -24,11 +24,55 @@ exports.onMediaCreated = onDocumentCreated(
     const split = event.data.ref.path.split('/');
     update.country = split[1];
 
-    update.createdAt = admin.firestore.FieldValue.serverTimestamp();
+    update.createdAt = FieldValue.serverTimestamp();
 
     return event.data.ref.update(update);
   }
 );
+
+function getTotalKey(type) {
+  switch (type) {
+    case 'post':
+      key = 'posts';
+      break;
+    case 'story':
+      key = 'stories';
+      break;
+    case '360photo':
+      key = 'photos360';
+      break;
+    case 'maps':
+      key = 'maps';
+      break;
+    case 'youtube':
+      key = 'videos';
+      break;
+    case 'short-video':
+      key = 'shorts';
+      break;
+  }
+
+  return key;
+}
+
+function string_to_slug(str) {
+  str = str.replace(/^\s+|\s+$/g, ''); // trim
+  str = str.toLowerCase();
+
+  // remove accents, swap ñ for n, etc
+  var from = 'àáäâãèéëêìíïîòóöôõùúüûñç·/_,:;';
+  var to = 'aaaaaeeeeiiiiooooõuuuunc------';
+  for (var i = 0, l = from.length; i < l; i++) {
+    str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+  }
+
+  str = str
+    .replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+    .replace(/\s+/g, '-') // collapse whitespace and replace by -
+    .replace(/-+/g, '-'); // collapse dashes
+
+  return str;
+}
 
 exports.onMediaUpdated = onDocumentUpdated(
   '/countries/{countryId}/cities/{cityId}/medias/{mediaId}',
@@ -57,7 +101,11 @@ exports.onMediaUpdated = onDocumentUpdated(
         .collection('cities')
         .doc(newValue.city)
         .collection('locations')
-        .where('slug', 'in', newValue.locations)
+        .where(
+          'slug',
+          'in',
+          newValue.locations.map((l) => string_to_slug(l))
+        )
         .get();
 
       const locations = [];
@@ -74,28 +122,7 @@ exports.onMediaUpdated = onDocumentUpdated(
         });
 
         if (!oldValue.locations || !oldValue.locations.includes(data.slug)) {
-          let key = '';
-
-          switch (newValue.type) {
-            case 'post':
-              key = 'posts';
-              break;
-            case 'story':
-              key = 'stories';
-              break;
-            case '360photo':
-              key = 'photos360';
-              break;
-            case 'maps':
-              key = 'maps';
-              break;
-            case 'youtube':
-              key = 'videos';
-              break;
-            case 'short-video':
-              key = 'shorts';
-              break;
-          }
+          let key = getTotalKey(newValue.type);
 
           doc.ref.update({
             totals: {
@@ -107,6 +134,14 @@ exports.onMediaUpdated = onDocumentUpdated(
       });
 
       update.location_data = locations;
+      update.hashtags = [
+        ...new Set(
+          [
+            newValue.hashtags,
+            locations.map((l) => l.slug.replaceAll('-', '')),
+          ].flat()
+        ),
+      ];
     }
 
     if (newValue.location_slug_update) {
@@ -114,26 +149,8 @@ exports.onMediaUpdated = onDocumentUpdated(
     }
 
     if (!oldValue.location && newValue.location) {
-      function string_to_slug(str) {
-        str = str.replace(/^\s+|\s+$/g, ''); // trim
-        str = str.toLowerCase();
-
-        // remove accents, swap ñ for n, etc
-        var from = 'àáäâãèéëêìíïîòóöôõùúüûñç·/_,:;';
-        var to = 'aaaaaeeeeiiiiooooõuuuunc------';
-        for (var i = 0, l = from.length; i < l; i++) {
-          str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
-        }
-
-        str = str
-          .replace(/[^a-z0-9 -]/g, '') // remove invalid chars
-          .replace(/\s+/g, '-') // collapse whitespace and replace by -
-          .replace(/-+/g, '-'); // collapse dashes
-
-        return str;
-      }
-
       const slug = string_to_slug(newValue.location);
+      const key = getTotalKey(newValue.type);
 
       const theNewLocation = {
         slug,
@@ -142,13 +159,29 @@ exports.onMediaUpdated = onDocumentUpdated(
         name: newValue.location,
         latitude: newValue.latitude || null,
         longitude: newValue.longitude || null,
+        totals: {
+          posts: 0,
+          stories: 0,
+          photos360: 0,
+          maps: 0,
+          videos: 0,
+          shorts: 0,
+          [key]: 1,
+        },
       };
 
+      const db = getFirestore();
       db.doc(
         `/countries/${newValue.country}/cities/${newValue.city}/locations/${slug}`
       ).set(theNewLocation);
 
       update.location_data = [theNewLocation];
+      update.locations = [slug];
+      update.hashtags = [...newValue.hashtags, slug.replaceAll('-', '')];
+    }
+
+    if (Object.keys(update).length === 0) {
+      return;
     }
 
     return event.data.after.ref.update(update);

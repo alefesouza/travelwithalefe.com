@@ -4,14 +4,25 @@ import { useState } from 'react';
 import { JsonEditor } from 'json-edit-react';
 
 const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
-  const [isEditMode, setIsEditMode] = useState(autoOpenEdit);
-  const [isEditTextMode, setIsEditTextMode] = useState(forceEditTextMode);
+  const params = new URLSearchParams(window.location.search);
+
+  const search = params.get('search') || '';
+  const height = params.get('height') || 'auto';
+  const width = params.get('width') || '100%';
+
+  const [isEditMode, setIsEditMode] = useState(
+    autoOpenEdit || params.get('auto_open') === 'true'
+  );
+  const [isEditTextMode, setIsEditTextMode] = useState(
+    forceEditTextMode || params.get('force_edit_text') === 'true'
+  );
   const [isLoading, setIsLoading] = useState(false);
   const [media, setMedia] = useState(JSON.parse(item));
 
   const onSave = () => {
     const { apps } = firebase;
     let app = null;
+    let db;
 
     if (apps.length <= 0) {
       const firebaseConfig = {
@@ -25,11 +36,15 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
       };
 
       app = firebase.initializeApp(firebaseConfig);
+      db = app.firestore();
+
+      if (location.hostname === 'localhost') {
+        db.useEmulator('127.0.0.1', 8080);
+      }
     } else {
       app = apps[0];
+      db = app.firestore();
     }
-
-    const db = app.firestore();
 
     setIsLoading(true);
 
@@ -59,12 +74,16 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
     <div
       style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}
     >
-      <div style={{ width: 500, overflow: 'auto' }}>
+      <div style={{ overflow: 'auto', width, height }}>
         <JsonEditor
           data={media}
           setData={setMedia}
           enableClipboard={false}
           collapse={1}
+          searchFilter="key"
+          searchText={search}
+          defaultValue=""
+          keySort={true}
         />
       </div>
 

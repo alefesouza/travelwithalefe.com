@@ -223,8 +223,13 @@ export default async function Country({ params: { slug }, searchParams }) {
     city ? '/' + city : '/country'
   }/page/${page}/sort/${sort === 'asc' ? 'asc' : 'desc'}`;
 
-  const cache = await db.doc(cacheRef).get();
-  // const cache = { exists: false };
+  let cache = null;
+
+  if (process.env.USER === 'alefesouza') {
+    cache = { exists: false };
+  } else {
+    cache = await db.doc(cacheRef).get();
+  }
 
   let instagramHighLightsSnapshot = [];
   let shortVideosSnapshot = [];

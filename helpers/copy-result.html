@@ -1,0 +1,94 @@
+# hashtags_totals
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <script src="./the-result.js"></script>
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js';
+      import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-analytics.js';
+      import {
+        getStorage,
+        ref,
+        getDownloadURL,
+      } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-storage.js';
+
+      import {
+        getFirestore,
+        collection,
+        getDocs,
+        doc,
+        writeBatch,
+        addDoc,
+        serverTimestamp,
+        collectionGroup,
+        query,
+        deleteField,
+        setDoc,
+        getDoc,
+        where,
+        connectFirestoreEmulator,
+      } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js';
+
+      // Your web app's Firebase configuration
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: 'AIzaSyBwRPBNhCfGDLC8wdAkIlx9m5mba5gm_iA',
+        authDomain: 'viajarcomale.firebaseapp.com',
+        projectId: 'viajarcomale',
+        storageBucket: 'viajarcomale.appspot.com',
+        messagingSenderId: '207097887664',
+        appId: '1:207097887664:web:b0f038dd322c756f77b475',
+        measurementId: 'G-SGK9KS9BBN',
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+
+      const db = getFirestore(app);
+
+      // connectFirestoreEmulator(db, '127.0.0.1', 8080);
+
+      const storage = getStorage();
+
+      const theBatch = writeBatch(db);
+
+      result.forEach((item) => {
+        if (item.order === 1) {
+          item.is_highlight = true;
+        }
+
+        item.hashtags = [item.country, item.city.replaceAll('-', '')];
+        item.hashtags_pt = [item.country, item.city.replaceAll('-', '')];
+
+        theBatch.set(
+          doc(
+            db,
+            '/countries/' +
+              item.country +
+              '/cities/' +
+              item.city +
+              '/medias/' +
+              item.id
+          ),
+          item,
+          {
+            merge: true,
+          }
+        );
+
+        console.log(item.id);
+      });
+
+      theBatch.commit();
+    </script>
+  </body>
+</html>

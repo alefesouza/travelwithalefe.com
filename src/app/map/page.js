@@ -26,8 +26,14 @@ export default async function MapPage() {
   const cacheRef = '/caches/static_pages/static_pages/locations';
 
   const db = getFirestore();
-  const cache = await db.doc(cacheRef).get();
-  // const cache = { exists: false };
+
+  let cache = null;
+
+  if (process.env.USER === 'alefesouza') {
+    cache = { exists: false };
+  } else {
+    cache = await db.doc(cacheRef).get();
+  }
 
   let locations = [];
 

@@ -48,7 +48,12 @@ serviceworker.js*
 items.json
 *adminsdk*
 /helpers/*.json
-/helpers/**
+/helpers/backup
+/helpers/stories
+/helpers/scripts
+/helpers/to_send
+/helpers/update_galleries.html
+/helpers/the-result.js
 *.log
 /data
 /images

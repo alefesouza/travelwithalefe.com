@@ -99,6 +99,21 @@ const countries = [
     name: 'Dominican Republic',
     slug: 'dominican-republic',
   },
+  {
+    flag: '🇨🇺',
+    name: 'Cuba',
+    slug: 'cuba',
+  },
+  {
+    flag: '🇬🇹',
+    name: 'Guatemala',
+    slug: 'guatemala',
+  },
+  {
+    flag: '🇸🇻',
+    name: 'El Salvador',
+    slug: 'el-salvador',
+  },
 ];
 
 export default countries;

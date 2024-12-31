@@ -6,7 +6,10 @@ const useEditMode = ({ edit_mode: editMode }) => {
   const forceEditTextMode = getCookie('force_edit_text_mode');
 
   return {
-    editMode: editModeCookie || editMode === 'true',
+    editMode:
+      editModeCookie ||
+      editMode === 'true' ||
+      process.env.USER === 'alefesouza',
     forceEditTextMode: forceEditTextMode === 'true',
     autoOpenEdit: autoOpenEdit === 'true',
   };

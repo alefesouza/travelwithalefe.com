@@ -11,5 +11,8 @@ items
     console.log(text);
     item.description = text;
 
-    fs.writeFileSync('helpers/the-result.json', JSON.stringify(items, null, 4));
+    fs.writeFileSync(
+      'helpers/the-result.js',
+      'const result = ' + JSON.stringify(items, null, 4)
+    );
   });

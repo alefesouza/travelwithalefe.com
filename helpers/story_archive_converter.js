@@ -1,7 +1,7 @@
 // lastCountry = null;
 // lastCity = null;
 
-// cityCount2 = {};
+// cityCount = {};
 
 // cityDatas = {
 //   'rio-de-janeiro': {
@@ -10,13 +10,13 @@
 //     end: '2024-08-19',
 //     city_location_id: 14,
 //   },
-//   'tulum': {
+//   tulum: {
 //     name: 'Tulum',
 //     slug: 'tulum',
 //     end: '2024-10-13',
 //     city_location_id: 2,
 //   },
-//   'havana': {
+//   havana: {
 //     name: 'Havana',
 //     slug: 'havana',
 //     end: '2024-10-18',
@@ -34,7 +34,7 @@
 //     end: '2024-10-24',
 //     city_location_id: 1,
 //   },
-//   'panacharel': {
+//   panacharel: {
 //     name: 'Panacharel',
 //     slug: 'panacharel',
 //     end: '2024-10-22',
@@ -46,22 +46,22 @@
 //     end: '2024-10-26',
 //     city_location_id: 3,
 //   },
-// }
+// };
 
 // countryDatas = {
-//   'mexico': {
+//   mexico: {
 //     name: 'Mexico',
 //     name_pt: 'México',
 //     iso: 'MX',
 //     slug: 'mexico',
 //   },
-//   'brazil': {
+//   brazil: {
 //     name: 'Brazil',
 //     name_pt: 'Brasil',
 //     iso: 'BR',
 //     slug: 'brazil',
 //   },
-//   'cuba': {
+//   cuba: {
 //     name: 'Cuba',
 //     iso: 'CU',
 //     slug: 'cuba',
@@ -71,63 +71,92 @@
 //     iso: 'SV',
 //     slug: 'el-salvador',
 //   },
-//   'guatemala': {
+//   guatemala: {
 //     name: 'Guatemala',
 //     iso: 'GT',
 //     slug: 'guatemala',
-//   }
+//   },
 // };
 
-// [...$0.children].map((item) => {
-//   const { country, city } = item.dataset;
+// function string_to_slug(str) {
+//   str = str.replace(/^\s+|\s+$/g, ''); // trim
+//   str = str.toLowerCase();
 
-//   if (country) {
-//     lastCountry = country;
-//     lastCity = city;
+//   // remove accents, swap ñ for n, etc
+//   var from = 'àáäâãèéëêìíïîòóöôõùúüûñç·/_,:;';
+//   var to = 'aaaaaeeeeiiiiooooõuuuunc------';
+//   for (var i = 0, l = from.length; i < l; i++) {
+//     str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
 //   }
 
-//   const file = (item.querySelector('img') || item.querySelector('video')).src;
-//   const filePathSplit = file.split('/');
+//   str = str
+//     .replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+//     .replace(/\s+/g, '-') // collapse whitespace and replace by -
+//     .replace(/-+/g, '-'); // collapse dashes
 
-//   const description = item.querySelector('._2pim') && item.querySelector('._2pim').textContent;
+//   return str;
+// }
 
-//   const cityData = {...cityDatas[lastCity]};
-//   const {city_location_id} = cityData;
-//   delete cityData.city_location_id;
+// [...$0.children]
+//   .map((item) => {
+//     const { country, city } = item.dataset;
 
-//   return {
-//     file_location: file.replace('file://', ''),
-//     city: lastCity,
-//     country: lastCountry,
-//     original_file: filePathSplit[filePathSplit.length - 1],
-//     date: item.querySelector('._3-94').textContent,
-//     latitude: [...item.querySelectorAll('div')].find(
-//       (el) => el.textContent == 'Latitude'
-//     )?.nextElementSibling?.textContent,
-//     longitude: [...item.querySelectorAll('div')].find(
-//       (el) => el.textContent == 'Longitude'
-//     )?.nextElementSibling?.textContent,
-//     description,
-//     description_pt:
+//     if (country) {
+//       lastCountry = country;
+//       lastCity = city;
+//     }
+
+//     const file = (item.querySelector('img') || item.querySelector('video')).src;
+//     const filePathSplit = file.split('/');
+
+//     const description =
+//       item.querySelector('._2pim') && item.querySelector('._2pim').textContent;
+
+//     const cityData = { ...cityDatas[lastCity] };
+//     const { city_location_id } = cityData;
+//     delete cityData.city_location_id;
+
+//     const cityPtHashtag = cityData[city].name_pt
+//       ? string_to_slug(cityData[city].name_pt).replaceAll('-', '')
+//       : city;
+//     const countryPtHashtag = countryData[city].name_pt
+//       ? string_to_slug(countryData[city].name_pt).replaceAll('-', '')
+//       : country;
+
+//     return {
+//       file_location: file.replace('file://', ''),
+//       city: lastCity,
+//       country: lastCountry,
+//       original_file: filePathSplit[filePathSplit.length - 1],
+//       date: item.querySelector('._3-94').textContent,
+//       latitude: [...item.querySelectorAll('div')].find(
+//         (el) => el.textContent == 'Latitude'
+//       )?.nextElementSibling?.textContent,
+//       longitude: [...item.querySelectorAll('div')].find(
+//         (el) => el.textContent == 'Longitude'
+//       )?.nextElementSibling?.textContent,
 //       description,
-//     locations: [],
-//     hashtags: [],
-//     hashtags_pt: [],
-//     city_location_id,
-//     cityData: cityData,
-//     countryData: countryDatas[lastCountry],
-//   };
-// }).reverse().map((item) => {
-//   if (!cityCount2[item.city]) {
-//     cityCount2[item.city] = 1;
-//   }
+//       description_pt: description,
+//       locations: [],
+//       hashtags: [city, country.replaceAll('-', '')],
+//       hashtags_pt: [cityPtHashtag, countryPtHashtag],
+//       city_location_id,
+//       cityData: cityData,
+//       countryData: countryDatas[lastCountry],
+//     };
+//   })
+//   .reverse()
+//   .map((item) => {
+//     if (!cityCount[item.city]) {
+//       cityCount[item.city] = 1;
+//     }
 
-//   item.order = cityCount2[item.city];
+//     item.order = cityCount[item.city];
 
-//   cityCount2[item.city]++;
+//     cityCount[item.city]++;
 
-//   return item;
-// });
+//     return item;
+//   });
 
 const fs = require('fs');
 const items = require('./the-stories.json');
