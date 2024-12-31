@@ -9,6 +9,14 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
   const search = params.get('search') || '';
   const height = params.get('height') || 'auto';
   const width = params.get('width') || '100%';
+  const addField = params.get('add_field') || '';
+  const fieldDefaultValue = params.get('field_default_value') || '';
+
+  let theMedia = JSON.parse(item);
+
+  if (addField) {
+    theMedia[addField] = fieldDefaultValue;
+  }
 
   const [isEditMode, setIsEditMode] = useState(
     autoOpenEdit || params.get('auto_open') === 'true'
@@ -17,7 +25,7 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
     forceEditTextMode || params.get('force_edit_text') === 'true'
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [media, setMedia] = useState(JSON.parse(item));
+  const [media, setMedia] = useState(theMedia);
 
   const onSave = () => {
     const { apps } = firebase;
@@ -49,6 +57,7 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
     setIsLoading(true);
 
     delete media.createdAt;
+    media.from_editor = true;
 
     db.doc(path)
       .update(media)
@@ -80,7 +89,15 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
           setData={setMedia}
           enableClipboard={false}
           collapse={1}
-          searchFilter="key"
+          searchFilter={({ key }, searchText) => {
+            if (!searchText) {
+              return true;
+            }
+
+            const split = searchText.split(',');
+
+            return split.includes(key);
+          }}
           searchText={search}
           defaultValue=""
           keySort={true}

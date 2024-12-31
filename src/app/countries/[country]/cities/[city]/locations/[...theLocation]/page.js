@@ -226,7 +226,7 @@ export default async function Country({
 
   let cache = null;
 
-  if (process.env.USER === 'alefesouza') {
+  if (editMode) {
     cache = { exists: false };
   } else {
     cache = await db.doc(cacheRef).get();

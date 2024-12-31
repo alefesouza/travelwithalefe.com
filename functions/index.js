@@ -89,6 +89,13 @@ exports.onMediaUpdated = onDocumentUpdated(
         .filter((h) => h);
     }
 
+    if (typeof newValue.hashtags_pt === 'string') {
+      update.hashtags_pt = newValue.hashtags_pt
+        .split('#')
+        .map((h) => h.trim())
+        .filter((h) => h);
+    }
+
     if (
       !newValue.location_slug_update &&
       newValue.locations &&
@@ -142,10 +149,22 @@ exports.onMediaUpdated = onDocumentUpdated(
           ].flat()
         ),
       ];
+      update.hashtags_pt = [
+        ...new Set(
+          [
+            newValue.hashtags,
+            locations.map((l) => l.slug.replaceAll('-', '')),
+          ].flat()
+        ),
+      ];
     }
 
     if (newValue.location_slug_update) {
       update.location_slug_update = FieldValue.delete();
+    }
+
+    if (newValue.from_editor) {
+      update.from_editor = FieldValue.delete();
     }
 
     if (!oldValue.location && newValue.location) {
@@ -178,6 +197,7 @@ exports.onMediaUpdated = onDocumentUpdated(
       update.location_data = [theNewLocation];
       update.locations = [slug];
       update.hashtags = [...newValue.hashtags, slug.replaceAll('-', '')];
+      update.hashtags_pt = [...newValue.hashtags_pt, slug.replaceAll('-', '')];
     }
 
     if (Object.keys(update).length === 0) {

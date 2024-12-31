@@ -38,7 +38,7 @@ export async function GET(req) {
 
     let cache = null;
 
-    if (process.env.USER === 'alefesouza') {
+    if (editMode) {
       cache = { exists: false };
     } else {
       cache = await db.doc(cacheRef).get();
@@ -113,7 +113,7 @@ export async function GET(req) {
 
     let cache = null;
 
-    if (process.env.USER === 'alefesouza') {
+    if (editMode) {
       cache = { exists: false };
     } else {
       cache = await db.doc(cacheRef).get();
