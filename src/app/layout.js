@@ -12,6 +12,7 @@ import getCookie from './utils/get-cookies';
 import Sidebar from './components/sidebar';
 import Link from 'next/link';
 import Autocomplete from './components/autocomplete';
+import useEditMode from './utils/use-edit-mode';
 
 export async function generateMetadata() {
   return defaultMetadata();
@@ -47,6 +48,10 @@ export default function RootLayout({ children }) {
 
   const ignoreAnalytics =
     getCookie('ignore_analytics') || host().includes('localhost');
+
+  const editMode = useEditMode({
+    edit_mode: headersList.get('x-searchparams').includes('edit_mode=true'),
+  });
 
   const sharedTags = (
     <>
@@ -410,6 +415,19 @@ export default function RootLayout({ children }) {
               __html: process.env.rawAppJsFile,
             }}
           />
+          {editMode.editMode && (
+            <>
+              <script
+                async
+                src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"
+              ></script>
+
+              <script
+                async
+                src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"
+              ></script>
+            </>
+          )}
         </body>
       )}
     </html>

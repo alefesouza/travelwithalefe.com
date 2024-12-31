@@ -9,7 +9,9 @@ export async function GET(req) {
 
   if (searchParams.get('ignore_analytics') === 'true') {
     const oneYear = 3600 * 1000 * 24 * 365;
-    cookies().set('__session', 'ignore_analytics=true', { maxAge: oneYear });
+    cookies().set('__session', 'ignore_analytics=true&edit_mode=true', {
+      maxAge: oneYear,
+    });
     redirect(host('/'));
   }
 
