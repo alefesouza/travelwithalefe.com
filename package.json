@@ -26,6 +26,7 @@
     "react-select": "^5.8.0",
     "react-wordcloud": "^1.2.7",
     "tinyduration": "^3.3.0",
+    "translate": "^3.0.1",
     "ua-parser-js": "^1.0.37",
     "workbox-window": "^7.0.0"
   },

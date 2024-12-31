@@ -1,60 +1,136 @@
-// fixedLat = [...$0.children].map((item) => ({ file: (item.querySelector('img')||item.querySelector('video')).src, date: item.querySelector('._3-94').textContent, latitude: [...item.querySelectorAll('div')].find(el => el.textContent == 'Latitude')?.nextElementSibling?.textContent, longitude: [...item.querySelectorAll('div')].find(el => el.textContent == 'Longitude')?.nextElementSibling?.textContent, description: item.querySelector('._2pim') && item.querySelector('._2pim').textContent }))
+// lastCountry = null;
+// lastCity = null;
 
-// let items = [];
+// cityCount2 = {};
 
-// document.querySelectorAll('img,video').forEach(m => {
-//     m.onclick = function(e) {
-//         e.preventDefault();
+// cityDatas = {
+//   'rio-de-janeiro': {
+//     name: 'Rio de Janeiro',
+//     slug: 'rio-de-janeiro',
+//     end: '2024-08-19',
+//     city_location_id: 14,
+//   },
+//   'tulum': {
+//     name: 'Tulum',
+//     slug: 'tulum',
+//     end: '2024-10-13',
+//     city_location_id: 2,
+//   },
+//   'havana': {
+//     name: 'Havana',
+//     slug: 'havana',
+//     end: '2024-10-18',
+//     city_location_id: 1,
+//   },
+//   'san-salvador': {
+//     name: 'San Salvador',
+//     slug: 'san-salvador',
+//     end: '2024-10-30',
+//     city_location_id: 1,
+//   },
+//   'antigua-guatemala': {
+//     name: 'Antigua Guatemala',
+//     slug: 'antigua-guatemala',
+//     end: '2024-10-24',
+//     city_location_id: 1,
+//   },
+//   'panacharel': {
+//     name: 'Panacharel',
+//     slug: 'panacharel',
+//     end: '2024-10-22',
+//     city_location_id: 2,
+//   },
+//   'guatemala-city': {
+//     name: 'Guatemala City',
+//     slug: 'guatemala-city',
+//     end: '2024-10-26',
+//     city_location_id: 3,
+//   },
+// }
 
-//         const hashtags = prompt('Hashtags');
-//         const location = prompt('Location');
-//         const description = prompt('Description');
-
-//         items.push({
-//             original_file: m.src,
-//             location,
-//             hashtags,
-//             description,
-//             city,
-//         })
-//     }
-// })
-
-// items = brussels.split('\n----\n').map((i) => {
-//   let [location, hashtags, newHashtags] = i.split('\n');
-//   const [thePlace, alternativeLocations] = location.split(' $ ');
-//   const theAlternativeLocations = alternativeLocations?.split(' € ');
-
-//   return { location: thePlace, alternative_names: theAlternativeLocations, hashtags, newHashtags };
-// }).reverse()
-
-// temp1.map((c, i) => ({...c, ...items[i]}))
-
-// const stories = require('./the-stories.json');
-// const fixed = require('./fixedLat.json');
-
-// const fs = require('fs');
-
-// stories.forEach((c) => {
-//   const lt = fixed.find((f) => f.file.includes(c.original_file.split('.')[0]));
-//   if (!lt) {
-//     return;
+// countryDatas = {
+//   'mexico': {
+//     name: 'Mexico',
+//     name_pt: 'México',
+//     iso: 'MX',
+//     slug: 'mexico',
+//   },
+//   'brazil': {
+//     name: 'Brazil',
+//     name_pt: 'Brasil',
+//     iso: 'BR',
+//     slug: 'brazil',
+//   },
+//   'cuba': {
+//     name: 'Cuba',
+//     iso: 'CU',
+//     slug: 'cuba',
+//   },
+//   'el-salvador': {
+//     name: 'El Salvador',
+//     iso: 'SV',
+//     slug: 'el-salvador',
+//   },
+//   'guatemala': {
+//     name: 'Guatemala',
+//     iso: 'GT',
+//     slug: 'guatemala',
 //   }
-//   c.latitude = lt.latitude;
-//   c.longitude = lt.longitude;
-//   c.date = lt.date;
-//   c.description = lt.description;
-//   const split = c.original_file.split('/');
-//   const file = split[split.length - 1];
+// };
 
-//   c.original_file = file;
-//   c.file = file;
+// [...$0.children].map((item) => {
+//   const { country, city } = item.dataset;
+
+//   if (country) {
+//     lastCountry = country;
+//     lastCity = city;
+//   }
+
+//   const file = (item.querySelector('img') || item.querySelector('video')).src;
+//   const filePathSplit = file.split('/');
+
+//   const description = item.querySelector('._2pim') && item.querySelector('._2pim').textContent;
+
+//   const cityData = {...cityDatas[lastCity]};
+//   const {city_location_id} = cityData;
+//   delete cityData.city_location_id;
+
+//   return {
+//     file_location: file.replace('file://', ''),
+//     city: lastCity,
+//     country: lastCountry,
+//     original_file: filePathSplit[filePathSplit.length - 1],
+//     date: item.querySelector('._3-94').textContent,
+//     latitude: [...item.querySelectorAll('div')].find(
+//       (el) => el.textContent == 'Latitude'
+//     )?.nextElementSibling?.textContent,
+//     longitude: [...item.querySelectorAll('div')].find(
+//       (el) => el.textContent == 'Longitude'
+//     )?.nextElementSibling?.textContent,
+//     description,
+//     description_pt:
+//       description,
+//     locations: [],
+//     hashtags: [],
+//     hashtags_pt: [],
+//     city_location_id,
+//     cityData: cityData,
+//     countryData: countryDatas[lastCountry],
+//   };
+// }).reverse().map((item) => {
+//   if (!cityCount2[item.city]) {
+//     cityCount2[item.city] = 1;
+//   }
+
+//   item.order = cityCount2[item.city];
+
+//   cityCount2[item.city]++;
+
+//   return item;
 // });
 
-// fs.writeFileSync('./test.json', JSON.stringify(stories, null, 4));
-
 const fs = require('fs');
-const items = require('./test.json');
+const items = require('./the-stories.json');
 const sizeOf = require('image-size');
 const sharp = require('sharp');
 const mt = require('media-thumbnail');
@@ -65,25 +141,6 @@ Date.prototype.addHours = function (h) {
   this.setTime(this.getTime() + h * 60 * 60 * 1000);
   return this;
 };
-
-function string_to_slug(str) {
-  str = str.replace(/^\s+|\s+$/g, ''); // trim
-  str = str.toLowerCase();
-
-  // remove accents, swap ñ for n, etc
-  var from = 'àáäâãèéëêìíïîòóöôõùúüûñç·/_,:;';
-  var to = 'aaaaaeeeeiiiiooooõuuuunc------';
-  for (var i = 0, l = from.length; i < l; i++) {
-    str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
-  }
-
-  str = str
-    .replace(/[^a-z0-9 -]/g, '') // remove invalid chars
-    .replace(/\s+/g, '-') // collapse whitespace and replace by -
-    .replace(/-+/g, '-'); // collapse dashes
-
-  return str;
-}
 
 const imageMagick = gm.subClass({ imageMagick: true });
 
@@ -136,22 +193,15 @@ const main = async () => {
     item.mode = 'portrait';
 
     const date = new Date(item.date);
-    console.log(item.date, date);
     item.date = date.toISOString().replace('T', ' ').substring(0, 19);
 
-    let file = './stories/' + item.country + '/' + item.city + '/' + item.file;
-
-    if (!fs.existsSync(file)) {
-      file = './stories/' + item.original_file;
-    }
-
-    item.file = file;
+    item.file = item.file_location;
 
     if (item.file.includes('.mp4') || !item.file.substring(2).includes('.')) {
       item.width = 720;
       item.height = 1280;
     } else {
-      const dimensions = sizeOf(file);
+      const dimensions = sizeOf(item.file);
 
       item.width = dimensions.width;
       item.height = dimensions.height;
@@ -170,14 +220,15 @@ const main = async () => {
         ? '.mp4'
         : '.jpg');
 
-    fs.copyFileSync(file, fileToSend);
+    fs.copyFileSync(item.file, fileToSend);
 
     if (item.file.includes('.mp4') || !item.file.substring(2).includes('.')) {
+      console.log(fileToSend);
       await mt.forVideo(fileToSend, fileToSend.replace('.mp4', '-thumb.png'), {
         width: 720,
       });
 
-      const duration = await getVideoDurationInSeconds(file);
+      const duration = await getVideoDurationInSeconds(item.file);
       item.duration = duration;
     }
 
@@ -256,82 +307,13 @@ const main = async () => {
       (item.file.includes('.mp4') || !item.file.substring(2).includes('.')
         ? '.mp4'
         : '.jpg');
+
+    delete item.file_location;
+
     console.log(item.file);
-    item.hashtags = [
-      ...(item?.hashtags?.split(' ') || []),
-      ...(item?.newHashtags?.split(` / `) || []),
-    ].join(' ');
-
-    if (item.location) {
-      const [name, namePt] = item.location.split(' / ');
-
-      item.location_data = [
-        {
-          name: name,
-          slug: string_to_slug(name),
-          latitude: item.latitude,
-          longitude: item.longitude,
-          country: item.country,
-          city: item.city,
-        },
-      ];
-
-      if (namePt) {
-        item.location_data.name_pt = namePt;
-      }
-
-      if (item.alternative_names) {
-        item.location_data.alternative_names = item.alternative_names;
-      }
-
-      item.locations = [item.location_data[0].slug];
-
-      delete item.latitude;
-      delete item.latitute;
-      delete item.longitude;
-      delete item.alternative_names;
-    }
   }
 
   fs.writeFileSync('./the-result.json', JSON.stringify(items, null, 4));
-  fs.writeFileSync(
-    './the-locations.json',
-    JSON.stringify(
-      items.filter((c) => c.location_data).flatMap((c) => c.location_data),
-      null,
-      4
-    )
-  );
 };
 
 main();
-
-// items.forEach((data, i) => {
-
-//   if (!data.hashtags) {
-//       return;
-//   }
-
-//   let en = null;
-//   let pt = null;
-
-//   if (data.newHashtags) {
-//       [en, pt] = data.newHashtags.split(' / ')
-//   }
-
-//   data.hashtags = data.hashtags.split(' ');
-
-//   data.hashtags = [data.city, data.country,data.locations ? data.locations[0].replaceAll('-', '') : null, ...data.hashtags].filter(c => c);
-
-// theBatch.update(doc(db, '/countries/' + data.country + '/medias/' + data.id), {
-// hashtags: data.hashtags.filter(c => c !== pt),
-// hashtags_pt: [...data.hashtags].filter(c => c !== en).map(c => {
-// const hash = allHashtags.find(d => d.name == c);
-// console.log(hash)
-// if (hash && hash.name_pt) {
-//   return hash.name_pt;
-// }
-// return c;
-// }),
-// }, {merge: true})
-// });

@@ -113,6 +113,44 @@ exports.onMediaUpdated = onDocumentUpdated(
       update.location_slug_update = FieldValue.delete();
     }
 
+    if (!oldValue.location && newValue.location) {
+      function string_to_slug(str) {
+        str = str.replace(/^\s+|\s+$/g, ''); // trim
+        str = str.toLowerCase();
+
+        // remove accents, swap ñ for n, etc
+        var from = 'àáäâãèéëêìíïîòóöôõùúüûñç·/_,:;';
+        var to = 'aaaaaeeeeiiiiooooõuuuunc------';
+        for (var i = 0, l = from.length; i < l; i++) {
+          str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+        }
+
+        str = str
+          .replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+          .replace(/\s+/g, '-') // collapse whitespace and replace by -
+          .replace(/-+/g, '-'); // collapse dashes
+
+        return str;
+      }
+
+      const slug = string_to_slug(newValue.location);
+
+      const theNewLocation = {
+        slug,
+        city: newValue.city,
+        country: newValue.country,
+        name: newValue.location,
+        latitude: newValue.latitude || null,
+        longitude: newValue.longitude || null,
+      };
+
+      db.doc(
+        `/countries/${newValue.country}/cities/${newValue.city}/locations/${slug}`
+      ).set(theNewLocation);
+
+      update.location_data = [theNewLocation];
+    }
+
     return event.data.after.ref.update(update);
   }
 );

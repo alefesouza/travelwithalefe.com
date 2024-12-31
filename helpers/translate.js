@@ -1,5 +1,5 @@
 const { translate } = require('@vitalets/google-translate-api');
-const items = require('./items.json');
+const items = require('./the-result.json');
 const fs = require('fs');
 
 items
@@ -11,5 +11,5 @@ items
     console.log(text);
     item.description = text;
 
-    fs.writeFileSync('helpers/items.json', JSON.stringify(items));
+    fs.writeFileSync('helpers/the-result.json', JSON.stringify(items, null, 4));
   });
