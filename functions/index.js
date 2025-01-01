@@ -152,7 +152,7 @@ exports.onMediaUpdated = onDocumentUpdated(
       update.hashtags_pt = [
         ...new Set(
           [
-            newValue.hashtags,
+            newValue.hashtags_pt,
             locations.map((l) => l.slug.replaceAll('-', '')),
           ].flat()
         ),
@@ -163,21 +163,16 @@ exports.onMediaUpdated = onDocumentUpdated(
       update.location_slug_update = FieldValue.delete();
     }
 
-    if (newValue.from_editor) {
-      update.from_editor = FieldValue.delete();
-    }
-
-    if (!oldValue.location && newValue.location) {
-      const slug = string_to_slug(newValue.location);
+    if ((!oldValue.location || newValue.from_editor) && newValue.location) {
+      const [locationEn, locationPt] = newValue.location.split(' $ ');
+      const slug = string_to_slug(locationEn);
       const key = getTotalKey(newValue.type);
 
       const theNewLocation = {
         slug,
         city: newValue.city,
         country: newValue.country,
-        name: newValue.location,
-        latitude: newValue.latitude || null,
-        longitude: newValue.longitude || null,
+        name: locationEn,
         totals: {
           posts: 0,
           stories: 0,
@@ -189,15 +184,33 @@ exports.onMediaUpdated = onDocumentUpdated(
         },
       };
 
+      if (locationPt) {
+        theNewLocation.name_pt = locationPt;
+      }
+
+      if (newValue.longitude && newValue.latitude) {
+        theNewLocation.longitude = newValue.longitude;
+        theNewLocation.latitude = newValue.latitude;
+      }
+
       const db = getFirestore();
       db.doc(
         `/countries/${newValue.country}/cities/${newValue.city}/locations/${slug}`
-      ).set(theNewLocation);
+      ).set(theNewLocation, { merge: true });
 
       update.location_data = [theNewLocation];
       update.locations = [slug];
       update.hashtags = [...newValue.hashtags, slug.replaceAll('-', '')];
-      update.hashtags_pt = [...newValue.hashtags_pt, slug.replaceAll('-', '')];
+      update.hashtags_pt = [
+        ...newValue.hashtags_pt,
+        locationPt
+          ? string_to_slug(locationPt).replaceAll('-', '')
+          : slug.replaceAll('-', ''),
+      ];
+    }
+
+    if (newValue.from_editor) {
+      update.from_editor = FieldValue.delete();
     }
 
     if (Object.keys(update).length === 0) {

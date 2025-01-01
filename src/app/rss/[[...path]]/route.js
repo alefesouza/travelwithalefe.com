@@ -9,6 +9,7 @@ import getTypePath from '@/app/utils/get-type-path';
 import logAccess from '@/app/utils/log-access';
 import { redirect } from 'next/navigation';
 import { customInitApp } from '@/app/firebase';
+import useEditMode from '@/app/utils/use-edit-mode';
 
 customInitApp();
 
@@ -17,6 +18,8 @@ export async function GET(req) {
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
   let { pathname, searchParams } = new URL(req.url);
+
+  const editMode = useEditMode(searchParams);
 
   let type = searchParams.get('type');
 

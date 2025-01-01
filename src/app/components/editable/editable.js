@@ -14,7 +14,7 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
 
   let theMedia = JSON.parse(item);
 
-  if (addField) {
+  if (addField && !theMedia[addField]) {
     theMedia[addField] = fieldDefaultValue;
   }
 
@@ -25,6 +25,7 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
     forceEditTextMode || params.get('force_edit_text') === 'true'
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [media, setMedia] = useState(theMedia);
 
   const onSave = () => {
@@ -64,11 +65,19 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
       .then((doc) => {
         console.log(doc);
         setIsLoading(false);
+        setIsSaved(true);
       })
       .catch((error) => {
         console.error(error);
         setIsLoading(false);
       });
+  };
+
+  const onCopy = () => {
+    setMedia({
+      ...media,
+      ...window.copy,
+    });
   };
 
   if (!isEditMode) {
@@ -91,6 +100,10 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
           collapse={1}
           searchFilter={({ key }, searchText) => {
             if (!searchText) {
+              return true;
+            }
+
+            if (!isNaN(parseFloat(key))) {
               return true;
             }
 
@@ -123,8 +136,18 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
             </button>
           )}
 
-          <button onClick={onSave} disabled={isLoading}>
-            Save
+          <button
+            onClick={onSave}
+            disabled={isLoading}
+            style={
+              isSaved ? { backgroundColor: 'green', color: '#ffffff' } : {}
+            }
+          >
+            {isSaved ? 'Saved' : 'Save'}
+          </button>
+
+          <button onClick={onCopy} disabled={isLoading}>
+            Copy
           </button>
 
           <button onClick={() => setIsEditMode(false)} disabled={isLoading}>
