@@ -8,6 +8,7 @@ import Link from 'next/link';
 import ShareButton from '../components/share-button';
 import defaultMetadata from '../utils/default-metadata';
 import AdSense from '../components/adsense';
+import useEditMode from '../utils/use-edit-mode';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -19,9 +20,10 @@ export async function generateMetadata() {
   return defaultMetadata(title, description);
 }
 
-export default async function MapPage() {
+export default async function MapPage({ searchParams }) {
   const i18n = useI18n();
   const host = useHost();
+  const editMode = useEditMode(searchParams);
 
   const cacheRef = '/caches/static_pages/static_pages/locations';
 
