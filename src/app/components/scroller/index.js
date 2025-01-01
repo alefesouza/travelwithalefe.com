@@ -415,7 +415,12 @@ export default function Scroller({
                                     '/countries/' +
                                     p.country +
                                     '/cities/' +
-                                    p.city +
+                                    (p.cityData.travel_number
+                                      ? p.city.replace(
+                                          '-' + p.cityData.travel_number,
+                                          ''
+                                        )
+                                      : p.city) +
                                     '/locations/' +
                                     location.slug
                                   }

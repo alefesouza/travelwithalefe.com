@@ -702,7 +702,12 @@ export default async function Country({ params: { slug }, searchParams }) {
     .locations.filter((l) => l.country === country);
 
   if (city) {
-    locations = locations.filter((l) => l.city === city);
+    const theCity = cityData[city];
+    if (theCity.main_city) {
+      locations = locations.filter((l) => l.city === theCity.main_city);
+    } else {
+      locations = locations.filter((l) => l.city === city);
+    }
   }
 
   const mainLocations = locations

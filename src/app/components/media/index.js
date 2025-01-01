@@ -247,7 +247,12 @@ export default function Media({
                           '/countries/' +
                           media.country +
                           '/cities/' +
-                          media.city +
+                          (media.cityData.travel_number
+                            ? media.city.replace(
+                                '-' + media.cityData.travel_number,
+                                ''
+                              )
+                            : media.city) +
                           '/locations/' +
                           location.slug
                         }

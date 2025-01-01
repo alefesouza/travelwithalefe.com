@@ -67,6 +67,18 @@ async function getCountry(country, city) {
   return countryData;
 }
 
+function getPossibleCities(theCity) {
+  let possibleCities = [theCity.slug];
+
+  if (theCity.travel_number) {
+    for (let i = 2; i <= theCity.travel_number; i++) {
+      possibleCities.push(theCity.slug + '-' + i);
+    }
+  }
+
+  return possibleCities;
+}
+
 export async function generateMetadata({
   params: { country, city, theLocation },
   searchParams,
@@ -151,7 +163,7 @@ export async function generateMetadata({
   let coverSnapshot = await db
     .collectionGroup('medias')
     .where('locations', 'array-contains', location)
-    .where('city', '==', city)
+    .where('city', 'in', getPossibleCities(theCity))
     .orderBy('date', sort)
     .limit(isWebStories ? 1 : 2)
     .get();
@@ -254,7 +266,7 @@ export default async function Country({
     const photosSnapshot = await db
       .collectionGroup('medias')
       .where('locations', 'array-contains', location)
-      .where('city', '==', city)
+      .where('city', 'in', getPossibleCities(theCity))
       .orderBy('order', sort)
       .get();
 

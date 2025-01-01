@@ -1,4 +1,8 @@
 medias.forEach((media) => {
+  if (!media.hashtags) {
+    return;
+  }
+
   media.hashtags = [
     ...media.hashtags,
     media.city.replaceAll('-', ''),
@@ -55,10 +59,25 @@ medias.forEach((media) => {
     media.hashtags_pt = [...new Set(media.hashtags_pt)];
   }
 
-  console.log(media);
-  theBatch.set(
-    doc(db, '/countries/' + media.country + '/medias/' + media.id),
-    media
+  console.log(media.id, media);
+  theBatch.update(
+    doc(
+      db,
+      '/countries/' +
+        media.country +
+        '/cities/' +
+        media.city +
+        '/medias/' +
+        media.id
+    ),
+    {
+      hashtags: media.hashtags,
+      hashtags_pt: media.hashtags_pt,
+      old_hashtags: deleteField(),
+      old_hashtags2: deleteField(),
+      old_hashtags_pt: deleteField(),
+      old_hashtags_pt2: deleteField(),
+    }
   );
 });
 

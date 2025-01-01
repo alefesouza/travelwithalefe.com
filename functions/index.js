@@ -15,10 +15,14 @@ exports.onMediaCreated = onDocumentCreated(
 
     // Set hashtags to an array
     if (typeof newValue.hashtags === 'string') {
-      update.hashtags = newValue.hashtags
-        .split('#')
-        .map((h) => h.trim())
-        .filter((h) => h);
+      update.hashtags = [
+        ...new Set(
+          newValue.hashtags
+            .split('#')
+            .map((h) => h.trim())
+            .filter((h) => h)
+        ),
+      ];
     }
 
     const split = event.data.ref.path.split('/');
@@ -83,17 +87,25 @@ exports.onMediaUpdated = onDocumentUpdated(
 
     // Set hashtags to an array
     if (typeof newValue.hashtags === 'string') {
-      update.hashtags = newValue.hashtags
-        .split('#')
-        .map((h) => h.trim())
-        .filter((h) => h);
+      update.hashtags = [
+        ...new Set(
+          newValue.hashtags
+            .split('#')
+            .map((h) => h.trim())
+            .filter((h) => h)
+        ),
+      ];
     }
 
     if (typeof newValue.hashtags_pt === 'string') {
-      update.hashtags_pt = newValue.hashtags_pt
-        .split('#')
-        .map((h) => h.trim())
-        .filter((h) => h);
+      update.hashtags_pt = [
+        ...new Set(
+          newValue.hashtags_pt
+            .split('#')
+            .map((h) => h.trim())
+            .filter((h) => h)
+        ),
+      ];
     }
 
     if (
@@ -200,12 +212,16 @@ exports.onMediaUpdated = onDocumentUpdated(
 
       update.location_data = [theNewLocation];
       update.locations = [slug];
-      update.hashtags = [...newValue.hashtags, slug.replaceAll('-', '')];
+      update.hashtags = [
+        ...new Set([...newValue.hashtags, slug.replaceAll('-', '')]),
+      ];
       update.hashtags_pt = [
-        ...newValue.hashtags_pt,
-        locationPt
-          ? string_to_slug(locationPt).replaceAll('-', '')
-          : slug.replaceAll('-', ''),
+        ...new Set([
+          ...newValue.hashtags_pt,
+          locationPt
+            ? string_to_slug(locationPt).replaceAll('-', '')
+            : slug.replaceAll('-', ''),
+        ]),
       ];
     }
 
@@ -383,6 +399,14 @@ exports.onHashtagUpdated = onDocumentUpdated(
 
         if (hashtags_pt[hashtagPtPtIndex]) {
           hashtags_pt[hashtagPtPtIndex] = newValue.name_pt;
+        }
+
+        if (
+          !hashtags_pt[hashtagPtIndex] &&
+          !hashtags_pt[hashtagPtPtIndex] &&
+          newValue.name_pt
+        ) {
+          hashtags_pt.push(newValue.name_pt);
         }
 
         const mediaUpdate = {

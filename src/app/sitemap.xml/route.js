@@ -29,6 +29,7 @@ export async function GET() {
     .bucket('viajarcomale.appspot.com')
     .file(reference)
     .exists();
+  // const cacheExists = [false];
 
   let obj = {};
 
