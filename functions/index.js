@@ -2,6 +2,7 @@ const {
   onDocumentCreated,
   onDocumentUpdated,
 } = require('firebase-functions/v2/firestore');
+const { getStorage } = require('firebase-admin/storage');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const admin = require('firebase-admin');
 
@@ -225,15 +226,152 @@ exports.onMediaUpdated = onDocumentUpdated(
       ];
     }
 
+    let promises = [];
+
+    if (
+      JSON.stringify(oldValue.hashtags) !== JSON.stringify(newValue.hashtags) ||
+      (newValue.locations &&
+        JSON.stringify(oldValue.locations) !==
+          JSON.stringify(newValue.locations)) ||
+      ((!oldValue.location || newValue.from_editor) && newValue.location)
+    ) {
+      const db = getFirestore();
+      const batch = db.batch();
+      const storage = getStorage();
+
+      const sites = ['.com', '.com.br'];
+      const sorts = ['desc', 'asc'];
+      const bucket = storage.bucket('viajarcomale.appspot.com');
+
+      [...new Set([...newValue.hashtags, ...newValue.hashtags_pt])].forEach(
+        (hashtag) => {
+          sorts.forEach((sort) => {
+            batch.delete(
+              db.doc(`caches/feeds/hashtags-cache/${hashtag}/sort/${sort}`)
+            );
+            batch.delete(
+              db.doc(`caches/hashtags/hashtags-cache/${hashtag}/sort/${sort}`)
+            );
+          });
+
+          try {
+            sites.forEach((site) => {
+              sorts.forEach((sort) => {
+                const file = bucket.file(
+                  `webstories/${site}-webstories-hashtags-${encodeURIComponent(
+                    hashtag
+                  )}-${sort}.html`
+                );
+
+                promises.push(
+                  file.exists().then((exists) => {
+                    if (exists[0]) {
+                      return file.delete();
+                    }
+                  })
+                );
+              });
+            });
+          } catch (e) {
+            console.log(e);
+          }
+        }
+      );
+
+      if (newValue.locations) {
+        newValue.locations.forEach((location) => {
+          sorts.forEach((sort) => {
+            batch.delete(
+              db.doc(
+                `caches/locations/locations-cache/${newValue.city}-${location}/sort/${sort}`
+              )
+            );
+          });
+
+          try {
+            sites.forEach((site) => {
+              sorts.forEach((sort) => {
+                const file = bucket.file(
+                  `webstories/${site}-webstories-countries-${newValue.country}-cities-${newValue.city}-locations-${location}-${sort}.html`
+                );
+
+                promises.push(
+                  file.exists().then((exists) => {
+                    if (exists[0]) {
+                      return file.delete();
+                    }
+                  })
+                );
+              });
+            });
+          } catch (e) {
+            console.log(e);
+          }
+        });
+      }
+
+      if (newValue.type === 'story') {
+        sorts.forEach((sort) => {
+          batch.delete(
+            db.doc(`caches/stories/stories-cache/${newValue.city}/sort/${sort}`)
+          );
+        });
+
+        try {
+          sites.forEach((site) => {
+            sorts.forEach((sort) => {
+              const file = bucket.file(
+                `webstories/${site}-webstories-countries-${newValue.country}-cities-${newValue.city}-stories-${sort}.html`
+              );
+
+              promises.push(
+                file.exists().then((exists) => {
+                  if (exists[0]) {
+                    return file.delete();
+                  }
+                })
+              );
+            });
+          });
+        } catch (e) {
+          console.log(e);
+        }
+      } else {
+        sorts.forEach((sort) => {
+          [...Array(10).keys()].forEach((index) => {
+            batch.delete(
+              db.doc(
+                `caches/countries/countries-cache/${
+                  newValue.country
+                }/country/page/${index + 1}/sort/${sort}`
+              )
+            );
+
+            batch.delete(
+              db.doc(
+                `caches/countries/countries-cache/${newValue.country}/${
+                  newValue.city
+                }/page/${index + 1}/sort/${sort}`
+              )
+            );
+          });
+        });
+      }
+
+      promises.push(batch.commit());
+    }
+
     if (newValue.from_editor) {
       update.from_editor = FieldValue.delete();
     }
 
     if (Object.keys(update).length === 0) {
-      return;
+      return Promise.all(promises);
     }
 
-    return event.data.after.ref.update(update);
+    promises.push(event.data.after.ref.update(update));
+
+    return Promise.all(promises);
   }
 );
 
