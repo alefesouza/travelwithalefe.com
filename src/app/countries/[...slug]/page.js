@@ -351,6 +351,7 @@ export default async function Country({ params: { slug }, searchParams }) {
 
     if (city) {
       if (isRandom && totalPhotos > 0) {
+        console.log('alefe1');
         instagramPhotosSnapshot = await db
           .collection('countries')
           .doc(country)
@@ -361,6 +362,7 @@ export default async function Country({ params: { slug }, searchParams }) {
           .where('city_index', 'in', randomArray)
           .get();
       } else {
+        console.log('alefe2', city);
         instagramPhotosSnapshot = await db
           .collection('countries')
           .doc(country)
@@ -393,6 +395,7 @@ export default async function Country({ params: { slug }, searchParams }) {
       }
     } else {
       if (isRandom && totalPhotos > 0) {
+        console.log('alefe3');
         instagramPhotosSnapshot = await db
           .collectionGroup('medias')
           .where('country', '==', country)
@@ -400,6 +403,7 @@ export default async function Country({ params: { slug }, searchParams }) {
           .where('country_index', 'in', randomArray)
           .get();
       } else {
+        console.log('alefe4', country, sort);
         instagramPhotosSnapshot = await db
           .collectionGroup('medias')
           .where('country', '==', country)
@@ -425,10 +429,12 @@ export default async function Country({ params: { slug }, searchParams }) {
 
     if (!isRandom) {
       if (sort === 'asc') {
+        console.log('alefe5');
         instagramPhotosSnapshot =
           instagramPhotosSnapshot.startAt(paginationStart);
         mapsPhotosSnapshot = mapsPhotosSnapshot.startAt(paginationMapsStart);
       } else {
+        console.log('alefe6', paginationStart);
         instagramPhotosSnapshot =
           instagramPhotosSnapshot.startAfter(paginationStart);
         mapsPhotosSnapshot = mapsPhotosSnapshot.startAfter(paginationMapsStart);
@@ -469,6 +475,7 @@ export default async function Country({ params: { slug }, searchParams }) {
 
     if (!cache.exists || isRandom) {
       if (totalPhotos > 0) {
+        console.log('alefe7');
         instagramPhotosSnapshot.forEach((photo) => {
           const data = photo.data();
           data.path = photo.ref.path;

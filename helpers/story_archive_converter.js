@@ -97,7 +97,7 @@
 //   return str;
 // }
 
-// [...$0.children]
+// [...document.querySelector('[role=main]').children]
 //   .map((item) => {
 //     const { country, city } = item.dataset;
 
