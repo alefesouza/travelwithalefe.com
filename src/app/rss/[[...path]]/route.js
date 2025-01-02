@@ -201,7 +201,7 @@ export async function GET(req) {
         gallery[itemWithHashtag] = item;
       }
 
-      if (finalHashtag.rss_limit === 2000) {
+      if (finalHashtag && finalHashtag.rss_limit === 2000) {
         expandedList = [...expandedList, ...gallery];
       } else {
         if (item.rss && item.rss.includes(finalHashtag.name)) {
