@@ -54,7 +54,7 @@ const bluesky = {
 
           const {
             data: { blob: image },
-          } = await agent.uploadBlob(chunks, { encoding: 'image/jpg' });
+          } = await agent.uploadBlob(chunks, { encoding: 'image/jpeg' });
 
           resolve(image);
         });
@@ -82,15 +82,15 @@ const bluesky = {
             alt: isBR ? item.description_pt : item.description,
             aspectRatio: {
               // a hint to clients
-              width: item.width,
-              height: item.height,
+              width: 500,
+              height: Number((item.height / item.width) * 500),
             },
           })),
         },
       }
     );
 
-    console.log('bluesky', res3);
+    console.info('bluesky', res3);
 
     const blueskyId = path.basename(res3.uri);
 
@@ -129,7 +129,7 @@ const mastodon = {
       mediaIds: attachments,
     });
 
-    console.log('mastodon', status);
+    console.info('mastodon', status);
 
     return status.id;
   },
@@ -166,7 +166,7 @@ const twitter = {
       media: { media_ids: mediaIds },
     });
 
-    console.log('twitter', result);
+    console.info('twitter', result);
 
     return result.data.id;
   },

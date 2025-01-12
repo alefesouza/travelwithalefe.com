@@ -37,6 +37,10 @@ async function createPost() {
 
   const item = items[0];
 
+  if (!item) {
+    return;
+  }
+
   const promises = [];
 
   const files = [
@@ -52,7 +56,7 @@ async function createPost() {
         const chunks = [];
 
         bucket
-          .file(file.substring(1))
+          .file('resize/500' + file)
           .createReadStream() //stream is created
           .on('data', (data) => {
             chunks.push(data);
