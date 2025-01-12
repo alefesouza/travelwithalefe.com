@@ -13,8 +13,12 @@
   },
   "main": "index.js",
   "dependencies": {
+    "@atproto/api": "^0.13.26",
     "firebase-admin": "^11.8.0",
-    "firebase-functions": "^4.3.1"
+    "firebase-functions": "^4.3.1",
+    "masto": "^6.10.2",
+    "request": "^2.88.2",
+    "twitter-api-v2": "^1.19.0"
   },
   "devDependencies": {
     "firebase-functions-test": "^3.1.0"
