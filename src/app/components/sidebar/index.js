@@ -13,6 +13,7 @@ import Autocomplete from '@/app/components/autocomplete';
 import NavbarLinks from '@/app/components/navbar-links';
 import { SITE_NAME } from '@/app/utils/constants';
 import AdSense from '@/app/components/adsense';
+import socialLinks from '@/app/utils/social-links';
 
 export default async function Sidebar({ isSubPage }) {
   const host = useHost();
@@ -95,7 +96,40 @@ export default async function Sidebar({ isSubPage }) {
           ))}
         </div>
         <div className="list-group">
-          {links.map((l) => (
+          {links.slice(0, 5).map((l) => (
+            <HomeButton
+              key={l.text}
+              text={i18n(l.text)}
+              url={isBR && l.url_pt ? l.url_pt : l.url}
+              image={l.image ? host(l.image) : null}
+              subpage={l.subpage}
+            />
+          ))}
+          <div style={{ display: 'flex', gap: 16 }}>
+            {socialLinks.slice(0, 2).map((l) => (
+              <HomeButton
+                key={l.text}
+                text={i18n(l.text)}
+                url={isBR && l.url_pt ? l.url_pt : l.url}
+                image={l.image ? host(l.image) : null}
+                subpage={l.subpage}
+                style={{ width: '50%' }}
+              />
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: 16 }}>
+            {socialLinks.slice(2, 4).map((l) => (
+              <HomeButton
+                key={l.text}
+                text={i18n(l.text)}
+                url={isBR && l.url_pt ? l.url_pt : l.url}
+                image={l.image ? host(l.image) : null}
+                subpage={l.subpage}
+                style={{ width: '50%' }}
+              />
+            ))}
+          </div>
+          {links.slice(5, 10).map((l) => (
             <HomeButton
               key={l.text}
               text={i18n(l.text)}
