@@ -107,6 +107,14 @@ export default function RootLayout({ children }) {
       <meta name="twitter:site:id" content="1693645649789480960" />
       <meta name="twitter:creator" content="@alefesouza" />
       <meta name="twitter:creator:id" content="84677172" />
+      <meta
+        name="fediverse:creator"
+        content={
+          isBR
+            ? '@viajarcomale@mastodon.social'
+            : '@travelwithalefe@mastodon.social'
+        }
+      />
 
       {isBR ? (
         <meta
