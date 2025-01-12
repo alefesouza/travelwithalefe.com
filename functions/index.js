@@ -7,6 +7,7 @@ const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 const { createPost } = require('./social-sharing');
+const { createTweet } = require('./twitter-sharing');
 
 admin.initializeApp();
 
@@ -562,4 +563,12 @@ exports.onHashtagUpdated = onDocumentUpdated(
   }
 );
 
-exports.createPostEveryThirtyMinutes = onSchedule('*/30 * * * *', createPost);
+exports.createPostEveryThirtyMinutes = onSchedule(
+  '*/30 11-23 * * *',
+  createPost
+);
+
+exports.createTweetEveryThirtyMinutes = onSchedule(
+  '*/30 11-23 * * *',
+  createTweet
+);

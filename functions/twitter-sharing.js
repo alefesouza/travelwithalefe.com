@@ -1,6 +1,6 @@
 const { getStorage } = require('firebase-admin/storage');
 const { getFirestore } = require('firebase-admin/firestore');
-const { bluesky, mastodon } = require('./social');
+const { twitter } = require('./social');
 
 // const { initializeApp, cert } = require('firebase-admin/app');
 
@@ -10,7 +10,7 @@ const { bluesky, mastodon } = require('./social');
 //   credential: cert(serviceAccount),
 // });
 
-async function createPost() {
+async function createTweet() {
   const firestore = getFirestore();
   const storage = getStorage();
   const bucket = storage.bucket('files.viajarcomale.com');
@@ -26,7 +26,7 @@ async function createPost() {
   compilationsSnaptshot.forEach((doc) => {
     const data = doc.data();
 
-    if (data.bluesky_id_pt && data.mastodon_id_pt) {
+    if (data.twitter_id_pt) {
       return;
     }
 
@@ -112,10 +112,10 @@ async function createPost() {
     }
   }
 
-  if (!item.bluesky_id || !item.bluesky_id_pt) {
+  if (!item.twitter_id || !item.twitter_id_pt) {
     try {
-      const blueskyId = await bluesky.post(
-        !!item.bluesky_id,
+      const twitterId = await twitter.post(
+        !!item.twitter_id,
         item,
         description,
         descriptionPt,
@@ -123,32 +123,16 @@ async function createPost() {
       );
 
       firestore.doc(item.path).update({
-        [item.bluesky_id ? 'bluesky_id_pt' : 'bluesky_id']: blueskyId,
+        [item.twitter_id ? 'twitter_id_pt' : 'twitter_id']: twitterId,
       });
     } catch (e) {
-      console.error('bluesky error', e);
-    }
-  }
-
-  if (!item.mastodon_id || !item.mastodon_id_pt) {
-    try {
-      const mastodonId = await mastodon.post(
-        !!item.mastodon_id,
-        item,
-        description,
-        descriptionPt,
-        allChunks
-      );
-
-      firestore.doc(item.path).update({
-        [item.mastodon_id ? 'mastodon_id_pt' : 'mastodon_id']: mastodonId,
-      });
-    } catch (e) {
-      console.error('mastodon error', e);
+      console.error('twitter error', e);
     }
   }
 }
 
+// createTweet();
+
 module.exports = {
-  createPost,
+  createTweet,
 };
