@@ -46,7 +46,7 @@ async function createPost() {
   const files = [
     item.file,
     ...item.gallery
-      .filter((item) => !item.file_type.includes('.mp4'))
+      .filter((item) => !item.file.includes('.mp4'))
       .map((item) => item.file),
   ].slice(0, 4);
 
