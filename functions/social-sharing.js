@@ -1,13 +1,13 @@
 const { getStorage } = require('firebase-admin/storage');
 const { getFirestore } = require('firebase-admin/firestore');
-const { initializeApp, cert } = require('firebase-admin/app');
+// const { initializeApp, cert } = require('firebase-admin/app');
 
-const serviceAccount = require('../viajarcomale-firebase-adminsdk-u7w0a-30def9db38.json');
+// const serviceAccount = require('../viajarcomale-firebase-adminsdk-u7w0a-30def9db38.json');
 const { bluesky, mastodon, twitter } = require('./social');
 
-initializeApp({
-  credential: cert(serviceAccount),
-});
+// initializeApp({
+//   credential: cert(serviceAccount),
+// });
 
 async function createPost() {
   const firestore = getFirestore();
@@ -150,4 +150,6 @@ async function createPost() {
   }
 }
 
-createPost();
+module.exports = {
+  createPost,
+};

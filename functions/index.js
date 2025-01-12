@@ -4,7 +4,9 @@ const {
 } = require('firebase-functions/v2/firestore');
 const { getStorage } = require('firebase-admin/storage');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
+const { createPost } = require('./social-sharing');
 
 admin.initializeApp();
 
@@ -559,3 +561,5 @@ exports.onHashtagUpdated = onDocumentUpdated(
     return batch.commit();
   }
 );
+
+exports.createPostEveryThirtyMinutes = onSchedule('*/30 * * * *', createPost);
