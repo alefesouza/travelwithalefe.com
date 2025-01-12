@@ -1,9 +1,10 @@
 const { getStorage } = require('firebase-admin/storage');
 const { getFirestore } = require('firebase-admin/firestore');
+const { bluesky, mastodon, twitter } = require('./social');
+
 // const { initializeApp, cert } = require('firebase-admin/app');
 
 // const serviceAccount = require('../viajarcomale-firebase-adminsdk-u7w0a-30def9db38.json');
-const { bluesky, mastodon, twitter } = require('./social');
 
 // initializeApp({
 //   credential: cert(serviceAccount),
@@ -112,47 +113,61 @@ async function createPost() {
   }
 
   if (!item.bluesky_id || !item.bluesky_id_pt) {
-    const blueskyId = await bluesky.post(
-      !!item.bluesky_id,
-      item,
-      description,
-      descriptionPt,
-      allChunks
-    );
+    try {
+      const blueskyId = await bluesky.post(
+        !!item.bluesky_id,
+        item,
+        description,
+        descriptionPt,
+        allChunks
+      );
 
-    firestore.doc(item.path).update({
-      [item.bluesky_id ? 'bluesky_id_pt' : 'bluesky_id']: blueskyId,
-    });
+      firestore.doc(item.path).update({
+        [item.bluesky_id ? 'bluesky_id_pt' : 'bluesky_id']: blueskyId,
+      });
+    } catch (e) {
+      console.error('bluesky error', e);
+    }
   }
 
   if (!item.mastodon_id || !item.mastodon_id_pt) {
-    const mastodonId = await mastodon.post(
-      !!item.mastodon_id,
-      item,
-      description,
-      descriptionPt,
-      allChunks
-    );
+    try {
+      const mastodonId = await mastodon.post(
+        !!item.mastodon_id,
+        item,
+        description,
+        descriptionPt,
+        allChunks
+      );
 
-    firestore.doc(item.path).update({
-      [item.mastodon_id ? 'mastodon_id_pt' : 'mastodon_id']: mastodonId,
-    });
+      firestore.doc(item.path).update({
+        [item.mastodon_id ? 'mastodon_id_pt' : 'mastodon_id']: mastodonId,
+      });
+    } catch (e) {
+      console.error('mastodon error', e);
+    }
   }
 
   if (!item.twitter_id || !item.twitter_id_pt) {
-    const twitterId = await twitter.post(
-      !!item.twitter_id,
-      item,
-      description,
-      descriptionPt,
-      allChunks
-    );
+    try {
+      const twitterId = await twitter.post(
+        !!item.twitter_id,
+        item,
+        description,
+        descriptionPt,
+        allChunks
+      );
 
-    firestore.doc(item.path).update({
-      [item.twitter_id ? 'twitter_id_pt' : 'twitter_id']: twitterId,
-    });
+      firestore.doc(item.path).update({
+        [item.twitter_id ? 'twitter_id_pt' : 'twitter_id']: twitterId,
+      });
+    } catch (e) {
+      console.error('twitter error', e);
+    }
   }
 }
+
+// createPost();
 
 module.exports = {
   createPost,
