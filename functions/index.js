@@ -566,3 +566,7 @@ exports.createPostEveryThirtyMinutes = onSchedule(
   '*/30 11-23 * * *',
   createPost
 );
+exports.createPixelfedPostEveryThirtyMinutes = onSchedule(
+  '*/30 11-23 * * *',
+  createPost
+);

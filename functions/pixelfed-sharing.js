@@ -1,6 +1,6 @@
 const { getStorage } = require('firebase-admin/storage');
-const { getFirestore } = require('firebase-admin/firestore');
-const { bluesky, fediverse, twitter } = require('./social');
+const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { fediverse } = require('./social');
 
 // const { initializeApp, cert } = require('firebase-admin/app');
 
@@ -26,10 +26,6 @@ async function createPost() {
   compilationsSnapshot.forEach((doc) => {
     const data = doc.data();
 
-    if (data.bluesky_id_pt && data.mastodon_id_pt && data.twitter_id_pt) {
-      return;
-    }
-
     items.push({
       ...data,
       path: doc.ref.path,
@@ -49,7 +45,7 @@ async function createPost() {
     ...item.gallery
       .filter((item) => !item.file.includes('.mp4'))
       .map((item) => item.file),
-  ].slice(0, 4);
+  ].slice(0, 10);
 
   for (const file of files) {
     promises.push(
@@ -120,57 +116,22 @@ async function createPost() {
     }
   }
 
-  if (!item.bluesky_id || !item.bluesky_id_pt) {
+  if (!item.pixelfed_id || !item.pixelfed_id_pt) {
     try {
-      const blueskyId = await bluesky.post(
-        !!item.bluesky_id,
+      const pixelfedId = await fediverse.post(
+        !!item.pixelfed_id,
         item,
         description,
         descriptionPt,
-        allChunks
+        allChunks,
+        false
       );
 
       firestore.doc(item.path).update({
-        [item.bluesky_id ? 'bluesky_id_pt' : 'bluesky_id']: blueskyId,
+        [item.pixelfed_id ? 'pixelfed_id_pt' : 'pixelfed_id']: pixelfedId,
       });
     } catch (e) {
-      console.error('bluesky error', e);
-    }
-  }
-
-  if (!item.mastodon_id || !item.mastodon_id_pt) {
-    try {
-      const mastodonId = await fediverse.post(
-        !!item.mastodon_id,
-        item,
-        description,
-        descriptionPt,
-        allChunks
-      );
-
-      firestore.doc(item.path).update({
-        [item.mastodon_id ? 'mastodon_id_pt' : 'mastodon_id']: mastodonId,
-      });
-    } catch (e) {
-      console.error('mastodon error', e);
-    }
-  }
-
-  if (!item.twitter_id || !item.twitter_id_pt) {
-    try {
-      const twitterId = await twitter.post(
-        !!item.twitter_id,
-        item,
-        description,
-        descriptionPt,
-        allChunks
-      );
-
-      firestore.doc(item.path).update({
-        [item.twitter_id ? 'twitter_id_pt' : 'twitter_id']: twitterId,
-      });
-    } catch (e) {
-      console.error('twitter error', e);
+      console.error('pixelfed error', e);
     }
   }
 }
