@@ -4,7 +4,7 @@ const { bluesky, mastodon } = require('./social');
 
 // const { initializeApp, cert } = require('firebase-admin/app');
 
-// const serviceAccount = require('../viajarcomale-firebase-adminsdk-u7w0a-30def9db38.json');
+// const serviceAccount = require('../viajarcomale-firebase-adminsdk-u7w0a-b4d02e4cb7.json');
 
 // initializeApp({
 //   credential: cert(serviceAccount),
@@ -53,11 +53,19 @@ async function createPost() {
 
   for (const file of files) {
     promises.push(
-      new Promise((resolve) => {
+      new Promise(async (resolve) => {
         const chunks = [];
 
+        let filePath = file.substring(1);
+
+        const [metadata] = await bucket.file(filePath).getMetadata();
+
+        if (metadata.size > 900000) {
+          filePath = 'resize/500' + file;
+        }
+
         bucket
-          .file('resize/500' + file)
+          .file(filePath)
           .createReadStream() //stream is created
           .on('data', (data) => {
             chunks.push(data);
@@ -148,6 +156,8 @@ async function createPost() {
     }
   }
 }
+
+// createPost();
 
 module.exports = {
   createPost,

@@ -82,8 +82,8 @@ const bluesky = {
             alt: isBR ? item.description_pt : item.description,
             aspectRatio: {
               // a hint to clients
-              width: 500,
-              height: Number((item.height / item.width) * 500),
+              width: item.width,
+              height: item.height,
             },
           })),
         },
