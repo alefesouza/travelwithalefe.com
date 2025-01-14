@@ -1,6 +1,6 @@
 const { getStorage } = require('firebase-admin/storage');
 const { getFirestore } = require('firebase-admin/firestore');
-const { bluesky, mastodon } = require('./social');
+const { bluesky, mastodon, twitter } = require('./social');
 
 // const { initializeApp, cert } = require('firebase-admin/app');
 
@@ -26,7 +26,7 @@ async function createPost() {
   compilationsSnaptshot.forEach((doc) => {
     const data = doc.data();
 
-    if (data.bluesky_id_pt && data.mastodon_id_pt) {
+    if (data.bluesky_id_pt && data.mastodon_id_pt && data.twitter_id_pt) {
       return;
     }
 
@@ -93,7 +93,7 @@ async function createPost() {
       ' #'
     )} ${siteLink}`;
 
-    while (description.length >= 300 && item.hashtags.length > 0) {
+    while (description.length >= 280 && item.hashtags.length > 0) {
       description = description.replace(
         ' #' + item.hashtags[item.hashtags.length - 1],
         ''
@@ -110,7 +110,7 @@ async function createPost() {
       ' #'
     )} ${siteLinkPt}`;
 
-    while (descriptionPt.length >= 300 && item.hashtags.length > 0) {
+    while (descriptionPt.length >= 280 && item.hashtags.length > 0) {
       descriptionPt = descriptionPt.replace(
         ' #' + item.hashtags_pt[item.hashtags_pt.length - 1],
         ''
@@ -153,6 +153,24 @@ async function createPost() {
       });
     } catch (e) {
       console.error('mastodon error', e);
+    }
+  }
+
+  if (!item.twitter_id || !item.twitter_id_pt) {
+    try {
+      const twitterId = await twitter.post(
+        !!item.twitter_id,
+        item,
+        description,
+        descriptionPt,
+        allChunks
+      );
+
+      firestore.doc(item.path).update({
+        [item.twitter_id ? 'twitter_id_pt' : 'twitter_id']: twitterId,
+      });
+    } catch (e) {
+      console.error('twitter error', e);
     }
   }
 }
