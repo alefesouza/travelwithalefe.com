@@ -96,7 +96,7 @@ export default async function Sidebar({ isSubPage }) {
           ))}
         </div>
         <div className="list-group">
-          {links.slice(0, 5).map((l) => (
+          {links.slice(0, 6).map((l) => (
             <HomeButton
               key={l.text}
               text={i18n(l.text)}
@@ -119,7 +119,7 @@ export default async function Sidebar({ isSubPage }) {
             ))}
           </div>
           <div style={{ display: 'flex', gap: 16 }}>
-            {socialLinks.slice(2, 4).map((l) => (
+            {socialLinks.slice(2, 5).map((l) => (
               <HomeButton
                 key={l.text}
                 text={i18n(l.text)}
@@ -131,7 +131,7 @@ export default async function Sidebar({ isSubPage }) {
               />
             ))}
           </div>
-          {links.slice(5, 10).map((l) => (
+          {links.slice(6, 15).map((l) => (
             <HomeButton
               key={l.text}
               text={i18n(l.text)}

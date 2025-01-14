@@ -24,12 +24,17 @@ const links = [
     subpage: true,
   },
   {
-    text: 'Kwai',
-    url: 'https://www.kwai.com/@viajarcomale',
-  },
-  {
     text: 'Pinterest',
     url: 'https://pinterest.com/viajarcomale/',
+  },
+  {
+    text: 'Pixelfed',
+    url: 'https://pixelfed.social/travelwithalefe',
+    url_pt: 'https://pixelfed.social/viajarcomale',
+  },
+  {
+    text: 'Kwai',
+    url: 'https://www.kwai.com/@viajarcomale',
   },
   {
     text: 'Telegram',
