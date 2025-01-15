@@ -7,6 +7,7 @@ const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
 const { createPost } = require('./social-sharing');
+const { createPixelfedPost } = require('./pixelfed-sharing');
 
 admin.initializeApp();
 
@@ -568,5 +569,5 @@ exports.createPostEveryThirtyMinutes = onSchedule(
 );
 exports.createPixelfedPostEveryThirtyMinutes = onSchedule(
   '*/30 11-23 * * *',
-  createPost
+  createPixelfedPost
 );
