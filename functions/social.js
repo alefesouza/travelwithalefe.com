@@ -60,13 +60,17 @@ const bluesky = {
     const images = await Promise.all(
       allChunks.map(async (chunks) => {
         return new Promise(async (resolve, reject) => {
-          const agent = await this.authenticate(isBR);
+          try {
+            const agent = await this.authenticate(isBR);
 
-          const {
-            data: { blob: image },
-          } = await agent.uploadBlob(chunks, { encoding: 'image/jpeg' });
+            const {
+              data: { blob: image },
+            } = await agent.uploadBlob(chunks, { encoding: 'image/jpeg' });
 
-          resolve(image);
+            resolve(image);
+          } catch (e) {
+            reject(e);
+          }
         });
       })
     );
@@ -136,12 +140,16 @@ const fediverse = {
     const attachments = await Promise.all(
       allChunks.map(async (chunks) => {
         return new Promise(async (resolve, reject) => {
-          const attachment = await masto.v2.media.create({
-            file: new Blob(chunks),
-            description: isBR ? item.description_pt : item.description,
-          });
+          try {
+            const attachment = await masto.v2.media.create({
+              file: new Blob(chunks),
+              description: isBR ? item.description_pt : item.description,
+            });
 
-          resolve(attachment.id);
+            resolve(attachment.id);
+          } catch (e) {
+            reject(e);
+          }
         });
       })
     );
@@ -175,11 +183,15 @@ const twitter = {
     const mediaIds = await Promise.all(
       allChunks.map(async (chunks) => {
         return new Promise(async (resolve, reject) => {
-          const mediaId = client.v1.uploadMedia(Buffer.concat(chunks), {
-            mimeType: EUploadMimeType.Jpeg,
-          });
+          try {
+            const mediaId = client.v1.uploadMedia(Buffer.concat(chunks), {
+              mimeType: EUploadMimeType.Jpeg,
+            });
 
-          resolve(mediaId);
+            resolve(mediaId);
+          } catch (e) {
+            reject(e);
+          }
         });
       })
     );
