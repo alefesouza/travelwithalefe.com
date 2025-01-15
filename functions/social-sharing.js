@@ -86,9 +86,9 @@ async function createPost() {
     item.country
   }/cities/${item.city}/posts/${item.id.replace(`${item.city}-post-`, '')}`;
 
-  let description = `${item.description.substring(0, 300)}… ${siteLink}`;
+  let description = `${item.description.substring(0, 200)}… ${siteLink}`;
 
-  if (item.description.length < 250) {
+  if (item.description.length < 200) {
     description = `${
       item.description
     } ${siteLink}\n.\n.\n.\n#${item.hashtags.join(' #')}`;
@@ -103,9 +103,9 @@ async function createPost() {
     }
   }
 
-  let descriptionPt = `${item.description_pt.substring(0, 300)}… ${siteLinkPt}`;
+  let descriptionPt = `${item.description_pt.substring(0, 200)}… ${siteLinkPt}`;
 
-  if (item.description_pt.length < 250) {
+  if (item.description_pt.length < 200) {
     descriptionPt = `${
       item.description_pt
     } ${siteLinkPt}\n.\n.\n.\n#${item.hashtags_pt.join(' #')}`;
