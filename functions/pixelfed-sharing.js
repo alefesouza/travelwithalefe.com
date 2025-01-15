@@ -1,5 +1,5 @@
 const { getStorage } = require('firebase-admin/storage');
-const { getFirestore, FieldValue } = require('firebase-admin/firestore');
+const { getFirestore } = require('firebase-admin/firestore');
 const { fediverse } = require('./social');
 
 // const { initializeApp, cert } = require('firebase-admin/app');
@@ -25,6 +25,10 @@ async function createPost() {
 
   compilationsSnapshot.forEach((doc) => {
     const data = doc.data();
+
+    if (data.pixelfed_id_pt) {
+      return;
+    }
 
     items.push({
       ...data,
