@@ -86,9 +86,17 @@ async function createPost() {
     item.country
   }/cities/${item.city}/posts/${item.id.replace(`${item.city}-post-`, '')}`;
 
+  if (!item.description) {
+    item.description = '';
+  }
+
   const description = `${
     item.description
   } ${siteLink}\n.\n.\n.\n#${item.hashtags.join(' #')}`;
+
+  if (!item.description_pt) {
+    item.description_pt = item.description;
+  }
 
   const descriptionPt = `${
     item.description_pt
