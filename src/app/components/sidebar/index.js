@@ -114,7 +114,6 @@ export default async function Sidebar({ isSubPage }) {
                 image={l.image ? host(l.image) : null}
                 subpage={l.subpage}
                 style={{ width: '50%' }}
-                rel="me"
               />
             ))}
           </div>

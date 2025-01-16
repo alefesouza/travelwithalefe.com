@@ -7,6 +7,7 @@ export default function HomeButton({ text, url, image, subpage, ...props }) {
       target={subpage ? '_self' : '_blank'}
       className="list-group-item list-group-item-action"
       prefetch={false}
+      rel={subpage ? null : 'me'}
       {...props}
     >
       {image && <img src={image} alt={text} width={48} height={48} />}
