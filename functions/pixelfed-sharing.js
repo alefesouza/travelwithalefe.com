@@ -10,7 +10,7 @@ const { fediverse } = require('./social');
 //   credential: cert(serviceAccount),
 // });
 
-async function createPost() {
+async function createPixelfedPost() {
   const firestore = getFirestore();
   const storage = getStorage();
   const bucket = storage.bucket('files.viajarcomale.com');
@@ -122,8 +122,8 @@ async function createPost() {
   }
 }
 
-// createPost();
+// createPixelfedPost();
 
 module.exports = {
-  createPost,
+  createPixelfedPost,
 };
