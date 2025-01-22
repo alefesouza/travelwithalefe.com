@@ -18,10 +18,11 @@ async function createPixelfedPost() {
   const compilationsSnapshot = await firestore
     .collectionGroup('medias')
     .where('type', '==', 'post')
-    .orderBy('date', 'asc')
+    .where('city', '==', 'new-york')
+    .orderBy('id', 'asc')
     .get();
 
-  const items = [];
+  let items = [];
 
   compilationsSnapshot.forEach((doc) => {
     const data = doc.data();
@@ -34,6 +35,10 @@ async function createPixelfedPost() {
       ...data,
       path: doc.ref.path,
     });
+  });
+
+  items.sort((a, b) => {
+    return a.id.localeCompare(b.id, 'en', { numeric: true });
   });
 
   const item = items[0];
@@ -53,18 +58,14 @@ async function createPixelfedPost() {
       .map((item) => item.file),
   ];
 
-  if (imageFiles.length >= 4) {
-    files = imageFiles.slice(0, 4);
-  } else {
-    files = [
-      ...new Set([
-        ...imageFiles,
-        ...item.gallery
-          .filter((item) => item.file.includes('.mp4'))
-          .map((item) => item.file.replace('.mp4', '-thumb.png')),
-      ]),
-    ].slice(0, 4);
-  }
+  files = [
+    ...new Set([
+      ...imageFiles,
+      ...item.gallery
+        .filter((item) => item.file.includes('.mp4'))
+        .map((item) => item.file.replace('.mp4', '-thumb.png')),
+    ]),
+  ];
 
   for (const file of files) {
     promises.push(
