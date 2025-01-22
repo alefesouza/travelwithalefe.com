@@ -17,7 +17,7 @@ async function createPixelfedPost() {
 
   const compilationsSnapshot = await firestore
     .collectionGroup('medias')
-    .where('is_compilation', '==', true)
+    .where('type', '==', 'post')
     .orderBy('date', 'asc')
     .get();
 
@@ -26,7 +26,7 @@ async function createPixelfedPost() {
   compilationsSnapshot.forEach((doc) => {
     const data = doc.data();
 
-    if (data.pixelfed_id_pt) {
+    if (data.pixelfed_id_pt || data.is_compilation) {
       return;
     }
 
@@ -44,12 +44,27 @@ async function createPixelfedPost() {
 
   const promises = [];
 
-  const files = [
+  let files = [];
+
+  const imageFiles = [
     item.file,
     ...item.gallery
       .filter((item) => !item.file.includes('.mp4'))
       .map((item) => item.file),
-  ].slice(0, 10);
+  ];
+
+  if (imageFiles.length >= 4) {
+    files = imageFiles.slice(0, 4);
+  } else {
+    files = [
+      ...new Set([
+        ...imageFiles,
+        ...item.gallery
+          .filter((item) => item.file.includes('.mp4'))
+          .map((item) => item.file.replace('.mp4', '-thumb.png')),
+      ]),
+    ].slice(0, 4);
+  }
 
   for (const file of files) {
     promises.push(
