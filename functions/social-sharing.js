@@ -44,12 +44,27 @@ async function createPost() {
 
   const promises = [];
 
-  const files = [
+  let files = [];
+
+  const imageFiles = [
     item.file,
     ...item.gallery
       .filter((item) => !item.file.includes('.mp4'))
       .map((item) => item.file),
-  ].slice(0, 4);
+  ];
+
+  if (imageFiles.length >= 4) {
+    files = imageFiles.slice(0, 4);
+  } else {
+    files = [
+      ...new Set([
+        ...imageFiles,
+        ...item.gallery
+          .filter((item) => item.file.includes('.mp4'))
+          .map((item) => item.file.replace('.mp4', '-thumb.png')),
+      ]),
+    ].slice(0, 4);
+  }
 
   for (const file of files) {
     promises.push(
@@ -118,7 +133,7 @@ async function createPost() {
       item.description_pt
     } ${siteLinkPt}\n.\n.\n.\n#${item.hashtags_pt.join(' #')}`;
 
-    while (descriptionPt.length >= 280 && item.hashtags.length > 0) {
+    while (descriptionPt.length >= 280 && item.hashtags_pt.length > 0) {
       descriptionPt = descriptionPt.replace(
         ' #' + item.hashtags_pt[item.hashtags_pt.length - 1],
         ''

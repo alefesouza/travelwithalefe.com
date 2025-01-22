@@ -96,8 +96,8 @@ const bluesky = {
             alt: isBR ? item.description_pt : item.description,
             aspectRatio: {
               // a hint to clients
-              width: item.width,
-              height: item.height,
+              width: item.width || 720,
+              height: item.height || 900,
             },
           })),
         },
