@@ -17,11 +17,12 @@ async function createPost() {
 
   const compilationsSnapshot = await firestore
     .collectionGroup('medias')
-    .where('is_compilation', '==', true)
-    .orderBy('date', 'asc')
+    .where('type', '==', 'post')
+    .where('city', '==', 'new-york')
+    .orderBy('id', 'asc')
     .get();
 
-  const items = [];
+  let items = [];
 
   compilationsSnapshot.forEach((doc) => {
     const data = doc.data();
@@ -34,6 +35,10 @@ async function createPost() {
       ...data,
       path: doc.ref.path,
     });
+  });
+
+  items.sort((a, b) => {
+    return a.id.localeCompare(b.id, 'en', { numeric: true });
   });
 
   const item = items[0];
