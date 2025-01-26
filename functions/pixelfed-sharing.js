@@ -18,7 +18,7 @@ async function createPixelfedPost() {
   const compilationsSnapshot = await firestore
     .collectionGroup('medias')
     .where('type', '==', 'post')
-    .where('city', '==', 'new-york')
+    .where('city', '==', 'san-francisco')
     .orderBy('id', 'asc')
     .get();
 
@@ -106,17 +106,29 @@ async function createPixelfedPost() {
     item.description = '';
   }
 
-  const description = `${
-    item.description
-  } ${siteLink}\n.\n.\n.\n#${item.hashtags.join(' #')}`;
+  const description = `${item.description}. Location: ${item.location_data
+    .map(
+      (l) =>
+        l.name +
+        (l.alternative_names && l.alternative_names.length
+          ? ' (' + l.alternative_names.join(', ') + ')'
+          : '')
+    )
+    .join(', ')} ${siteLink}\n.\n.\n.\n#${item.hashtags.join(' #')}`;
 
   if (!item.description_pt) {
     item.description_pt = item.description;
   }
 
-  const descriptionPt = `${
-    item.description_pt
-  } ${siteLinkPt}\n.\n.\n.\n#${item.hashtags_pt.join(' #')}`;
+  const descriptionPt = `${item.description_pt}. Local: ${item.location_data
+    .map(
+      (l) =>
+        (l.name_pt ? l.name_pt : l.name) +
+        (l.alternative_names && l.alternative_names.length
+          ? ' (' + l.alternative_names.join(', ') + ')'
+          : '')
+    )
+    .join(', ')} ${siteLinkPt}\n.\n.\n.\n#${item.hashtags_pt.join(' #')}`;
 
   if (!item.pixelfed_id || !item.pixelfed_id_pt) {
     try {
