@@ -114,6 +114,21 @@ const countries = [
     name: 'El Salvador',
     slug: 'el-salvador',
   },
+  {
+    flag: '🇮🇹',
+    name: 'Italy',
+    slug: 'italy',
+  },
+  {
+    flag: '🇻🇦',
+    name: 'Vatican',
+    slug: 'vatican',
+  },
+  {
+    flag: '🇸🇲',
+    name: 'San Marino',
+    slug: 'san-marino',
+  },
 ];
 
 export default countries;

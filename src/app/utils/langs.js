@@ -158,6 +158,8 @@ const langs = {
     Belgium: 'Bélgica',
     'United Kingdom': 'Reino Unido',
     'Dominican Republic': 'República Dominicana',
+    'Italy': 'Itália',
+    'Vatican': 'Vaticano',
 
     // Manifest
     'Access Travel with Alefe Albums': 'Acessar os álbuns do Viajar com Alê',

@@ -1,3 +1,4 @@
+
 function string_to_slug(str) {
   str = str.replace(/^\s+|\s+$/g, ''); // trim
   str = str.toLowerCase();
@@ -25,9 +26,20 @@ const allHashtags = [
     ])
   ),
 ].filter((hashtag) => hashtag);
-let unkownHashtags = result
-  .flatMap((media) => media.hashtags)
-  .filter((hashtag) => !allHashtags.includes(hashtag))
+let unkownHashtags = medias
+  .filter(media => media.hashtags && (['italy', 'san-marino', 'vatican'].includes(media.country) || 'lisbon-2' === media.city))
+  .flatMap((media) => {
+    return media.hashtags.map((hashtag, i) => {
+      if (media.hashtags_pt[i] && hashtag !== media.hashtags_pt[i]) {
+        return hashtag + ' $ ' + media.hashtags_pt[i];
+      }
+
+      return hashtag;
+    });
+  })
+  .filter((hashtag) => {
+    return !allHashtags.includes(hashtag.split(' $ ')[0]);
+  })
   .filter((hashtag) => hashtag)
   .map((hashtag) => string_to_slug(hashtag));
 
@@ -43,14 +55,10 @@ const locationSlugs = locations.map((location) =>
   location.slug.replaceAll('-', '')
 );
 
-console.log(countrySlugs, citySlugs, locationSlugs);
-
 console.log(unkownHashtags);
 
-unkownHashtags.forEach((hashtag) => {
-  if (['floresta', 'osenhordosaneis'].includes(hashtag)) {
-    return;
-  }
+unkownHashtags.forEach((theHashtag) => {
+  const [hashtag, name_pt] = theHashtag.split('-');
 
   const newHashtag = {
     name: hashtag,
@@ -66,13 +74,11 @@ unkownHashtags.forEach((hashtag) => {
     hide_on_cloud: false,
   };
 
-  if (newHashtag.name === 'forest') {
-    newHashtag.name_pt = 'floresta';
+  if (name_pt) {
+    newHashtag.name_pt = name_pt;
   }
 
-  if (newHashtag.name === 'thelordoftherings') {
-    newHashtag.name_pt = 'osenhordosaneis';
-  }
+  console.log(newHashtag);
 
   const newHashtagRef = doc(db, 'hashtags/' + hashtag);
 

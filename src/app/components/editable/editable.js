@@ -27,6 +27,7 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [media, setMedia] = useState(theMedia);
+  const [deletedFields, setDeletedFields] = useState([]);
 
   const onSave = () => {
     const { apps } = firebase;
@@ -60,6 +61,14 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
     delete media.createdAt;
     media.from_editor = true;
 
+    for (const deletedField of deletedFields) {
+      const lastKey = deletedField.pop();
+      const target = deletedField.reduce((acc, key) => acc[key], media);
+      target[lastKey] = firebase.firestore.FieldValue.delete();
+    }
+
+    console.log(media);
+
     db.doc(path)
       .update(media)
       .then((doc) => {
@@ -88,6 +97,14 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
     );
   }
 
+  const onDelete = (e) => {
+    if (e.path.length > 1) {
+      return;
+    }
+
+    setDeletedFields([...deletedFields, e.path]);
+  };
+
   return (
     <div
       style={{ display: 'flex', alignItems: 'center', flexDirection: 'column' }}
@@ -97,6 +114,7 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
           data={media}
           setData={setMedia}
           enableClipboard={false}
+          onDelete={onDelete}
           collapse={1}
           searchFilter={({ key }, searchText) => {
             if (!searchText) {

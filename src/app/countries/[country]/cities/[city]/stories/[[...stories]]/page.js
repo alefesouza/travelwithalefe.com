@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
 import { SITE_NAME, WEBSTORIES_ITEMS_PER_PAGE } from '@/app/utils/constants';
-import { redirect } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import Media from '@/app/components/media';
 import ShareButton from '@/app/components/share-button';
 import randomIntFromInterval from '@/app/utils/random-int';

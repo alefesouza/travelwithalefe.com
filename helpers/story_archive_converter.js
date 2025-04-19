@@ -1,80 +1,102 @@
-// lastCountry = null;
-// lastCity = null;
+lastCountry = null;
+lastCity = null;
 
-// cityCount = {};
+cityCount = {};
 
-// cityDatas = {
-//   'rio-de-janeiro': {
-//     name: 'Rio de Janeiro',
-//     slug: 'rio-de-janeiro',
-//     end: '2024-08-19',
-//     city_location_id: 14,
-//   },
-//   tulum: {
-//     name: 'Tulum',
-//     slug: 'tulum',
-//     end: '2024-10-13',
-//     city_location_id: 2,
-//   },
-//   havana: {
-//     name: 'Havana',
-//     slug: 'havana',
-//     end: '2024-10-18',
-//     city_location_id: 1,
-//   },
-//   'san-salvador': {
-//     name: 'San Salvador',
-//     slug: 'san-salvador',
-//     end: '2024-10-30',
-//     city_location_id: 1,
-//   },
-//   'antigua-guatemala': {
-//     name: 'Antigua Guatemala',
-//     slug: 'antigua-guatemala',
-//     end: '2024-10-24',
-//     city_location_id: 1,
-//   },
-//   panacharel: {
-//     name: 'Panacharel',
-//     slug: 'panacharel',
-//     end: '2024-10-22',
-//     city_location_id: 2,
-//   },
-//   'guatemala-city': {
-//     name: 'Guatemala City',
-//     slug: 'guatemala-city',
-//     end: '2024-10-26',
-//     city_location_id: 3,
-//   },
-// };
+cityDatas = {
+  'rome': {
+    name: 'Rome',
+    name_pt: 'Roma',
+    slug: 'rome',
+    start: '2025-02-08',
+    end: '2025-02-11',
+    city_location_id: 1,
+  },
+  ['vatican-city']: {
+    name: 'Vatican City',
+    name_pt: 'Cidade do Vaticano',
+    slug: 'vatican-city',
+    start: '2025-02-11',
+    end: '2025-02-11',
+    city_location_id: 2,
+  },
+  florence: {
+    name: 'Florence',
+    name_pt: 'Florença',
+    slug: 'florence',
+    start: '2025-02-13',
+    end: '2025-02-13',
+    city_location_id: 2,
+  },
+  ['san-marino']: {
+    name: 'San Marino',
+    slug: 'san-marino',
+    start: '2025-02-14',
+    end: '2025-02-14',
+    city_location_id: 1,
+  },
+  siena: {
+    name: 'Siena',
+    slug: 'siena',
+    start: '2025-02-15',
+    end: '2025-02-15',
+    city_location_id: 3,
+  },
+  'cinque-terre': {
+    name: 'Cinque Terre',
+    name_pt: 'Cinque Terre',
+    slug: 'cinque-terre',
+    start: '2025-02-16',
+    end: '2025-02-16',
+    city_location_id: 4,
+  },
+  'pisa': {
+    name: 'Pisa',
+    slug: 'pisa',
+    start: '2025-02-16',
+    end: '2025-02-16',
+    city_location_id: 5,
+  },
+  'venice': {
+    name: 'Venice',
+    name_pt: 'Veneza',
+    slug: 'venice',
+    start: '2025-02-17',
+    end: '2025-02-19',
+    city_location_id: 6,
+  },
+  'lisbon-2': {
+    name: 'Lisbon',
+    name_pt: 'Lisboa',
+    slug: 'lisbon-2',
+    start: '2025-02-19',
+    end: '2025-02-20',
+    city_location_id: 1,
+  },
+};
 
 // countryDatas = {
-//   mexico: {
-//     name: 'Mexico',
-//     name_pt: 'México',
-//     iso: 'MX',
-//     slug: 'mexico',
+//   italy: {
+//     name: 'Italy',
+//     name_pt: 'Itália',
+//     iso: 'IT',
+//     slug: 'italy',
 //   },
-//   brazil: {
-//     name: 'Brazil',
-//     name_pt: 'Brasil',
-//     iso: 'BR',
-//     slug: 'brazil',
+//   vatican: {
+//     name: 'Vatican',
+//     name_pt: 'Vaticano',
+//     iso: 'VA',
+//     slug: 'vatican',
 //   },
-//   cuba: {
-//     name: 'Cuba',
-//     iso: 'CU',
-//     slug: 'cuba',
+//   ['san-marino']: {
+//     name: 'San Marino',
+//     iso: 'SM',
+//     slug: 'san-marino',
 //   },
-//   'el-salvador': {
-//     name: 'El Salvador',
-//     iso: 'SV',
-//     slug: 'el-salvador',
-//   },
-//   guatemala: {
-//     name: 'Guatemala',
-//     iso: 'GT',
-//     slug: 'guatemala',
+//   portugal: {
+//     name: 'Portugal',
+//     iso: 'PT',
+//     slug: 'portugal',
 //   },
 // };
 
@@ -97,12 +119,15 @@
 //   return str;
 // }
 
-// [...document.querySelector('[role=main]').children]
+// [...document.querySelector('[role=main]').children].reverse()
 //   .map((item) => {
 //     const { country, city } = item.dataset;
 
 //     if (country) {
 //       lastCountry = country;
+//     }
+
+//     if (city) {
 //       lastCity = city;
 //     }
 
@@ -116,12 +141,14 @@
 //     const { city_location_id } = cityData;
 //     delete cityData.city_location_id;
 
-//     const cityPtHashtag = cityData[city].name_pt
-//       ? string_to_slug(cityData[city].name_pt).replaceAll('-', '')
-//       : city;
-//     const countryPtHashtag = countryData[city].name_pt
-//       ? string_to_slug(countryData[city].name_pt).replaceAll('-', '')
-//       : country;
+//     const countryData = { ...countryDatas[lastCountry] };
+
+//     const cityPtHashtag = cityData.name_pt
+//       ? string_to_slug(cityData.name_pt).replaceAll('-', '')
+//       : lastCity;
+//     const countryPtHashtag = countryData.name_pt
+//       ? string_to_slug(countryData.name_pt).replaceAll('-', '')
+//       : lastCountry;
 
 //     return {
 //       file_location: file.replace('file://', ''),
@@ -138,14 +165,13 @@
 //       description,
 //       description_pt: description,
 //       locations: [],
-//       hashtags: [city, country.replaceAll('-', '')],
-//       hashtags_pt: [cityPtHashtag, countryPtHashtag],
+//       hashtags: [string_to_slug(lastCity).replace('-2', ''), string_to_slug(lastCountry)],
+//       hashtags_pt: [cityPtHashtag.replace('-2', ''), countryPtHashtag],
 //       city_location_id,
 //       cityData: cityData,
 //       countryData: countryDatas[lastCountry],
 //     };
 //   })
-//   .reverse()
 //   .map((item) => {
 //     if (!cityCount[item.city]) {
 //       cityCount[item.city] = 1;

@@ -89,6 +89,28 @@ exports.onMediaUpdated = onDocumentUpdated(
     const newValue = event.data.after.data();
     const update = {};
 
+    if (newValue.location_update) {
+      update.location_update = FieldValue.delete();
+
+      if (newValue.from_editor) {
+        update.from_editor = FieldValue.delete();
+      }
+
+      return event.data.after.ref.update(update);
+    }
+
+    if (
+      newValue.latitude === '41.914166666667' ||
+      newValue.latitude === '41.909588333333'
+    ) {
+      return;
+    }
+
+
+    if (newValue.city === 'lisbon-2' && !newValue.cityData.travel_number) {
+      update.cityData = {...newValue.cityData, travel_number: 2};
+    }
+
     // Set hashtags to an array
     if (typeof newValue.hashtags === 'string') {
       update.hashtags = [
@@ -112,12 +134,31 @@ exports.onMediaUpdated = onDocumentUpdated(
       ];
     }
 
+    let locations = [];
+
     if (
-      !newValue.location_slug_update &&
-      newValue.locations &&
-      JSON.stringify(oldValue.locations) !== JSON.stringify(newValue.locations)
+      (newValue.locations &&
+        JSON.stringify(oldValue.locations) !==
+          JSON.stringify(newValue.locations)) ||
+      (!newValue.locations && newValue.location)
     ) {
+      if (newValue.location) {
+        newValue.locations = [string_to_slug(newValue.location)];
+        update.location = FieldValue.delete();
+      }
+
       const db = getFirestore();
+      const country = await db
+        .collection('countries')
+        .doc(newValue.country)
+        .get();
+
+      const city = country.data().cities.find((c) => c.slug === newValue.city);
+
+      if (city.main_city) {
+        newValue.city = city.main_city;
+      }
+
       const locationsSnapshot = await db
         .collection('countries')
         .doc(newValue.country)
@@ -131,7 +172,6 @@ exports.onMediaUpdated = onDocumentUpdated(
         )
         .get();
 
-      const locations = [];
       locationsSnapshot.forEach((doc) => {
         const data = doc.data();
 
@@ -175,11 +215,19 @@ exports.onMediaUpdated = onDocumentUpdated(
       ];
     }
 
-    if (newValue.location_slug_update) {
-      update.location_slug_update = FieldValue.delete();
-    }
+    if (newValue.location && locations.length === 0) {
+      const db = getFirestore();
+      const country = await db
+        .collection('countries')
+        .doc(newValue.country)
+        .get();
 
-    if ((!oldValue.location || newValue.from_editor) && newValue.location) {
+      const city = country.data().cities.find((c) => c.slug === newValue.city);
+
+      if (city.main_city) {
+        newValue.city = city.main_city;
+      }
+
       const [locationEn, locationPt] = newValue.location.split(' $ ');
       const slug = string_to_slug(locationEn);
       const key = getTotalKey(newValue.type);
@@ -209,7 +257,14 @@ exports.onMediaUpdated = onDocumentUpdated(
         theNewLocation.latitude = newValue.latitude;
       }
 
-      const db = getFirestore();
+      if (newValue.alternative_names) {
+        theNewLocation.alternative_names = newValue.alternative_names;
+      }
+
+      if (newValue.alternative_name) {
+        theNewLocation.alternative_names = [newValue.alternative_name];
+      }
+
       db.doc(
         `/countries/${newValue.country}/cities/${newValue.city}/locations/${slug}`
       ).set(theNewLocation, { merge: true });
@@ -217,7 +272,18 @@ exports.onMediaUpdated = onDocumentUpdated(
       update.location_data = [theNewLocation];
       update.locations = [slug];
       update.hashtags = [
-        ...new Set([...newValue.hashtags, slug.replaceAll('-', '')]),
+        ...new Set([
+          ...newValue.hashtags,
+          slug.replaceAll('-', ''),
+          ...(newValue.alternative_name
+            ? [string_to_slug(newValue.alternative_name).replaceAll('-', '')]
+            : []),
+          ...(newValue.alternative_names
+            ? newValue.alternative_names.map((l) =>
+                string_to_slug(l).replaceAll('-', '')
+              )
+            : []),
+        ]),
       ];
       update.hashtags_pt = [
         ...new Set([
@@ -225,9 +291,19 @@ exports.onMediaUpdated = onDocumentUpdated(
           locationPt
             ? string_to_slug(locationPt).replaceAll('-', '')
             : slug.replaceAll('-', ''),
+          ...(newValue.alternative_name
+            ? [string_to_slug(newValue.alternative_name).replaceAll('-', '')]
+            : []),
+          ...(newValue.alternative_names
+            ? newValue.alternative_names.map((l) =>
+                string_to_slug(l).replaceAll('-', '')
+              )
+            : []),
         ]),
       ];
     }
+
+    delete newValue.location;
 
     let promises = [];
 
@@ -482,11 +558,8 @@ exports.onLocationUpdated = onDocumentUpdated(
             latitude: l.latitude || null,
             longitude: l.longitude || null,
           })),
+          location_update: true,
         };
-
-        if (oldValue.slug !== newValue.slug) {
-          mediaUpdate.location_slug_update = true;
-        }
 
         batch.update(doc.ref, mediaUpdate);
       });
