@@ -35,7 +35,9 @@ export default function SchemaData({
         itemProp="uploadDate"
         content={
           media.date
-            ? media.date.replace(' ', 'T') + '+03:00'
+            ? media.date.includes(',')
+              ? new Date(media.date).toISOString() + '+00:00'
+              : media.date.replace(' ', 'T') + '+03:00'
             : media.cityData && media.cityData.end + 'T12:00:00+03:00'
         }
       />

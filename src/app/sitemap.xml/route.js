@@ -107,7 +107,9 @@ export async function GET() {
               'video:title': title,
               'video:description': description,
               'video:publication_date': media.date
-                ? media.date.replace(' ', 'T') + '+03:00'
+                ? media.date.includes(',')
+                  ? new Date(media.date).toISOString().slice(0, -5) + '+00:00'
+                  : media.date.replace(' ', 'T') + '+03:00'
                 : media.cityData.end + 'T12:00:00+03:00',
               'video:family_friendly': 'yes',
               'video:requires_subscription': 'no',
