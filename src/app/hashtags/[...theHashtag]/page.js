@@ -283,7 +283,7 @@ export default async function Country({
     cache = await db.doc(cacheRef).get();
   }
 
-  let isRandom = sort === 'random';
+  let isRandom = false;
 
   if (isRandom) {
     sort = 'desc';

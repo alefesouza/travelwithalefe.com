@@ -147,7 +147,7 @@ export default async function Highlight({
 
   let sort =
     (searchParams.sort &&
-      ['asc', 'desc', 'random'].includes(searchParams.sort) &&
+      ['asc', 'desc'].includes(searchParams.sort) &&
       searchParams.sort) ||
     'asc';
 
@@ -184,7 +184,7 @@ export default async function Highlight({
     cache = await db.doc(cacheRef).get();
   }
 
-  let isRandom = sort === 'random';
+  let isRandom = false;
   const isWebStories = stories && stories[stories.length - 1] === 'webstories';
 
   if (isRandom) {
@@ -371,16 +371,16 @@ export default async function Highlight({
         {[
           { name: 'Latest', value: 'desc' },
           { name: 'Oldest', value: 'asc' },
-          { name: 'Random', value: 'random' },
+          // { name: 'Random', value: 'random' },
         ].map((o) => (
           <Link
             key={o}
             href={
-              o.value === 'random'
-                ? sort === 'random'
-                  ? basePath
-                  : basePath + '?sort=random&shuffle=' + newShuffle
-                : o.value !== 'asc'
+              // o.value === 'random'
+              //   ? sort === 'random'
+              //     ? basePath
+              //     : basePath + '?sort=random&shuffle=' + newShuffle
+              o.value !== 'asc'
                 ? '?sort=' + o.value
                 : basePath
             }

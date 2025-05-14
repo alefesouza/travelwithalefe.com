@@ -12,4 +12,8 @@ User-agent: AhrefsBot
 User-agent: SemrushBot
 User-agent: DataForSeoBot
 User-agent: DotBot
+User-agent: barkrowler
+User-agent: BLEXBot
+User-agent: NetNewsWire
+User-agent: CCBot
 Disallow: /

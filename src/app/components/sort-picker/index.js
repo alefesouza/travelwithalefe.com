@@ -5,8 +5,6 @@ export default function SortPicker({
   type,
   basePath,
   sort,
-  newShuffle,
-  isRandom,
 }) {
   const i18n = useI18n();
 
@@ -18,16 +16,12 @@ export default function SortPicker({
         {[
           { name: 'Latest', value: 'desc' },
           { name: 'Oldest', value: 'asc' },
-          { name: 'Random', value: 'random' },
+          // { name: 'Random', value: 'random' },
         ].map((o) => (
           <Link
             key={o}
             href={
-              o.value === 'random'
-                ? sort === 'random'
-                  ? basePath
-                  : basePath + '?sort=random&shuffle=' + newShuffle
-                : o.value !== 'desc'
+              o.value !== 'desc'
                 ? '?sort=' + o.value
                 : basePath
             }
@@ -46,19 +40,6 @@ export default function SortPicker({
           </Link>
         ))}
       </div>
-
-      {sort === 'random' && (
-        <div style={{ textAlign: 'center', marginTop: 18 }}>
-          <Link
-            href={'?sort=random&shuffle=' + newShuffle}
-            scroll={false}
-            prefetch={false}
-            className="shuffle"
-          >
-            <button className="btn btn-primary">{i18n('Shuffle')}</button>
-          </Link>
-        </div>
-      )}
     </div>
   );
 }

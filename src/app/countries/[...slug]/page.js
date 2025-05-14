@@ -51,7 +51,7 @@ function getDataFromRoute(slug, searchParams) {
     path1 === 'expand' || path3 === 'expand' || path5 === 'expand';
   let sort =
     (searchParams.sort &&
-      ['asc', 'desc', 'random'].includes(searchParams.sort) &&
+      ['asc', 'desc'].includes(searchParams.sort) &&
       searchParams.sort) ||
     'desc';
 
@@ -200,12 +200,12 @@ export default async function Country({ params: { slug }, searchParams }) {
     }
   }
 
-  if (
-    searchParams.sort == 'random' &&
-    (!searchParams.shuffle || Object.keys(searchParams).length > 2)
-  ) {
-    return notFound();
-  }
+  // if (
+  //   searchParams.sort == 'random' &&
+  //   (!searchParams.shuffle || Object.keys(searchParams).length > 2)
+  // ) {
+  //   return notFound();
+  // }
 
   const db = getFirestore();
   const countryData = await getCountry(db, slug, searchParams);
@@ -237,7 +237,7 @@ export default async function Country({ params: { slug }, searchParams }) {
   let youtubeSnapshot = [];
   let _360PhotosSnapshot = [];
   let mapsPhotosSnapshot = [];
-  let isRandom = sort === 'random';
+  let isRandom = false;
   let randomArray = [];
 
   const cityData = countryData.cities.reduce((prev, curr, i) => {
@@ -630,18 +630,18 @@ export default async function Country({ params: { slug }, searchParams }) {
         {[
           { name: 'Latest', value: 'desc' },
           { name: 'Oldest', value: 'asc' },
-          { name: 'Random', value: 'random' },
+          // { name: 'Random', value: 'random' },
         ].map((o) => (
           <Link
             key={o.value}
             href={
-              o.value === 'random'
-                ? sort === 'random'
-                  ? paginationBase.split('?')[0].replace('/page/{page}', '')
-                  : paginationBase.split('?')[0].replace('/page/{page}', '') +
-                    '?sort=random&shuffle=' +
-                    newShuffle
-                : o.value !== 'desc'
+              // o.value === 'random'
+              //   ? sort === 'random'
+              //     ? paginationBase.split('?')[0].replace('/page/{page}', '')
+              //     : paginationBase.split('?')[0].replace('/page/{page}', '') +
+              //       '?sort=random&shuffle=' +
+              //       newShuffle
+              o.value !== 'desc'
                 ? '?sort=' + o.value
                 : paginationBase.split('?')[0].replace('/page/{page}', '')
             }

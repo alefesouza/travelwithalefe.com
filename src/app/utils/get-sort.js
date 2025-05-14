@@ -5,7 +5,7 @@ export default function getSort(
 ) {
   let sort =
     (searchParams.sort &&
-      ['asc', 'desc', 'random'].includes(searchParams.sort) &&
+      ['asc', 'desc'].includes(searchParams.sort) &&
       searchParams.sort) ||
     'desc';
 
@@ -17,9 +17,9 @@ export default function getSort(
     }
   }
 
-  if (sort === 'random' && !allowRandom) {
-    sort = 'desc';
-  }
+  // if (sort === 'random' && !allowRandom) {
+  //   sort = 'desc';
+  // }
 
   return sort;
 }
