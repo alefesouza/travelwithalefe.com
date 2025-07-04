@@ -9,6 +9,7 @@ import ShareButton from '../components/share-button';
 import defaultMetadata from '../utils/default-metadata';
 import AdSense from '../components/adsense';
 import useEditMode from '../utils/use-edit-mode';
+import { headers } from 'next/headers';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks

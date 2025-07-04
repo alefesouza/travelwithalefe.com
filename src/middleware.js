@@ -6,6 +6,12 @@ export default function middleware(req) {
   const pathname = req.nextUrl.pathname;
 
   const searchParams = req.nextUrl.searchParams;
+  const searchParamsString = searchParams.toString();
+
+  console.log(
+    headers.get('user-agent'),
+    origin + pathname + (searchParamsString ? '?' + searchParamsString : '')
+  );
 
   if (origin && origin === 'viajarcomale.com') {
     return NextResponse.redirect(
