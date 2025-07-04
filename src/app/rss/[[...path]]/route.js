@@ -7,9 +7,11 @@ import removeDiacritics from '@/app/utils/remove-diacritics';
 import getMetadata from '@/app/utils/get-metadata';
 import getTypePath from '@/app/utils/get-type-path';
 import logAccess from '@/app/utils/log-access';
+import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import { customInitApp } from '@/app/firebase';
 import useEditMode from '@/app/utils/use-edit-mode';
+import { RSS_HASHTAGS } from '@/app/utils/rss-hashtags';
 
 customInitApp();
 
@@ -69,6 +71,7 @@ export async function GET(req) {
       db.doc(cacheRef).set({
         photos,
         last_update: new Date().toISOString().split('T')[0],
+        user_agent: headers().get('user-agent'),
       });
     } else {
       photos = cache.data().photos;
@@ -81,6 +84,10 @@ export async function GET(req) {
     }
 
     if (!hashtag) {
+      return notFound();
+    }
+
+    if (!RSS_HASHTAGS.includes(hashtag)) {
       return notFound();
     }
 
@@ -150,6 +157,7 @@ export async function GET(req) {
       db.doc(cacheRef).set({
         photos,
         last_update: new Date().toISOString().split('T')[0],
+        user_agent: headers().get('user-agent'),
       });
     } else {
       photos = cache.data().photos;
