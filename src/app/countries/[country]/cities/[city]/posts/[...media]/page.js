@@ -20,8 +20,16 @@ import getTypePath from '@/app/utils/get-type-path';
 import AdSense from '@/app/components/adsense';
 import getTypeLabel from '@/app/utils/get-type-label';
 import useEditMode from '@/app/utils/use-edit-mode';
+import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
 
 async function getCountry(country, city) {
+  if (
+    !cachedCountries.includes(country) ||
+    (city && !cachedCities.includes(city))
+  ) {
+    return false;
+  }
+
   const db = getFirestore();
   const countryDoc = await db.collection('countries').doc(country).get();
   const countryData = countryDoc.data();
@@ -65,6 +73,13 @@ function getSelectedMedia(media, theMedia, country, city) {
 }
 
 export async function generateMetadata({ params: { country, city, media } }) {
+  if (
+    !cachedCountries.includes(country) ||
+    (city && !cachedCities.includes(city))
+  ) {
+    return notFound();
+  }
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
@@ -157,6 +172,13 @@ export default async function Country({
   const isWindows =
     new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
   const editMode = useEditMode(searchParams);
+
+  if (
+    !cachedCountries.includes(country) ||
+    (city && !cachedCities.includes(city))
+  ) {
+    return notFound();
+  }
 
   if (media.length > 2) {
     redirect(

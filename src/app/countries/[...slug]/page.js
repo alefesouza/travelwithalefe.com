@@ -26,6 +26,7 @@ import AdSense from '@/app/components/adsense';
 import addAds from '@/app/utils/add-ads';
 import { notFound } from 'next/navigation';
 import useEditMode from '@/app/utils/use-edit-mode';
+import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
 
 function getDataFromRoute(slug, searchParams) {
   const [country, path1, path2, path3, path4, path5] = slug;
@@ -67,6 +68,13 @@ function getDataFromRoute(slug, searchParams) {
 async function getCountry(db, slug, searchParams) {
   let { country, city } = getDataFromRoute(slug, searchParams);
 
+  if (
+    !cachedCountries.includes(country) ||
+    (city && !cachedCities.includes(city))
+  ) {
+    return false;
+  }
+
   const countryDoc = await db.collection('countries').doc(country).get();
   const countryData = countryDoc.data();
 
@@ -92,6 +100,14 @@ export async function generateMetadata({ params: { slug }, searchParams }) {
   }
 
   let { city, country, page } = getDataFromRoute(slug, searchParams);
+
+  if (
+    !cachedCountries.includes(country) ||
+    (city && !cachedCities.includes(city))
+  ) {
+    return notFound();
+  }
+
   let theCity = null;
 
   if (city) {
@@ -188,25 +204,6 @@ export default async function Country({ params: { slug }, searchParams }) {
     return notFound();
   }
 
-  if (searchParams.shuffle) {
-    const theShuffle = parseInt(searchParams.shuffle);
-
-    if (
-      theShuffle != searchParams.shuffle ||
-      theShuffle < 1 ||
-      theShuffle > 15
-    ) {
-      return notFound();
-    }
-  }
-
-  // if (
-  //   searchParams.sort == 'random' &&
-  //   (!searchParams.shuffle || Object.keys(searchParams).length > 2)
-  // ) {
-  //   return notFound();
-  // }
-
   const db = getFirestore();
   const countryData = await getCountry(db, slug, searchParams);
 
@@ -218,6 +215,23 @@ export default async function Country({ params: { slug }, searchParams }) {
     slug,
     searchParams
   );
+
+  if (
+    !cachedCountries.includes(country) ||
+    (city && !cachedCities.includes(city))
+  ) {
+    return notFound();
+  }
+
+  const cityData = countryData.cities.reduce((prev, curr, i) => {
+    prev[curr.slug] = curr;
+
+    return prev;
+  }, {});
+
+  if (city && !cityData[city]) {
+    return notFound();
+  }
 
   const cacheRef = `/caches/countries/countries-cache/${country}/caches${
     city ? '/' + city : '/country'
@@ -240,11 +254,9 @@ export default async function Country({ params: { slug }, searchParams }) {
   let isRandom = false;
   let randomArray = [];
 
-  const cityData = countryData.cities.reduce((prev, curr, i) => {
-    prev[curr.slug] = curr;
-
-    return prev;
-  }, {});
+  if (city && !cityData[city]) {
+    return notFound();
+  }
 
   const totalPhotos = city
     ? cityData[city]?.totals?.posts

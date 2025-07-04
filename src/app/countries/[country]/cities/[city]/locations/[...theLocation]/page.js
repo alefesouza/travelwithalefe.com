@@ -26,6 +26,11 @@ import SortPicker from '@/app/components/sort-picker';
 import Pagination from '@/app/components/pagination';
 import useEditMode from '@/app/utils/use-edit-mode';
 import Editable from '@/app/components/editable/editable';
+import {
+  cachedCities,
+  cachedCountries,
+  cachedLocations,
+} from '@/app/utils/cache-data';
 
 function getDataFromRoute(slug, searchParams) {
   const [location, path5, path6, path7, path8] = slug;
@@ -55,6 +60,13 @@ async function getCountry(country, city) {
   const db = getFirestore();
   const countryDoc = await db.collection('countries').doc(country).get();
   const countryData = countryDoc.data();
+
+  if (
+    !cachedCountries.includes(country) ||
+    (city && !cachedCities.includes(city))
+  ) {
+    return false;
+  }
 
   if (!countryData) {
     return notFound();
@@ -93,6 +105,14 @@ export async function generateMetadata({
     theLocation,
     searchParams
   );
+
+  if (
+    !cachedLocations.includes(location) ||
+    !cachedCountries.includes(country) ||
+    !cachedCities.includes(city)
+  ) {
+    return notFound();
+  }
 
   // if (
   //   theLocation.length > 2 ||
@@ -230,20 +250,6 @@ export default async function Country({
 
   let theCity = countryData.cities.find((c) => c.slug === city);
 
-  const cacheRef = `/caches/locations/locations-cache/${city}-${location}/sort/${
-    sort === 'asc' ? 'asc' : 'desc'
-  }`;
-
-  const db = getFirestore();
-
-  let cache = null;
-
-  if (editMode) {
-    cache = { exists: false };
-  } else {
-    cache = await db.doc(cacheRef).get();
-  }
-
   let isRandom = false;
 
   if (isRandom) {
@@ -251,6 +257,8 @@ export default async function Country({
   }
 
   let photos = [];
+
+  const db = getFirestore();
 
   const mediaRef = await db
     .collection('countries')
@@ -261,6 +269,22 @@ export default async function Country({
     .doc(location)
     .get();
   let theMedia = mediaRef.data();
+
+  if (!theMedia) {
+    return notFound();
+  }
+
+  const cacheRef = `/caches/locations/locations-cache/${city}-${location}/sort/${
+    sort === 'asc' ? 'asc' : 'desc'
+  }`;
+
+  let cache = null;
+
+  if (editMode) {
+    cache = { exists: false };
+  } else {
+    cache = await db.doc(cacheRef).get();
+  }
 
   if (!cache.exists || isWebStories) {
     const photosSnapshot = await db

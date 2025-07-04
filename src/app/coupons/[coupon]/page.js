@@ -7,11 +7,12 @@ import { SITE_NAME } from '@/app/utils/constants';
 import defaultMetadata from '@/app/utils/default-metadata';
 import logAccess from '@/app/utils/log-access';
 import styles from '../page.module.css';
-import { redirect } from 'next/navigation';
 // @ad
 import AdSense from '@/app/components/adsense';
 import Editable from '@/app/components/editable/editable';
 import useEditMode from '@/app/utils/use-edit-mode';
+import { cachedCoupons } from '@/app/utils/cache-data';
+import { notFound } from 'next/navigation';
 
 export async function generateMetadata({ params: { coupon } }) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -19,6 +20,10 @@ export async function generateMetadata({ params: { coupon } }) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
+
+  if (!cachedCoupons.includes(coupon)) {
+    return notFound();
+  }
 
   const db = getFirestore();
   const couponRef = await db.collection('coupons').doc(coupon).get();

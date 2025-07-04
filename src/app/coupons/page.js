@@ -103,6 +103,10 @@ export async function generateMetadata() {
   const couponsPageRef = await db.doc('/pages/coupons').get();
   const couponsPageData = couponsPageRef.data();
 
+  if (!couponsPageData) {
+    return notFound();
+  }
+
   const title = i18n('Coupons') + ' - ' + i18n(SITE_NAME);
   const description = isBR
     ? couponsPageData.description_pt
@@ -120,10 +124,15 @@ export default async function Coupons({ searchParams }) {
   const cacheRef = '/caches/static_pages/static_pages/coupons';
 
   const db = getFirestore();
-  const cache = await db.doc(cacheRef).get();
 
   const couponsPageRef = await db.doc('/pages/coupons').get();
   const couponsPageData = couponsPageRef.data();
+
+  if (!couponsPageData) {
+    return notFound();
+  }
+
+  const cache = await db.doc(cacheRef).get();
 
   let coupons = [];
 

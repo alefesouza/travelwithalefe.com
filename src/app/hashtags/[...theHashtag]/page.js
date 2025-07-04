@@ -26,6 +26,7 @@ import Pagination from '@/app/components/pagination';
 import useEditMode from '@/app/utils/use-edit-mode';
 import Editable from '@/app/components/editable/editable';
 import { RSS_HASHTAGS } from '@/app/utils/rss-hashtags';
+import { cachedHashtags } from '@/app/utils/cache-data';
 
 function getDataFromRoute(slug, searchParams) {
   const [hashtag, path1, path2, path3] = slug;
@@ -65,6 +66,10 @@ export async function generateMetadata({
     theHashtag,
     searchParams
   );
+
+  if (!cachedHashtags.includes(hashtag)) {
+    return notFound();
+  }
 
   // if (
   //   theHashtag.length > 2 ||
@@ -214,7 +219,9 @@ export async function generateMetadata({
         pt: ptUrl,
       },
       types: {
-        'application/rss+xml': host('/rss/hashtags/' + hashtag),
+        'application/rss+xml': RSS_HASHTAGS.includes(hashtag)
+          ? host('/rss/hashtags/' + hashtag)
+          : null,
       },
     },
     ...(!isWebStories && page <= maxPages
@@ -246,6 +253,10 @@ export default async function Country({
     theHashtag,
     searchParams
   );
+
+  if (!cachedHashtags.includes(hashtag)) {
+    return notFound();
+  }
 
   const db = getFirestore();
   const hashtagPtSnapshot = await db

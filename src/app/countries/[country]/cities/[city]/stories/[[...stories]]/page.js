@@ -22,8 +22,16 @@ import expandDate from '@/app/utils/expand-date';
 import AdSense from '@/app/components/adsense';
 import addAds from '@/app/utils/add-ads';
 import useEditMode from '@/app/utils/use-edit-mode';
+import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
 
 async function getCountry(country, city) {
+  if (
+    !cachedCountries.includes(country) ||
+    (city && !cachedCities.includes(city))
+  ) {
+    return notFound();
+  }
+
   const db = getFirestore();
   const countryDoc = await db.collection('countries').doc(country).get();
   const countryData = countryDoc.data();
@@ -381,9 +389,7 @@ export default async function Highlight({
               //   ? sort === 'random'
               //     ? basePath
               //     : basePath + '?sort=random&shuffle=' + newShuffle
-              o.value !== 'asc'
-                ? '?sort=' + o.value
-                : basePath
+              o.value !== 'asc' ? '?sort=' + o.value : basePath
             }
             scroll={false}
           >
