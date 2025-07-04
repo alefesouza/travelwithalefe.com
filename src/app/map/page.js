@@ -78,6 +78,7 @@ export default async function MapPage({ searchParams }) {
     db.doc(cacheRef).set({
       locations,
       last_update: new Date().toISOString().split('T')[0],
+      user_agent: headers().get('user-agent'),
     });
   } else {
     locations = cache.data().locations;

@@ -284,6 +284,7 @@ export default async function Country({
       db.doc(cacheRef).set({
         photos,
         last_update: new Date().toISOString().split('T')[0],
+        user_agent: headers().get('user-agent'),
       });
     }
   } else {

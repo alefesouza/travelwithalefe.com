@@ -494,6 +494,7 @@ export default async function Country({ params: { slug }, searchParams }) {
         _360photos,
         mapsPhotos,
         last_update: new Date().toISOString().split('T')[0],
+        user_agent: headers().get('user-agent'),
       });
     }
   }

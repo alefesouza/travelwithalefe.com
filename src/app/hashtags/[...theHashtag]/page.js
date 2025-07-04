@@ -25,6 +25,7 @@ import SortPicker from '@/app/components/sort-picker';
 import Pagination from '@/app/components/pagination';
 import useEditMode from '@/app/utils/use-edit-mode';
 import Editable from '@/app/components/editable/editable';
+import { RSS_HASHTAGS } from '@/app/utils/rss-hashtags';
 
 function getDataFromRoute(slug, searchParams) {
   const [hashtag, path1, path2, path3] = slug;
@@ -332,6 +333,7 @@ export default async function Country({
       db.doc(cacheRef).set({
         photos,
         last_update: new Date().toISOString().split('T')[0],
+        user_agent: headers().get('user-agent'),
       });
     }
   } else {
@@ -578,20 +580,23 @@ export default async function Country({
                 ></img>
               </a>
             )}
-            <a
-              href={host(
-                '/rss/hashtags/' +
-                  (hashtagPt ? finalHashtag.name_pt : finalHashtag.name)
-              )}
-              target="_blank"
-            >
-              <img
-                src="/images/rss.svg"
-                alt={i18n('RSS Icon')}
-                width={32}
-                height={32}
-              ></img>
-            </a>
+            {(RSS_HASHTAGS.includes(finalHashtag.name) ||
+              RSS_HASHTAGS.includes(finalHashtag.name_pt)) && (
+              <a
+                href={host(
+                  '/rss/hashtags/' +
+                    (hashtagPt ? finalHashtag.name_pt : finalHashtag.name)
+                )}
+                target="_blank"
+              >
+                <img
+                  src="/images/rss.svg"
+                  alt={i18n('RSS Icon')}
+                  width={32}
+                  height={32}
+                ></img>
+              </a>
+            )}
             <ShareButton />
           </div>
         </div>

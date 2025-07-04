@@ -56,6 +56,7 @@ export default async function MapPage() {
     db.doc(cacheRef).set({
       hashtags,
       last_update: new Date().toISOString().split('T')[0],
+      user_agent: headers().get('user-agent'),
     });
   } else {
     hashtags = cache.data().hashtags;
