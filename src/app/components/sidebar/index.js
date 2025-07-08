@@ -72,28 +72,30 @@ export default async function Sidebar({ isSubPage }) {
           {i18n('My photos and videos by country')}
         </h2>
         <div className={styles.country_selector}>
-          {countries.map((c) => (
-            <Link
-              href={`/countries/${c.slug}`}
-              key={c.name}
-              className={styles.country}
-              prefetch={false}
-            >
-              <div className={styles.country_flag}>
-                {isWindows ? (
-                  <img
-                    src={host('/flags/' + c.slug + '.png')}
-                    alt={i18n(c.name)}
-                    width={30}
-                    height={30}
-                  />
-                ) : (
-                  c.flag
-                )}
-              </div>
-              <span>{i18n(c.name)}</span>
-            </Link>
-          ))}
+          {countries
+            .sort((a, b) => a.order - b.order)
+            .map((c) => (
+              <Link
+                href={`/countries/${c.slug}`}
+                key={c.name}
+                className={styles.country}
+                prefetch={false}
+              >
+                <div className={styles.country_flag}>
+                  {isWindows ? (
+                    <img
+                      src={host('/flags/' + c.slug + '.png')}
+                      alt={i18n(c.name)}
+                      width={30}
+                      height={30}
+                    />
+                  ) : (
+                    c.flag
+                  )}
+                </div>
+                <span>{i18n(c.name)}</span>
+              </Link>
+            ))}
         </div>
         <div className="list-group">
           {links.slice(0, 6).map((l) => (

@@ -27,6 +27,7 @@ import addAds from '@/app/utils/add-ads';
 import { notFound } from 'next/navigation';
 import useEditMode from '@/app/utils/use-edit-mode';
 import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
+import countries from '@/app/utils/countries';
 
 function getDataFromRoute(slug, searchParams) {
   const [country, path1, path2, path3, path4, path5] = slug;
@@ -65,24 +66,19 @@ function getDataFromRoute(slug, searchParams) {
   };
 }
 
-async function getCountry(db, slug, searchParams) {
+function getCountry(db, slug, searchParams) {
   let { country, city } = getDataFromRoute(slug, searchParams);
 
+  const theCountry = countries.find((c) => c.slug === country);
+
   if (
-    !cachedCountries.includes(country) ||
-    (city && !cachedCities.includes(city))
+    !theCountry ||
+    (city && !theCountry.cities.find((c) => c.slug === city))
   ) {
     return false;
   }
 
-  const countryDoc = await db.collection('countries').doc(country).get();
-  const countryData = countryDoc.data();
-
-  if (city && !countryData.cities.find((c) => c.slug === city)) {
-    return false;
-  }
-
-  return countryData;
+  return theCountry;
 }
 
 export async function generateMetadata({ params: { slug }, searchParams }) {
@@ -93,7 +89,7 @@ export async function generateMetadata({ params: { slug }, searchParams }) {
   const isBR = host().includes('viajarcomale.com.br');
 
   const db = getFirestore();
-  const countryData = await getCountry(db, slug, searchParams);
+  const countryData = getCountry(db, slug, searchParams);
 
   if (!countryData) {
     return notFound();
@@ -205,7 +201,7 @@ export default async function Country({ params: { slug }, searchParams }) {
   }
 
   const db = getFirestore();
-  const countryData = await getCountry(db, slug, searchParams);
+  const countryData = getCountry(db, slug, searchParams);
 
   if (!countryData) {
     return notFound();

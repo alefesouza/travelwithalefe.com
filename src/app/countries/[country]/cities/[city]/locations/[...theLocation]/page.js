@@ -31,6 +31,7 @@ import {
   cachedCountries,
   cachedLocations,
 } from '@/app/utils/cache-data';
+import countries from '@/app/utils/countries';
 
 function getDataFromRoute(slug, searchParams) {
   const [location, path5, path6, path7, path8] = slug;
@@ -56,27 +57,17 @@ function getDataFromRoute(slug, searchParams) {
   };
 }
 
-async function getCountry(country, city) {
-  const db = getFirestore();
-  const countryDoc = await db.collection('countries').doc(country).get();
-  const countryData = countryDoc.data();
+function getCountry(country, city) {
+  const theCountry = countries.find((c) => c.slug === country);
 
   if (
-    !cachedCountries.includes(country) ||
-    (city && !cachedCities.includes(city))
+    !theCountry ||
+    (city && !theCountry.cities.find((c) => c.slug === city))
   ) {
     return false;
   }
 
-  if (!countryData) {
-    return notFound();
-  }
-
-  if (city && !countryData.cities.find((c) => c.slug === city)) {
-    return false;
-  }
-
-  return countryData;
+  return theCountry;
 }
 
 function getPossibleCities(theCity) {
@@ -125,7 +116,7 @@ export async function generateMetadata({
   //   );
   // }
 
-  const countryData = await getCountry(country, city);
+  const countryData = getCountry(country, city);
 
   if (!countryData) {
     return notFound();
@@ -242,7 +233,7 @@ export default async function Country({
   let { page, expandGalleries, sort, location, isWebStories } =
     getDataFromRoute(theLocation, searchParams);
 
-  const countryData = await getCountry(country, city);
+  const countryData = getCountry(country, city);
 
   if (!countryData) {
     return notFound();

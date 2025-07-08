@@ -21,24 +21,19 @@ import AdSense from '@/app/components/adsense';
 import getTypeLabel from '@/app/utils/get-type-label';
 import useEditMode from '@/app/utils/use-edit-mode';
 import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
+import countries from '@/app/utils/countries';
 
-async function getCountry(country, city) {
+function getCountry(country, city) {
+  const theCountry = countries.find((c) => c.slug === country);
+
   if (
-    !cachedCountries.includes(country) ||
-    (city && !cachedCities.includes(city))
+    !theCountry ||
+    (city && !theCountry.cities.find((c) => c.slug === city))
   ) {
     return false;
   }
 
-  const db = getFirestore();
-  const countryDoc = await db.collection('countries').doc(country).get();
-  const countryData = countryDoc.data();
-
-  if (city && !countryData.cities.find((c) => c.slug === city)) {
-    return false;
-  }
-
-  return countryData;
+  return theCountry;
 }
 
 function getSelectedMedia(media, theMedia, country, city) {
@@ -103,7 +98,7 @@ export async function generateMetadata({ params: { country, city, media } }) {
     redirect(cityPath + '/' + typePath + '/' + split[split.length - 1]);
   }
 
-  const countryData = await getCountry(country, city);
+  const countryData = getCountry(country, city);
 
   if (!countryData) {
     return notFound();
@@ -225,7 +220,7 @@ export default async function Country({
     return;
   }
 
-  const countryData = await getCountry(country, city);
+  const countryData = getCountry(country, city);
 
   if (!countryData) {
     return notFound();

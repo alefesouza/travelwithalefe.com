@@ -22,25 +22,19 @@ import expandDate from '@/app/utils/expand-date';
 import AdSense from '@/app/components/adsense';
 import addAds from '@/app/utils/add-ads';
 import useEditMode from '@/app/utils/use-edit-mode';
-import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
+import countries from '@/app/utils/countries';
 
-async function getCountry(country, city) {
+function getCountry(country, city) {
+  const theCountry = countries.find((c) => c.slug === country);
+
   if (
-    !cachedCountries.includes(country) ||
-    (city && !cachedCities.includes(city))
+    !theCountry ||
+    (city && !theCountry.cities.find((c) => c.slug === city))
   ) {
-    return notFound();
-  }
-
-  const db = getFirestore();
-  const countryDoc = await db.collection('countries').doc(country).get();
-  const countryData = countryDoc.data();
-
-  if (city && !countryData.cities.find((c) => c.slug === city)) {
     return false;
   }
 
-  return countryData;
+  return theCountry;
 }
 
 export async function generateMetadata({ params: { country, city, stories } }) {
@@ -51,7 +45,7 @@ export async function generateMetadata({ params: { country, city, stories } }) {
   const isBR = host().includes('viajarcomale.com.br');
   const isWebStories = stories && stories[stories.length - 1] === 'webstories';
 
-  const countryData = await getCountry(country, city);
+  const countryData = getCountry(country, city);
 
   if (!countryData) {
     return notFound();
@@ -159,7 +153,7 @@ export default async function Highlight({
       searchParams.sort) ||
     'asc';
 
-  const countryData = await getCountry(country, city);
+  const countryData = getCountry(country, city);
 
   if (!countryData) {
     return notFound();
