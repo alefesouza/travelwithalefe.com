@@ -626,30 +626,6 @@
     subtree: true,
   });
 
-  const bodyObserver = new MutationObserver(function (e) {
-    if (
-      e.every((i) => i.type === 'attributes') &&
-      document.querySelector(
-        '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
-      )
-    ) {
-      document
-        .querySelectorAll(
-          '[data-ad-status="unfilled"]:not(.adsbygoogle-noablate)'
-        )
-        .forEach((el) => {
-          el.parentElement.style.display = 'none';
-        });
-    }
-  });
-
-  bodyObserver.observe(document.querySelector('body'), {
-    characterData: false,
-    childList: true,
-    attributes: true,
-    subtree: true,
-  });
-
   setupLinks('body');
 
   if (

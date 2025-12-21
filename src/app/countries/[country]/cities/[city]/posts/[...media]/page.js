@@ -16,8 +16,6 @@ import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 import getTypePath from '@/app/utils/get-type-path';
-/* @ad */
-import AdSense from '@/app/components/adsense';
 import getTypeLabel from '@/app/utils/get-type-label';
 import useEditMode from '@/app/utils/use-edit-mode';
 import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
@@ -512,13 +510,6 @@ export default async function Country({
         theMedia.gallery.length > 0 &&
         theMedia.gallery.map((g, i) => (
           <div key={g.file} style={{ marginTop: 16 }}>
-            {/* @ad */}
-            {((i === 3 && theMedia.gallery.length >= 6) ||
-              (i === 6 && theMedia.gallery.length >= 9)) && (
-              <div className="container-fluid ad">
-                <AdSense index={i} />
-              </div>
-            )}
             <div className="container">
               <Media
                 key={g.file}
@@ -566,11 +557,6 @@ export default async function Country({
         ) : (
           <div />
         )}
-      </div>
-
-      {/* @ad */}
-      <div className="container-fluid ad">
-        <AdSense index={0} />
       </div>
 
       <div className="container">

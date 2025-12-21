@@ -10,7 +10,6 @@ import shuffle from '../utils/array-shuffle';
 import defaultMetadata from '../utils/default-metadata';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
-import AdSense from '../components/adsense';
 import { theCachedHashtags } from '../utils/cache-hashtags';
 
 export async function generateMetadata() {
@@ -135,11 +134,6 @@ export default async function MapPage() {
             isAndroid={isAndroid}
           />
         </div>
-      </div>
-
-      {/* @ad */}
-      <div className="ad">
-        <AdSense index={1} />
       </div>
     </div>
   );

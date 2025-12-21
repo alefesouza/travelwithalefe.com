@@ -21,9 +21,6 @@ import defaultMetadata from '@/app/utils/default-metadata';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
-// @ad
-import AdSense from '@/app/components/adsense';
-import addAds from '@/app/utils/add-ads';
 import expandPosts from '@/app/utils/expand-posts';
 import getItemsPagination from '@/app/utils/get-items-pagination';
 import SortPicker from '@/app/components/sort-picker';
@@ -531,12 +528,6 @@ export default async function Country({
 
   const maxPages = Math.ceil(theMedia.total / WEBSTORIES_ITEMS_PER_PAGE);
 
-  // @ad
-  instagramPhotos = addAds(instagramPhotos);
-
-  // @ad
-  mapsPhotos = addAds(mapsPhotos);
-
   const webStoriesHref = host(
     '/webstories/countries/' +
       country +
@@ -797,16 +788,6 @@ export default async function Country({
           </Scroller>
         )}
 
-        {/* @ad */}
-        {(shortVideos.length > 0 ||
-          youtubeVideos.length > 0 ||
-          _360photos.length > 0) &&
-          (instagramPhotos.length >= 8 || mapsPhotos.length >= 8) && (
-            <div className="container-fluid ad" style={{ textAlign: 'center' }}>
-              <AdSense index={1} />
-            </div>
-          )}
-
         {instagramPhotos.filter((p) => !p.file_type).length > 1 && (
           <SortPicker
             type="photos"
@@ -854,21 +835,14 @@ export default async function Country({
 
               <div className="instagram_highlights_items">
                 {instagramPhotos.map((p) => (
-                  <div key={p.id} className={p.type === 'ad' ? 'row-ad' : null}>
-                    {/* @ad */}
-                    {p.type === 'ad' ? (
-                      <AdSense index={p.id} />
-                    ) : (
-                      <Media
-                        key={p.id}
-                        media={p}
-                        isBR={isBR}
-                        expandGalleries={expandGalleries}
-                        isListing
-                        editMode={editMode}
-                      />
-                    )}
-                  </div>
+                  <Media
+                    key={p.id}
+                    media={p}
+                    isBR={isBR}
+                    expandGalleries={expandGalleries}
+                    isListing
+                    editMode={editMode}
+                  />
                 ))}
               </div>
             </div>
@@ -904,31 +878,19 @@ export default async function Country({
 
               <div className="instagram_highlights_items">
                 {mapsPhotos.map((p) => (
-                  <div key={p.id} className={p.type === 'ad' ? 'row-ad' : null}>
-                    {/* @ad */}
-                    {p.type === 'ad' ? (
-                      <AdSense index={p.id} />
-                    ) : (
-                      <Media
-                        key={p.id}
-                        media={p}
-                        isBR={isBR}
-                        expandGalleries={expandGalleries}
-                        isListing
-                        editMode={editMode}
-                      />
-                    )}
-                  </div>
+                  <Media
+                    key={p.id}
+                    media={p}
+                    isBR={isBR}
+                    expandGalleries={expandGalleries}
+                    isListing
+                    editMode={editMode}
+                  />
                 ))}
               </div>
             </div>
           </div>
         )}
-      </div>
-
-      {/* @ad */}
-      <div className="container-fluid ad" style={{ textAlign: 'center' }}>
-        <AdSense index={2} />
       </div>
 
       <script

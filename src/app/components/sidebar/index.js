@@ -12,7 +12,6 @@ import Footer from '@/app/components/footer';
 import Autocomplete from '@/app/components/autocomplete';
 import NavbarLinks from '@/app/components/navbar-links';
 import { SITE_NAME } from '@/app/utils/constants';
-import AdSense from '@/app/components/adsense';
 import socialLinks from '@/app/utils/social-links';
 
 export default async function Sidebar({ isSubPage }) {
@@ -56,14 +55,6 @@ export default async function Sidebar({ isSubPage }) {
       </nav>
       <div className="container">
         <Autocomplete />
-      </div>
-
-      <div style={{ marginTop: 36 }}>
-        {isSubPage ? (
-          <AdSense index="sidebar" isTopBanner isSidebar />
-        ) : (
-          <AdSense index="main" isTopBanner />
-        )}
       </div>
 
       <Top />

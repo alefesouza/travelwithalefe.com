@@ -7,8 +7,6 @@ import { SITE_NAME, USE_CACHE } from '@/app/utils/constants';
 import defaultMetadata from '@/app/utils/default-metadata';
 import logAccess from '@/app/utils/log-access';
 import styles from '../page.module.css';
-// @ad
-import AdSense from '@/app/components/adsense';
 import Editable from '@/app/components/editable/editable';
 import useEditMode from '@/app/utils/use-edit-mode';
 import { theCachedCoupons } from '@/app/utils/cache-coupons';
@@ -166,11 +164,6 @@ export default async function Coupons({ params: { coupon }, searchParams }) {
             )}
           </div>
         </div>
-      </div>
-
-      {/* @ad */}
-      <div className="ad">
-        <AdSense index={1} />
       </div>
     </>
   );

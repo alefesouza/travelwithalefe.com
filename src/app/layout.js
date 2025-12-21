@@ -244,12 +244,6 @@ export default function RootLayout({ children }) {
               />
             </>
           )}
-          {/* @ad */}
-          <script
-            async
-            src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6770185635428450"
-            crossOrigin="anonymous"
-          ></script>
         </head>
       )}
 
@@ -284,13 +278,6 @@ export default function RootLayout({ children }) {
               async
               custom-element="amp-story"
               src="https://cdn.ampproject.org/v0/amp-story-1.0.js"
-              className="amp-asset"
-            ></script>
-            {/* @ad */}
-            <script
-              async
-              custom-element="amp-story-auto-ads"
-              src="https://cdn.ampproject.org/v0/amp-story-auto-ads-0.1.js"
               className="amp-asset"
             ></script>
           </head>

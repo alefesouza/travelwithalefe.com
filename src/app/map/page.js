@@ -7,7 +7,6 @@ import { SITE_NAME, USE_CACHE } from '../utils/constants';
 import Link from 'next/link';
 import ShareButton from '../components/share-button';
 import defaultMetadata from '../utils/default-metadata';
-import AdSense from '../components/adsense';
 import { theCachedLocations } from '../utils/cache-locations';
 import countries from '../utils/countries';
 import useEditMode from '@/app/utils/use-edit-mode';
@@ -135,11 +134,6 @@ export default async function MapPage({ searchParams }) {
         resetZoomText={i18n('Reset Zoom')}
         apiKey={process.env.NEXT_MAPS_API_KEY}
       />
-
-      {/* @ad */}
-      <div className="ad">
-        <AdSense index={1} />
-      </div>
     </div>
   );
 }

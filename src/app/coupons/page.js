@@ -7,8 +7,6 @@ import { SITE_NAME, USE_CACHE } from '@/app/utils/constants';
 import defaultMetadata from '@/app/utils/default-metadata';
 import logAccess from '@/app/utils/log-access';
 import styles from './page.module.css';
-// @ad
-import AdSense from '../components/adsense';
 import Editable from '../components/editable/editable';
 import useEditMode from '../utils/use-edit-mode';
 import { theCachedCoupons } from '../utils/cache-coupons';
@@ -210,21 +208,12 @@ export default async function Coupons({ searchParams }) {
         </div>
       </div>
 
-      <div className="container-fluid ad">
-        <AdSense index={0} />
-      </div>
-
       <div className="container">
         <div className="instagram_highlights_items">
           {coupons.slice(8).map((item) => (
             <Coupon item={item} key={item.slug} editMode={editMode} />
           ))}
         </div>
-      </div>
-
-      {/* @ad */}
-      <div className="ad">
-        <AdSense index={1} />
       </div>
     </>
   );

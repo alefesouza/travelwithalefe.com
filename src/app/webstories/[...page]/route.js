@@ -188,11 +188,6 @@ export async function GET(req) {
         '</style>'
     );
 
-    // @ad
-    $('amp-story').append(
-      `<amp-story-auto-ads><script type="application/json">{ "ad-attributes": { "type": "adsense", "data-ad-client": "${process.env.NEXT_GOOGLE_ADSENSE_ACCOUNT}", "data-ad-slot": "${process.env.NEXT_GOOGLE_ADSENSE_WEB_STORIES_AD_SLOT}" } }</script></amp-story-auto-ads>`
-    );
-
     html = $.html();
 
     if (sort !== 'random') {
@@ -212,9 +207,6 @@ export async function GET(req) {
     let $ = require('cheerio').load(html.toString());
     $('amp-story-auto-analytics').remove();
     $('[custom-element="amp-story-auto-analytics"]').remove();
-    // @ad
-    $('amp-story-auto-ads').remove();
-    $('[custom-element="amp-story-auto-ads"]').remove();
     html = $.html();
   }
 

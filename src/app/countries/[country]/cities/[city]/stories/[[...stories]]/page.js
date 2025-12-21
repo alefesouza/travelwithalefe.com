@@ -22,9 +22,6 @@ import Country, {
 } from '../../posts/[...media]/page';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
-// @ad
-import AdSense from '@/app/components/adsense';
-import addAds from '@/app/utils/add-ads';
 import useEditMode from '@/app/utils/use-edit-mode';
 import countries from '@/app/utils/countries';
 import { cachedMedias } from '@/app/utils/cache-medias';
@@ -396,9 +393,6 @@ export default async function Highlight({
     );
   }
 
-  // @ad
-  instagramStories = addAds(instagramStories);
-
   let newShuffle = randomIntFromInterval(1, 15);
 
   if (newShuffle == searchParams.shuffle) {
@@ -561,31 +555,19 @@ export default async function Highlight({
 
               <div className="instagram_highlights_items">
                 {instagramStories.map((p) => (
-                  <div key={p.id} className={p.type === 'ad' ? 'row-ad' : null}>
-                    {/* @ad */}
-                    {p.type === 'ad' ? (
-                      <AdSense index={p.id} />
-                    ) : (
-                      <Media
-                        media={p}
-                        isBR={isBR}
-                        key={p.id}
-                        hasPoster
-                        isListing
-                        editMode={editMode}
-                      />
-                    )}
-                  </div>
+                  <Media
+                    media={p}
+                    isBR={isBR}
+                    key={p.id}
+                    hasPoster
+                    isListing
+                    editMode={editMode}
+                  />
                 ))}
               </div>
             </div>
           </div>
         )}
-      </div>
-
-      {/* @ad */}
-      <div className="container-fluid ad" style={{ textAlign: 'center' }}>
-        <AdSense index={2} />
       </div>
 
       <StructuredBreadcrumbs breadcrumbs={breadcrumbs} />

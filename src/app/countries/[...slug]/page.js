@@ -22,9 +22,6 @@ import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 import LocationsMap from '@/app/components/locations-map';
-// @ad
-import AdSense from '@/app/components/adsense';
-import addAds from '@/app/utils/add-ads';
 import { notFound } from 'next/navigation';
 import useEditMode from '@/app/utils/use-edit-mode';
 import {
@@ -60,7 +57,7 @@ function getDataFromRoute(slug, searchParams) {
     path1 === 'expand' || path3 === 'expand' || path5 === 'expand';
   let sort =
     (searchParams.sort &&
-      ['asc', 'desc'].includes(searchParams.sort) &&
+      ['asc', 'desc', 'random'].includes(searchParams.sort) &&
       searchParams.sort) ||
     'desc';
 
@@ -326,7 +323,6 @@ export default async function Country({ params: { slug }, searchParams }) {
     let youtubeSnapshot = [];
     let _360PhotosSnapshot = [];
     let mapsPhotosSnapshot = [];
-    let isRandom = false;
 
     if (!cache.exists || isRandom) {
       if (isRandom) {
@@ -483,16 +479,16 @@ export default async function Country({ params: { slug }, searchParams }) {
       }
 
       if (!isRandom) {
-        if (sort === 'asc') {
-          instagramPhotosSnapshot =
-            instagramPhotosSnapshot.startAt(paginationStart);
-          mapsPhotosSnapshot = mapsPhotosSnapshot.startAt(paginationMapsStart);
-        } else {
-          instagramPhotosSnapshot =
-            instagramPhotosSnapshot.startAfter(paginationStart);
-          mapsPhotosSnapshot =
-            mapsPhotosSnapshot.startAfter(paginationMapsStart);
-        }
+        // if (sort === 'asc') {
+        //   instagramPhotosSnapshot =
+        //     instagramPhotosSnapshot.startAt(paginationStart);
+        //   mapsPhotosSnapshot = mapsPhotosSnapshot.startAt(paginationMapsStart);
+        // } else {
+        //   instagramPhotosSnapshot =
+        //     instagramPhotosSnapshot.startAfter(paginationStart);
+        //   mapsPhotosSnapshot =
+        //     mapsPhotosSnapshot.startAfter(paginationMapsStart);
+        // }
 
         instagramPhotosSnapshot = await instagramPhotosSnapshot
           .limit(ITEMS_PER_PAGE)
@@ -623,8 +619,8 @@ export default async function Country({ params: { slug }, searchParams }) {
 
   const index = city ? 'city_index' : 'country_index';
 
-  if (USE_CACHE) {
-    if (isRandom) {
+  if (isRandom) {
+    if (USE_CACHE) {
       instagramHighLights = arrayShuffle(instagramHighLights);
       shortVideos = arrayShuffle(shortVideos);
       youtubeVideos = arrayShuffle(youtubeVideos);
@@ -633,31 +629,31 @@ export default async function Country({ params: { slug }, searchParams }) {
       mapsPhotos = arrayShuffle(mapsPhotos);
 
       sort = 'random';
+    } else {
+      instagramHighLights = instagramHighLights
+        .map((value) => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value);
+      shortVideos = shortVideos
+        .map((value) => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value);
+      youtubeVideos = youtubeVideos
+        .map((value) => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value);
+      _360photos = _360photos
+        .map((value) => ({ value, sort: Math.random() }))
+        .sort((a, b) => a.sort - b.sort)
+        .map(({ value }) => value);
+      instagramPhotos = instagramPhotos.sort(
+        (a, b) => randomArray.indexOf(a[index]) - randomArray.indexOf(b[index])
+      );
+      mapsPhotos = mapsPhotos.sort(
+        (a, b) => randomArray.indexOf(a[index]) - randomArray.indexOf(b[index])
+      );
+      sort = 'random';
     }
-  } else {
-    instagramHighLights = instagramHighLights
-      .map((value) => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value);
-    shortVideos = shortVideos
-      .map((value) => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value);
-    youtubeVideos = youtubeVideos
-      .map((value) => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value);
-    _360photos = _360photos
-      .map((value) => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value);
-    instagramPhotos = instagramPhotos.sort(
-      (a, b) => randomArray.indexOf(a[index]) - randomArray.indexOf(b[index])
-    );
-    mapsPhotos = mapsPhotos.sort(
-      (a, b) => randomArray.indexOf(a[index]) - randomArray.indexOf(b[index])
-    );
-    sort = 'random';
   }
 
   if (expandGalleries) {
@@ -724,8 +720,10 @@ export default async function Country({ params: { slug }, searchParams }) {
 
   logAccess(currentPath + ('?sort=' + sort));
 
+  let newShuffle = null;
+
   if (!USE_CACHE) {
-    let newShuffle = randomIntFromInterval(1, 15);
+    newShuffle = randomIntFromInterval(1, 15);
 
     if (newShuffle == searchParams.shuffle) {
       newShuffle = randomIntFromInterval(1, 15);
@@ -802,11 +800,6 @@ export default async function Country({ params: { slug }, searchParams }) {
     });
   }
 
-  // @ad
-  instagramPhotos = addAds(instagramPhotos);
-
-  // @ad
-  mapsPhotos = addAds(mapsPhotos);
   let locations = [];
 
   if (USE_CACHE) {
@@ -1014,17 +1007,6 @@ export default async function Country({ params: { slug }, searchParams }) {
           />
         )}
 
-        {/* @ad */}
-        {(instagramHighLights.length > 0 ||
-          shortVideos.length > 0 ||
-          youtubeVideos.length > 0 ||
-          _360photos.length > 0) &&
-          (instagramPhotos.length >= 8 || mapsPhotos.length >= 8) && (
-            <div className="container-fluid ad">
-              <AdSense index={1} />
-            </div>
-          )}
-
         {instagramPhotos.filter((p) => !p.file_type).length > 1 &&
           sortPicker('photos')}
 
@@ -1066,21 +1048,14 @@ export default async function Country({ params: { slug }, searchParams }) {
 
               <div className="instagram_highlights_items">
                 {instagramPhotos.map((p, i) => (
-                  <div key={p.id} className={p.type === 'ad' ? 'row-ad' : null}>
-                    {/* @ad */}
-                    {p.type === 'ad' ? (
-                      <AdSense index={p.id} />
-                    ) : (
-                      <Media
-                        key={p.id}
-                        media={p}
-                        isBR={isBR}
-                        expandGalleries={expandGalleries}
-                        isListing
-                        editMode={editMode}
-                      />
-                    )}
-                  </div>
+                  <Media
+                    key={p.id}
+                    media={p}
+                    isBR={isBR}
+                    expandGalleries={expandGalleries}
+                    isListing
+                    editMode={editMode}
+                  />
                 ))}
               </div>
 
@@ -1114,13 +1089,6 @@ export default async function Country({ params: { slug }, searchParams }) {
           </div>
         )}
 
-        {/* @ad */}
-        {instagramPhotos.length > 16 && (
-          <div className="container-fluid ad" style={{ textAlign: 'center' }}>
-            <AdSense index={5} />
-          </div>
-        )}
-
         {mapsPhotos.filter((p) => !p.file_type).length > 1 &&
           sortPicker('maps')}
 
@@ -1144,21 +1112,14 @@ export default async function Country({ params: { slug }, searchParams }) {
 
               <div className="instagram_highlights_items">
                 {mapsPhotos.map((p, i) => (
-                  <div key={p.id} className={p.type === 'ad' ? 'row-ad' : null}>
-                    {/* @ad */}
-                    {p.type === 'ad' ? (
-                      <AdSense index={p.id} />
-                    ) : (
-                      <Media
-                        key={p.id}
-                        media={p}
-                        isBR={isBR}
-                        expandGalleries={expandGalleries}
-                        isListing
-                        editMode={editMode}
-                      />
-                    )}
-                  </div>
+                  <Media
+                    key={p.id}
+                    media={p}
+                    isBR={isBR}
+                    expandGalleries={expandGalleries}
+                    isListing
+                    editMode={editMode}
+                  />
                 ))}
               </div>
 
@@ -1194,11 +1155,6 @@ export default async function Country({ params: { slug }, searchParams }) {
             </div>
           </div>
         )}
-      </div>
-
-      {/* @ad */}
-      <div className="container-fluid ad" style={{ textAlign: 'center' }}>
-        <AdSense index={2} />
       </div>
 
       {breadcrumbs.length && (
