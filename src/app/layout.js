@@ -1,7 +1,6 @@
 import './globals.css';
 import { customInitApp } from './firebase';
 customInitApp();
-import Script from 'next/script';
 import useHost from './hooks/use-host';
 import useI18n from './hooks/use-i18n';
 import { SITE_NAME } from './utils/constants';
@@ -174,7 +173,7 @@ export default function RootLayout({ children }) {
           )}
           {pathname === '/' && (
             <>
-              <Script
+              <script
                 id="ld-website"
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
@@ -204,8 +203,8 @@ export default function RootLayout({ children }) {
                     },
                   }),
                 }}
-              ></Script>
-              <Script
+              ></script>
+              <script
                 id="ld-organization"
                 type="application/ld+json"
                 dangerouslySetInnerHTML={{
@@ -223,7 +222,7 @@ export default function RootLayout({ children }) {
                     ],
                   }),
                 }}
-              ></Script>
+              ></script>
             </>
           )}
           {!ignoreAnalytics && (

@@ -17,4 +17,8 @@ export const RSS_HASHTAGS = [
   'video360',
   'comidastipicas',
   'typicalfood',
+  'saltlakecity',
+  'grandcanyon',
+  'losangeles',
+  'roadtriplaxslc',
 ];

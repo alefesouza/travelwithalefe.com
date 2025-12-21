@@ -3,7 +3,11 @@ import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
 import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
-import { SITE_NAME, WEBSTORIES_ITEMS_PER_PAGE } from '@/app/utils/constants';
+import {
+  SITE_NAME,
+  USE_CACHE,
+  WEBSTORIES_ITEMS_PER_PAGE,
+} from '@/app/utils/constants';
 import { notFound, redirect } from 'next/navigation';
 import Media from '@/app/components/media';
 import ShareButton from '@/app/components/share-button';
@@ -23,6 +27,8 @@ import AdSense from '@/app/components/adsense';
 import addAds from '@/app/utils/add-ads';
 import useEditMode from '@/app/utils/use-edit-mode';
 import countries from '@/app/utils/countries';
+import { cachedMedias } from '@/app/utils/cache-medias';
+import arrayShuffle from '@/app/utils/array-shuffle';
 
 function getCountry(country, city) {
   const theCountry = countries.find((c) => c.slug === country);
@@ -65,20 +71,30 @@ export async function generateMetadata({ params: { country, city, stories } }) {
 
   const db = getFirestore();
 
-  const instagramHighLightsSnapshot = await db
-    .collection('countries')
-    .doc(country)
-    .collection('cities')
-    .doc(city)
-    .collection('medias')
-    .where('type', '==', 'story')
-    .where('is_highlight', '==', true)
-    .get();
+  if (USE_CACHE) {
+    theMedia = cachedMedias.find(
+      (m) =>
+        m.country === country &&
+        m.city === city &&
+        m.type === 'story' &&
+        m.is_highlight
+    );
+  } else {
+    const instagramHighLightsSnapshot = await db
+      .collection('countries')
+      .doc(country)
+      .collection('cities')
+      .doc(city)
+      .collection('medias')
+      .where('type', '==', 'story')
+      .where('is_highlight', '==', true)
+      .get();
 
-  instagramHighLightsSnapshot.forEach((media) => {
-    const data = media.data();
-    theMedia = data;
-  });
+    instagramHighLightsSnapshot.forEach((media) => {
+      const data = media.data();
+      theMedia = data;
+    });
+  }
 
   if (stories && stories[stories.length - 1] !== 'webstories') {
     return generateMediaMetadata({
@@ -149,7 +165,7 @@ export default async function Highlight({
 
   let sort =
     (searchParams.sort &&
-      ['asc', 'desc'].includes(searchParams.sort) &&
+      ['asc', 'desc', 'random'].includes(searchParams.sort) &&
       searchParams.sort) ||
     'asc';
 
@@ -172,21 +188,24 @@ export default async function Highlight({
     });
   }
 
-  const cacheRef = `/caches/stories/stories-cache/${theCity.slug}/sort/${
-    sort === 'asc' ? 'asc' : 'desc'
-  }`;
-
-  const db = getFirestore();
-
   let cache = null;
+  let cacheRef = null;
 
-  if (editMode) {
-    cache = { exists: false };
-  } else {
-    cache = await db.doc(cacheRef).get();
+  if (!USE_CACHE) {
+    cacheRef = `/caches/stories/stories-cache/${theCity.slug}/sort/${
+      sort === 'asc' ? 'asc' : 'desc'
+    }`;
+
+    const db = getFirestore();
+
+    if (editMode) {
+      cache = { exists: false };
+    } else {
+      cache = await db.doc(cacheRef).get();
+    }
   }
 
-  let isRandom = false;
+  let isRandom = sort === 'random';
   const isWebStories = stories && stories[stories.length - 1] === 'webstories';
 
   if (isRandom) {
@@ -195,24 +214,30 @@ export default async function Highlight({
 
   let photos = [];
 
-  if (!cache.exists || isWebStories) {
-    let photosSnapshot = await db
-      .collection('countries')
-      .doc(country)
-      .collection('cities')
-      .doc(city)
-      .collection('medias');
+  if (USE_CACHE) {
+    let photosSnapshot = cachedMedias.filter(
+      (m) => m.country === country && m.city === city
+    );
 
     if (!isWebStories) {
-      photosSnapshot = photosSnapshot.where('type', '==', 'story');
+      photosSnapshot = photosSnapshot.filter((m) => m.type === 'story');
     }
 
-    photosSnapshot = await photosSnapshot.orderBy('order', sort).get();
+    if (sort === 'desc') {
+      function sortByDateDesc(a, b) {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      }
 
-    photosSnapshot.forEach((photo) => {
-      const data = photo.data();
-      data.path = photo.ref.path;
+      photosSnapshot = photosSnapshot.sort(sortByDateDesc);
+    } else {
+      function sortByDateAsc(a, b) {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      }
 
+      photosSnapshot = photosSnapshot.sort(sortByDateAsc);
+    }
+
+    photosSnapshot.forEach((data) => {
       if (data.type === 'story') {
         data.link =
           'https://www.instagram.com/stories/highlights/' +
@@ -222,32 +247,63 @@ export default async function Highlight({
 
       photos = [...photos, data];
     });
-
-    if (!photos.length) {
-      return notFound();
-    }
-
-    if (!isRandom && !isWebStories && !cache.exists) {
-      db.doc(cacheRef).set({
-        photos,
-        last_update: new Date().toISOString().split('T')[0],
-        user_agent: headers().get('user-agent'),
-      });
-    }
   } else {
-    photos = cache.data().photos;
+    const db = getFirestore();
+
+    if (!cache.exists || isWebStories) {
+      let photosSnapshot = await db
+        .collection('countries')
+        .doc(country)
+        .collection('cities')
+        .doc(city)
+        .collection('medias');
+
+      if (!isWebStories) {
+        photosSnapshot = photosSnapshot.where('type', '==', 'story');
+      }
+
+      photosSnapshot = await photosSnapshot.orderBy('order', sort).get();
+
+      photosSnapshot.forEach((photo) => {
+        const data = photo.data();
+        data.path = photo.ref.path;
+
+        if (data.type === 'story') {
+          data.link =
+            'https://www.instagram.com/stories/highlights/' +
+            data.original_id +
+            '/';
+        }
+
+        photos = [...photos, data];
+      });
+
+      if (!photos.length) {
+        return notFound();
+      }
+
+      if (!isRandom && !isWebStories && !cache.exists) {
+        db.doc(cacheRef).set({
+          photos,
+          last_update: new Date().toISOString().split('T')[0],
+          user_agent: headers().get('user-agent'),
+        });
+      }
+    } else {
+      photos = cache.data().photos;
+    }
+  }
+
+  if (!photos.length) {
+    return notFound();
   }
 
   if (isRandom) {
-    photos = photos
-      .map((value) => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value);
+    photos = arrayShuffle(photos);
     sort = 'random';
   }
 
   logAccess(
-    db,
     host((isWebStories ? '/webstories' : '') + '/stories/') +
       theCity.slug +
       ('?sort=' + sort)
@@ -374,17 +430,11 @@ export default async function Highlight({
         {[
           { name: 'Latest', value: 'desc' },
           { name: 'Oldest', value: 'asc' },
-          // { name: 'Random', value: 'random' },
+          { name: 'Random', value: 'random' },
         ].map((o) => (
           <Link
             key={o}
-            href={
-              // o.value === 'random'
-              //   ? sort === 'random'
-              //     ? basePath
-              //     : basePath + '?sort=random&shuffle=' + newShuffle
-              o.value !== 'asc' ? '?sort=' + o.value : basePath
-            }
+            href={o.value !== 'asc' ? '?sort=' + o.value : basePath}
             scroll={false}
           >
             <label>

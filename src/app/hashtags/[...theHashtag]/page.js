@@ -3,7 +3,11 @@ import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
 import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
-import { SITE_NAME, WEBSTORIES_ITEMS_PER_PAGE } from '@/app/utils/constants';
+import {
+  SITE_NAME,
+  USE_CACHE,
+  WEBSTORIES_ITEMS_PER_PAGE,
+} from '@/app/utils/constants';
 import Scroller from '@/app/components/scroller';
 import { notFound, permanentRedirect } from 'next/navigation';
 import Media from '@/app/components/media';
@@ -27,6 +31,9 @@ import useEditMode from '@/app/utils/use-edit-mode';
 import Editable from '@/app/components/editable/editable';
 import { RSS_HASHTAGS } from '@/app/utils/rss-hashtags';
 import { cachedHashtags } from '@/app/utils/cache-data';
+import { theCachedHashtags } from '../../utils/cache-hashtags';
+import { cachedMedias } from '../../utils/cache-medias';
+import arrayShuffle from '@/app/utils/array-shuffle';
 
 function getDataFromRoute(slug, searchParams) {
   const [hashtag, path1, path2, path3] = slug;
@@ -67,8 +74,18 @@ export async function generateMetadata({
     searchParams
   );
 
-  if (!cachedHashtags.includes(hashtag)) {
-    return notFound();
+  if (USE_CACHE) {
+    if (
+      !theCachedHashtags.find(
+        (h) => h.name === hashtag || h.name_pt === hashtag
+      )
+    ) {
+      return notFound();
+    }
+  } else {
+    if (!cachedHashtags.includes(hashtag)) {
+      return notFound();
+    }
   }
 
   // if (
@@ -97,32 +114,50 @@ export async function generateMetadata({
   );
 
   const db = getFirestore();
-  const hashtagPtSnapshot = await db
-    .collection('hashtags')
-    .where('name_pt', '==', hashtag)
-    .get();
+
   let hashtagPt = null;
   let hashtagEn = null;
 
-  hashtagPtSnapshot.forEach((doc) => {
-    hashtagPt = doc.data();
-  });
+  if (USE_CACHE) {
+    hashtagPt = theCachedHashtags.find((h) => h.name_pt === hashtag);
 
-  if (!hashtagPt) {
-    const hashtagEnDoc = await db.collection('hashtags').doc(hashtag).get();
-    hashtagEn = hashtagEnDoc.data();
+    if (!hashtagPt) {
+      hashtagEn = theCachedHashtags.find((h) => h.name === hashtag);
+    }
+  } else {
+    const hashtagPtSnapshot = await db
+      .collection('hashtags')
+      .where('name_pt', '==', hashtag)
+      .get();
+
+    hashtagPtSnapshot.forEach((doc) => {
+      hashtagPt = doc.data();
+    });
+
+    if (!hashtagPt) {
+      const hashtagEnDoc = await db.collection('hashtags').doc(hashtag).get();
+      hashtagEn = hashtagEnDoc.data();
+    }
   }
 
   if (!hashtagPt && !hashtagEn) {
-    const hashtagAlternateDoc = await db
-      .collection('hashtags')
-      .where('alternate_tags', 'array-contains', hashtag)
-      .get();
     let hashtagAlternate = null;
 
-    hashtagAlternateDoc.forEach((doc) => {
-      hashtagAlternate = doc.data();
-    });
+    if (USE_CACHE) {
+      hashtagAlternate = theCachedHashtags.find(
+        (h) => h.alternate_tags && h.alternate_tags.includes(hashtag)
+      );
+    } else {
+      const hashtagAlternateDoc = await db
+        .collection('hashtags')
+        .where('alternate_tags', 'array-contains', hashtag)
+        .get();
+      hashtagAlternate = null;
+
+      hashtagAlternateDoc.forEach((doc) => {
+        hashtagAlternate = doc.data();
+      });
+    }
 
     if (hashtagAlternate) {
       permanentRedirect(
@@ -159,30 +194,65 @@ export async function generateMetadata({
   }
 
   const sort = getSort(searchParams, false, false);
-  let coverSnapshot = await db
-    .collectionGroup('medias')
-    .where('highlight_hashtags', 'array-contains', finalHashtag.name)
-    .limit(1)
-    .get();
-
-  if (coverSnapshot.size === 0) {
-    coverSnapshot = await db
-      .collectionGroup('medias')
-      .where('hashtags', 'array-contains', finalHashtag.name)
-      .orderBy('date', sort)
-      .limit(isWebStories ? 1 : 2)
-      .get();
-  }
-
   let cover = null;
 
-  coverSnapshot.forEach((photo) => {
-    const data = photo.data();
+  if (USE_CACHE) {
+    let coverSnapshot = cachedMedias.filter(
+      (m) =>
+        m.highlight_hashtags && m.highlight_hashtags.includes(finalHashtag.name)
+    );
 
-    if ((cover && cover.type === 'post') || !cover) {
-      cover = data;
+    if (!coverSnapshot.length) {
+      coverSnapshot = cachedMedias.filter(
+        (m) => m.hashtags && m.hashtags.includes(finalHashtag.name)
+      );
+
+      if (sort === 'desc') {
+        function sortByDateDesc(a, b) {
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        }
+
+        coverSnapshot = coverSnapshot.sort(sortByDateDesc);
+      } else {
+        function sortByDateAsc(a, b) {
+          return new Date(a.date).getTime() - new Date(b.date).getTime();
+        }
+
+        coverSnapshot = coverSnapshot.sort(sortByDateAsc);
+      }
+
+      coverSnapshot = coverSnapshot.slice(0, isWebStories ? 1 : 2);
     }
-  });
+
+    coverSnapshot.forEach((data) => {
+      if ((cover && cover.type === 'post') || !cover) {
+        cover = data;
+      }
+    });
+  } else {
+    let coverSnapshot = await db
+      .collectionGroup('medias')
+      .where('highlight_hashtags', 'array-contains', finalHashtag.name)
+      .limit(1)
+      .get();
+
+    if (coverSnapshot.size === 0) {
+      coverSnapshot = await db
+        .collectionGroup('medias')
+        .where('hashtags', 'array-contains', finalHashtag.name)
+        .orderBy('date', sort)
+        .limit(isWebStories ? 1 : 2)
+        .get();
+    }
+
+    coverSnapshot.forEach((photo) => {
+      const data = photo.data();
+
+      if ((cover && cover.type === 'post') || !cover) {
+        cover = data;
+      }
+    });
+  }
 
   if (!cover) {
     return notFound();
@@ -254,25 +324,44 @@ export default async function Country({
     searchParams
   );
 
-  if (!cachedHashtags.includes(hashtag)) {
-    return notFound();
+  if (USE_CACHE) {
+    if (
+      !theCachedHashtags.find(
+        (h) => h.name === hashtag || h.name_pt === hashtag
+      )
+    ) {
+      return notFound();
+    }
+  } else {
+    if (!cachedHashtags.includes(hashtag)) {
+      return notFound();
+    }
   }
 
   const db = getFirestore();
-  const hashtagPtSnapshot = await db
-    .collection('hashtags')
-    .where('name_pt', '==', hashtag)
-    .get();
   let hashtagPt = null;
   let hashtagEn = null;
 
-  hashtagPtSnapshot.forEach((doc) => {
-    hashtagPt = doc.data();
-  });
+  if (USE_CACHE) {
+    hashtagPt = theCachedHashtags.find((h) => h.name_pt === hashtag);
 
-  if (!hashtagPt) {
-    const hashtagEnDoc = await db.collection('hashtags').doc(hashtag).get();
-    hashtagEn = hashtagEnDoc.data();
+    if (!hashtagPt) {
+      hashtagEn = theCachedHashtags.find((h) => h.name === hashtag);
+    }
+  } else {
+    const hashtagPtSnapshot = await db
+      .collection('hashtags')
+      .where('name_pt', '==', hashtag)
+      .get();
+
+    hashtagPtSnapshot.forEach((doc) => {
+      hashtagPt = doc.data();
+    });
+
+    if (!hashtagPt) {
+      const hashtagEnDoc = await db.collection('hashtags').doc(hashtag).get();
+      hashtagEn = hashtagEnDoc.data();
+    }
   }
 
   const finalHashtag = hashtagPt || hashtagEn;
@@ -282,20 +371,21 @@ export default async function Country({
   }
 
   hashtag = finalHashtag.name;
-
-  const cacheRef = `/caches/hashtags/hashtags-cache/${hashtag}/sort/${
-    sort === 'asc' ? 'asc' : 'desc'
-  }`;
-
   let cache = null;
 
-  if (editMode) {
-    cache = { exists: false };
-  } else {
-    cache = await db.doc(cacheRef).get();
+  if (!USE_CACHE) {
+    const cacheRef = `/caches/hashtags/hashtags-cache/${hashtag}/sort/${
+      sort === 'asc' ? 'asc' : 'desc'
+    }`;
+
+    if (editMode) {
+      cache = { exists: false };
+    } else {
+      cache = await db.doc(cacheRef).get();
+    }
   }
 
-  let isRandom = false;
+  let isRandom = sort === 'random';
 
   if (isRandom) {
     sort = 'desc';
@@ -303,59 +393,81 @@ export default async function Country({
 
   let photos = [];
 
-  if (!cache.exists || isWebStories) {
-    const photosSnapshot = await db
-      .collectionGroup('medias')
-      .where('hashtags', 'array-contains', hashtag)
-      .orderBy('date', sort)
-      .get();
+  if (USE_CACHE) {
+    let photosSnapshot = cachedMedias.filter(
+      (m) => m.hashtags && m.hashtags.includes(hashtag)
+    );
 
-    photosSnapshot.forEach((photo) => {
-      const data = photo.data();
-      data.path = photo.ref.path;
+    if (sort === 'desc') {
+      function sortByDateDesc(a, b) {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      }
 
+      photosSnapshot = photosSnapshot.sort(sortByDateDesc);
+    } else {
+      function sortByDateAsc(a, b) {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      }
+
+      photosSnapshot = photosSnapshot.sort(sortByDateAsc);
+    }
+
+    photosSnapshot.forEach((data) => {
       photos = [...photos, data];
     });
-
-    if (!photos.length) {
-      const hashtagAlternateDoc = await db
-        .collection('hashtags')
-        .where('alternate_tags', 'array-contains', hashtag)
-        .get();
-      let hashtagAlternate = null;
-
-      hashtagAlternateDoc.forEach((doc) => {
-        hashtagAlternate = doc.data();
-      });
-
-      if (hashtagAlternate) {
-        permanentRedirect(
-          '/hashtags/' +
-            (isBR && hashtagAlternate.name_pt
-              ? hashtagAlternate.name_pt
-              : hashtagAlternate.name)
-        );
-      } else {
-        return notFound();
-      }
-    }
-
-    if (!isRandom && !cache.exists) {
-      db.doc(cacheRef).set({
-        photos,
-        last_update: new Date().toISOString().split('T')[0],
-        user_agent: headers().get('user-agent'),
-      });
-    }
   } else {
-    photos = cache.data().photos;
+    if (!cache.exists || isWebStories) {
+      const photosSnapshot = await db
+        .collectionGroup('medias')
+        .where('hashtags', 'array-contains', hashtag)
+        .orderBy('date', sort)
+        .get();
+
+      photosSnapshot.forEach((photo) => {
+        const data = photo.data();
+        data.path = photo.ref.path;
+
+        photos = [...photos, data];
+      });
+
+      if (!photos.length) {
+        const hashtagAlternateDoc = await db
+          .collection('hashtags')
+          .where('alternate_tags', 'array-contains', hashtag)
+          .get();
+        let hashtagAlternate = null;
+
+        hashtagAlternateDoc.forEach((doc) => {
+          hashtagAlternate = doc.data();
+        });
+
+        if (hashtagAlternate) {
+          permanentRedirect(
+            '/hashtags/' +
+              (isBR && hashtagAlternate.name_pt
+                ? hashtagAlternate.name_pt
+                : hashtagAlternate.name)
+          );
+        } else {
+          return notFound();
+        }
+      }
+
+      if (!isRandom && !cache.exists) {
+        db.doc(cacheRef).set({
+          photos,
+          last_update: new Date().toISOString().split('T')[0],
+          user_agent: headers().get('user-agent'),
+        });
+      }
+    } else {
+      photos = cache.data().photos;
+    }
   }
 
   if (isRandom) {
-    photos = photos
-      .map((value) => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value);
+    photos = arrayShuffle(photos);
+
     sort = 'random';
   }
 
@@ -456,7 +568,6 @@ export default async function Country({
   mapsPhotos = addAds(mapsPhotos);
 
   logAccess(
-    db,
     host('/hashtags/') +
       hashtag +
       (expandGalleries ? '/expand' : '') +

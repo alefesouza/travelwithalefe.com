@@ -2,7 +2,12 @@ import { parse } from 'js2xmlparser';
 import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
 import { getFirestore } from 'firebase-admin/firestore';
-import { FILE_DOMAIN, ITEMS_PER_PAGE, SITE_NAME } from '@/app/utils/constants';
+import {
+  FILE_DOMAIN,
+  ITEMS_PER_PAGE,
+  SITE_NAME,
+  USE_CACHE,
+} from '@/app/utils/constants';
 import removeDiacritics from '@/app/utils/remove-diacritics';
 import getMetadata from '@/app/utils/get-metadata';
 import getTypePath from '@/app/utils/get-type-path';
@@ -12,6 +17,8 @@ import { notFound, redirect } from 'next/navigation';
 import { customInitApp } from '@/app/firebase';
 import useEditMode from '@/app/utils/use-edit-mode';
 import { RSS_HASHTAGS } from '@/app/utils/rss-hashtags';
+import { cachedMedias } from '@/app/utils/cache-medias';
+import { theCachedHashtags } from '@/app/utils/cache-hashtags';
 
 customInitApp();
 
@@ -39,42 +46,58 @@ export async function GET(req) {
       return notFound();
     }
 
-    const cacheRef = `/caches/feeds/pages/home${type ? '-' + type : ''}`;
-
-    let cache = null;
-
-    if (editMode) {
-      cache = { exists: false };
-    } else {
-      cache = await db.doc(cacheRef).get();
-    }
-
-    if (!cache.exists) {
-      let photosSnapshot = db
-        .collectionGroup('medias')
-        .limit(ITEMS_PER_PAGE)
-        .orderBy('createdAt', 'desc');
+    if (USE_CACHE) {
+      let photosSnapshot = cachedMedias;
 
       if (type) {
-        photosSnapshot = photosSnapshot.where('type', '==', type);
+        photosSnapshot = photosSnapshot.filter((m) => m.type === type);
       }
 
-      photosSnapshot = await photosSnapshot.get();
+      photosSnapshot = photosSnapshot
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, ITEMS_PER_PAGE);
 
-      photosSnapshot.forEach((doc) => {
-        const data = doc.data();
-        data.path = doc.ref.path;
-
+      photosSnapshot.forEach((data) => {
         photos.push(data);
       });
-
-      db.doc(cacheRef).set({
-        photos,
-        last_update: new Date().toISOString().split('T')[0],
-        user_agent: headers().get('user-agent'),
-      });
     } else {
-      photos = cache.data().photos;
+      const cacheRef = `/caches/feeds/pages/home${type ? '-' + type : ''}`;
+
+      let cache = null;
+
+      if (editMode) {
+        cache = { exists: false };
+      } else {
+        cache = await db.doc(cacheRef).get();
+      }
+
+      if (!cache.exists) {
+        let photosSnapshot = db
+          .collectionGroup('medias')
+          .limit(ITEMS_PER_PAGE)
+          .orderBy('createdAt', 'desc');
+
+        if (type) {
+          photosSnapshot = photosSnapshot.where('type', '==', type);
+        }
+
+        photosSnapshot = await photosSnapshot.get();
+
+        photosSnapshot.forEach((doc) => {
+          const data = doc.data();
+          data.path = doc.ref.path;
+
+          photos.push(data);
+        });
+
+        db.doc(cacheRef).set({
+          photos,
+          last_update: new Date().toISOString().split('T')[0],
+          user_agent: headers().get('user-agent'),
+        });
+      } else {
+        photos = cache.data().photos;
+      }
     }
   } else {
     const split = pathname.split('/');
@@ -91,20 +114,29 @@ export async function GET(req) {
       return notFound();
     }
 
-    const hashtagPtSnapshot = await db
-      .collection('hashtags')
-      .where('name_pt', '==', hashtag)
-      .get();
     let hashtagPt = null;
     let hashtagEn = null;
 
-    hashtagPtSnapshot.forEach((doc) => {
-      hashtagPt = doc.data();
-    });
+    if (USE_CACHE) {
+      hashtagPt = theCachedHashtags.find((h) => h.name_pt === hashtag);
 
-    if (!hashtagPt) {
-      const hashtagEnDoc = await db.collection('hashtags').doc(hashtag).get();
-      hashtagEn = hashtagEnDoc.data();
+      if (!hashtagPt) {
+        hashtagEn = theCachedHashtags.find((h) => h.name === hashtag);
+      }
+    } else {
+      const hashtagPtSnapshot = await db
+        .collection('hashtags')
+        .where('name_pt', '==', hashtag)
+        .get();
+
+      hashtagPtSnapshot.forEach((doc) => {
+        hashtagPt = doc.data();
+      });
+
+      if (!hashtagPt) {
+        const hashtagEnDoc = await db.collection('hashtags').doc(hashtag).get();
+        hashtagEn = hashtagEnDoc.data();
+      }
     }
 
     finalHashtag = hashtagPt || hashtagEn;
@@ -117,50 +149,76 @@ export async function GET(req) {
       return;
     }
 
-    const cacheRef = `/caches/feeds/hashtags-cache/${finalHashtag.name}${
-      type ? '-' + type : ''
-    }/sort/desc`;
+    if (USE_CACHE) {
+      finalHashtag.rss_limit = 300;
 
-    let cache = null;
-
-    if (editMode) {
-      cache = { exists: false };
-    } else {
-      cache = await db.doc(cacheRef).get();
-    }
-
-    if (!cache.exists) {
-      let photosSnapshot = db
-        .collectionGroup('medias')
-        .where('hashtags', 'array-contains', finalHashtag.name);
+      let photosSnapshot = cachedMedias.filter(
+        (m) => m.hashtags && m.hashtags.includes(finalHashtag.name)
+      );
 
       if (type) {
-        photosSnapshot = photosSnapshot.where('type', '==', type);
+        photosSnapshot = photosSnapshot.filter((m) => m.type === type);
       }
 
-      photosSnapshot = await photosSnapshot
-        .limit(finalHashtag.rss_limit ? finalHashtag.rss_limit : ITEMS_PER_PAGE)
-        .orderBy('createdAt', 'desc')
-        .get();
+      photosSnapshot = photosSnapshot
+        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+        .slice(0, finalHashtag.rss_limit || ITEMS_PER_PAGE);
 
-      photosSnapshot.forEach((doc) => {
-        const data = doc.data();
-        data.path = doc.ref.path;
-
+      photosSnapshot.forEach((data) => {
         photos.push(data);
       });
 
       if (photos.length === 0) {
         return notFound();
       }
-
-      db.doc(cacheRef).set({
-        photos,
-        last_update: new Date().toISOString().split('T')[0],
-        user_agent: headers().get('user-agent'),
-      });
     } else {
-      photos = cache.data().photos;
+      const cacheRef = `/caches/feeds/hashtags-cache/${finalHashtag.name}${
+        type ? '-' + type : ''
+      }/sort/desc`;
+
+      let cache = null;
+
+      if (editMode) {
+        cache = { exists: false };
+      } else {
+        cache = await db.doc(cacheRef).get();
+      }
+
+      if (!cache.exists) {
+        let photosSnapshot = db
+          .collectionGroup('medias')
+          .where('hashtags', 'array-contains', finalHashtag.name);
+
+        if (type) {
+          photosSnapshot = photosSnapshot.where('type', '==', type);
+        }
+
+        photosSnapshot = await photosSnapshot
+          .limit(
+            finalHashtag.rss_limit ? finalHashtag.rss_limit : ITEMS_PER_PAGE
+          )
+          .orderBy('createdAt', 'desc')
+          .get();
+
+        photosSnapshot.forEach((doc) => {
+          const data = doc.data();
+          data.path = doc.ref.path;
+
+          photos.push(data);
+        });
+
+        if (photos.length === 0) {
+          return notFound();
+        }
+
+        db.doc(cacheRef).set({
+          photos,
+          last_update: new Date().toISOString().split('T')[0],
+          user_agent: headers().get('user-agent'),
+        });
+      } else {
+        photos = cache.data().photos;
+      }
     }
   }
 
@@ -240,14 +298,20 @@ export async function GET(req) {
     }
   );
 
-  const items = [
+  let items = [
     ...instagramStories,
     ...instagramPhotos,
     ...shortVideos,
     ...youtubeVideos,
     ..._360photos,
     ...mapsPhotos,
-  ].sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+  ];
+
+  if (USE_CACHE) {
+    items = items.sort((a, b) => new Date(b.date) - new Date(a.date));
+  } else {
+    items = items.sort((a, b) => b.createdAt.toDate() - a.createdAt.toDate());
+  }
 
   let obj = {
     '@': {
@@ -344,7 +408,9 @@ export async function GET(req) {
               },
               '#': link,
             },
-            pubDate: p.createdAt.toDate().toUTCString(),
+            pubDate: USE_CACHE
+              ? new Date(p.date).toUTCString()
+              : p.createdAt.toDate().toUTCString(),
             category: 'Travel',
             ['media:category']: p.hashtags
               ? isBR && p.hashtags_pt
@@ -358,7 +424,7 @@ export async function GET(req) {
     },
   };
 
-  logAccess(db, hashtag ? host('/rss/hashtags/') + hashtag : host('/rss'));
+  logAccess(hashtag ? host('/rss/hashtags/') + hashtag : host('/rss'));
 
   obj = parse('rss', obj, { declaration: { include: false } });
   const declaration = `<?xml version="1.0" encoding="UTF-8" ?>

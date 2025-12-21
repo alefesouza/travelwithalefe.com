@@ -28,7 +28,7 @@ export default function Countries() {
     new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
 
   const db = getFirestore();
-  logAccess(db, host('/countries'));
+  logAccess(host('/countries'));
 
   return (
     <div className="container">

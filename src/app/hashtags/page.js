@@ -2,7 +2,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import logAccess from '../utils/log-access';
 import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
-import { SITE_NAME } from '../utils/constants';
+import { SITE_NAME, USE_CACHE } from '../utils/constants';
 import Link from 'next/link';
 import ShareButton from '../components/share-button';
 import HashtagCloud from '../components/hashtag-cloud';
@@ -11,6 +11,7 @@ import defaultMetadata from '../utils/default-metadata';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import AdSense from '../components/adsense';
+import { theCachedHashtags } from '../utils/cache-hashtags';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -31,49 +32,60 @@ export default async function MapPage() {
   const isAndroid =
     new UAParser(headers().get('user-agent')).getOS().name === 'Android';
 
-  const cacheRef = '/caches/static_pages/static_pages/hashtags_page';
-
-  const db = getFirestore();
-  const cache = await db.doc(cacheRef).get();
-
   let hashtags = [];
+  let allHashtags = [];
 
-  if (!cache.exists) {
-    const hashtagsSnapshot = await db
-      .collection('hashtags')
-      .where('is_place', '==', false)
-      .where('hide_on_cloud', '==', false)
-      .limit(100)
-      .orderBy('total', 'desc')
-      .get();
+  if (USE_CACHE) {
+    hashtags = theCachedHashtags
+      .filter((h) => !h.is_place && !h.hide_on_cloud)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 100);
 
-    hashtagsSnapshot.forEach((photo) => {
-      const data = photo.data();
-
-      hashtags = [...hashtags, data];
-    });
-
-    db.doc(cacheRef).set({
-      hashtags,
-      last_update: new Date().toISOString().split('T')[0],
-      user_agent: headers().get('user-agent'),
-    });
+    allHashtags = isBR
+      ? theCachedHashtags.map((h) => h.name_pt || h.name)
+      : theCachedHashtags.map((h) => h.name);
   } else {
-    hashtags = cache.data().hashtags;
+    const cacheRef = '/caches/static_pages/static_pages/hashtags_page';
+
+    const db = getFirestore();
+    const cache = await db.doc(cacheRef).get();
+    // const cache = { exists: false }; // For testing purposes
+
+    if (!cache.exists) {
+      const hashtagsSnapshot = await db
+        .collection('hashtags')
+        .where('is_place', '==', false)
+        .where('hide_on_cloud', '==', false)
+        .limit(100)
+        .orderBy('total', 'desc')
+        .get();
+
+      hashtagsSnapshot.forEach((photo) => {
+        const data = photo.data();
+
+        hashtags = [...hashtags, data];
+      });
+
+      db.doc(cacheRef).set({
+        hashtags,
+        last_update: new Date().toISOString().split('T')[0],
+        user_agent: headers().get('user-agent'),
+      });
+    } else {
+      hashtags = cache.data().hashtags;
+    }
+
+    const allHashtagsRef = await db
+      .collection('caches')
+      .doc('static_pages')
+      .collection('static_pages')
+      .doc('hashtags')
+      .get();
+    const allHashtagsData = allHashtagsRef.data();
+    allHashtags = isBR ? allHashtagsData.hashtags_pt : allHashtagsData.hashtags;
   }
 
-  const allHashtagsRef = await db
-    .collection('caches')
-    .doc('static_pages')
-    .collection('static_pages')
-    .doc('hashtags')
-    .get();
-  const allHashtagsData = allHashtagsRef.data();
-  const allHashtags = isBR
-    ? allHashtagsData.hashtags_pt
-    : allHashtagsData.hashtags;
-
-  logAccess(db, host('/hashtags'));
+  logAccess(host('/hashtags'));
 
   return (
     <div>

@@ -1,102 +1,45 @@
-lastCountry = null;
-lastCity = null;
+// lastCountry = null;
+// lastCity = null;
 
-cityCount = {};
+// cityCount = {};
 
-cityDatas = {
-  'rome': {
-    name: 'Rome',
-    name_pt: 'Roma',
-    slug: 'rome',
-    start: '2025-02-08',
-    end: '2025-02-11',
-    city_location_id: 1,
-  },
-  ['vatican-city']: {
-    name: 'Vatican City',
-    name_pt: 'Cidade do Vaticano',
-    slug: 'vatican-city',
-    start: '2025-02-11',
-    end: '2025-02-11',
-    city_location_id: 2,
-  },
-  florence: {
-    name: 'Florence',
-    name_pt: 'Florença',
-    slug: 'florence',
-    start: '2025-02-13',
-    end: '2025-02-13',
-    city_location_id: 2,
-  },
-  ['san-marino']: {
-    name: 'San Marino',
-    slug: 'san-marino',
-    start: '2025-02-14',
-    end: '2025-02-14',
-    city_location_id: 1,
-  },
-  siena: {
-    name: 'Siena',
-    slug: 'siena',
-    start: '2025-02-15',
-    end: '2025-02-15',
-    city_location_id: 3,
-  },
-  'cinque-terre': {
-    name: 'Cinque Terre',
-    name_pt: 'Cinque Terre',
-    slug: 'cinque-terre',
-    start: '2025-02-16',
-    end: '2025-02-16',
-    city_location_id: 4,
-  },
-  'pisa': {
-    name: 'Pisa',
-    slug: 'pisa',
-    start: '2025-02-16',
-    end: '2025-02-16',
-    city_location_id: 5,
-  },
-  'venice': {
-    name: 'Venice',
-    name_pt: 'Veneza',
-    slug: 'venice',
-    start: '2025-02-17',
-    end: '2025-02-19',
-    city_location_id: 6,
-  },
-  'lisbon-2': {
-    name: 'Lisbon',
-    name_pt: 'Lisboa',
-    slug: 'lisbon-2',
-    start: '2025-02-19',
-    end: '2025-02-20',
-    city_location_id: 1,
-  },
-};
+// cityDatas = {
+//   'los-angeles': {
+//     name: 'Los Angeles',
+//     slug: 'los-angeles',
+//     start: '2025-05-25',
+//     end: '2025-05-31',
+//     city_location_id: 9,
+//   },
+//   ['road-trip-lax-slc']: {
+//     name: 'Road Trip Los Angeles - Salt Lake City',
+//     slug: 'road-trip-lax-slc',
+//     start: '2025-05-31',
+//     end: '2025-06-05',
+//     city_location_id: 10,
+//   },
+//   ['grand-canyon']: {
+//     name: 'Grand Canyon',
+//     slug: 'grand-canyon',
+//     start: '2025-06-01',
+//     end: '2025-06-03',
+//     city_location_id: 11,
+//   },
+//   ['salt-lake-city']: {
+//     name: 'Salt Lake City',
+//     slug: 'salt-lake-city',
+//     start: '2025-06-05',
+//     end: '2025-06-07',
+//     city_location_id: 12,
+//   },
+// };
 
 // countryDatas = {
-//   italy: {
-//     name: 'Italy',
-//     name_pt: 'Itália',
-//     iso: 'IT',
-//     slug: 'italy',
-//   },
-//   vatican: {
-//     name: 'Vatican',
-//     name_pt: 'Vaticano',
-//     iso: 'VA',
-//     slug: 'vatican',
-//   },
-//   ['san-marino']: {
-//     name: 'San Marino',
-//     iso: 'SM',
-//     slug: 'san-marino',
-//   },
-//   portugal: {
-//     name: 'Portugal',
-//     iso: 'PT',
-//     slug: 'portugal',
+//   ['united-states']: {
+//     name: 'United States',
+//     name_pt: 'Estados Unidos',
+//     iso: 'US',
+//     slug: 'united-states',
 //   },
 // };
 

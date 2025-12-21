@@ -9,6 +9,10 @@
   </head>
 
   <body>
+    <script src="backup/countries.js"></script>
+    <script src="backup/locations.js"></script>
+    <script src="backup/hashtags.js"></script>
+    <script src="backup/medias.js"></script>
     <script type="module">
       // Import the functions you need from the SDKs you need
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js';
@@ -30,7 +34,7 @@
         collectionGroup,
         query,
         deleteField,
-        setDoc,
+        updateDoc,
         getDoc,
         where,
         connectFirestoreEmulator,
@@ -54,191 +58,100 @@
 
       const db = getFirestore(app);
 
-      connectFirestoreEmulator(db, '127.0.0.1', 8080);
+      // connectFirestoreEmulator(db, '127.0.0.1', 8080);
 
       const storage = getStorage();
 
       const theBatch = writeBatch(db);
 
-      getDoc(doc(db, 'countries/canada')).then((doc) => {
-        if (doc.exists()) {
-          console.log('Document data:', doc.data());
-        } else {
-          // doc.data() will be undefined in this case
-          console.log('No such document!');
-        }
-      });
+      const cities = countries.find((c) => c.slug === 'united-states').cities;
+      const lastCity = cities[cities.length - 1];
 
-      setDoc(doc(db, 'countries/el-salvador'), {
-        is_compilation: true,
-        slug: 'el-salvador',
-        cities: [
-          {
-            name: 'San Salvador',
-            location_id: 1,
-            start: '2024-10-27',
-            longitude: -89.20827251669532,
-            slug: 'san-salvador',
-            mapZoom: 9,
-            totals: {
-              stories: 10,
-              photos360: 0,
-              videos: 0,
-              shorts: 0,
-              posts: 0,
-              maps: 0,
-            },
-            latitude: 13.699904704162607,
-            order: 1,
-            end: '2024-10-30',
-            total: 332,
-          },
-        ],
-        mapZoom: 3,
-        longitude: -88.82793762073166,
-        totals: {
-          posts: 0,
-          photos360: 0,
-          maps: 0,
-          stories: 10,
-          videos: 0,
-          shorts: 0,
-        },
-        iso: 'SV',
-        name: 'El Salvador',
-        latitude: 13.671871369738154,
-        total: 10,
-        order: 23,
-        flag: '🇸🇻',
-      });
+      const newCities = [{
+    name: 'Los Angeles',
+    slug: 'los-angeles',
+    start: '2025-05-25',
+    end: '2025-05-31',
+    location_id: 9,
+    "latitude": 43.12618001137168,
+    "order": 9,
+    "totals": {
+        "stories": 30,
+        "posts": 1,
+        "photos360": 0,
+        "videos": 0,
+        "shorts": 0,
+        "maps": 0
+    },
+    "total": 31,
+    "mapZoom": 12,
+    "longitude": -72.39704516887943,
+}, {
+    name: 'Road Trip Los Angeles - Salt Lake City',
+    slug: 'road-trip-lax-slc',
+    start: '2025-05-31',
+    end: '2025-06-05',
+    location_id: 10,
+    "latitude": 43.12618001137168,
+    "order": 10,
+    "totals": {
+        "stories": 30,
+        "posts": 1,
+        "photos360": 0,
+        "videos": 0,
+        "shorts": 0,
+        "maps": 0
+    },
+    "total": 31,
+    "mapZoom": 12,
+    "longitude": -72.39704516887943,
+}, {
+    name: 'Grand Canyon',
+    slug: 'grand-canyon',
+    start: '2025-06-01',
+    end: '2025-06-03',
+    location_id: 11,
+    "latitude": 43.12618001137168,
+    "order": 12,
+    "totals": {
+        "stories": 30,
+        "posts": 1,
+        "photos360": 0,
+        "videos": 0,
+        "shorts": 0,
+        "maps": 0
+    },
+    "total": 31,
+    "mapZoom": 12,
+    "longitude": -72.39704516887943,
+}, {
+    name: 'Salt Lake City',
+    slug: 'salt-lake-city',
+    start: '2025-06-05',
+    end: '2025-06-07',
+    location_id: 12,
+    "latitude": 43.12618001137168,
+    "order": 12,
+    "totals": {
+        "stories": 30,
+        "posts": 1,
+        "photos360": 0,
+        "videos": 0,
+        "shorts": 0,
+        "maps": 0
+    },
+    "total": 31,
+    "mapZoom": 12,
+    "longitude": -72.39704516887943,
+}]
 
-      setDoc(doc(db, 'countries/cuba'), {
-        is_compilation: true,
-        slug: 'cuba',
-        cities: [
-          {
-            name: 'Havana',
-            location_id: 1,
-            start: '2024-10-13',
-            longitude: -82.35589375028586,
-            slug: 'havana',
-            mapZoom: 9,
-            totals: {
-              stories: 49,
-              photos360: 0,
-              videos: 0,
-              shorts: 0,
-              posts: 2,
-              maps: 281,
-            },
-            latitude: 23.138780256606104,
-            order: 1,
-            end: '2024-10-18',
-            total: 332,
-          },
-        ],
-        mapZoom: 3,
-        longitude: -78.9294402913782,
-        totals: {
-          posts: 0,
-          photos360: 0,
-          maps: 0,
-          stories: 10,
-          videos: 0,
-          shorts: 0,
-        },
-        iso: 'CU',
-        name: 'Cuba',
-        latitude: 21.688270407441642,
-        total: 10,
-        order: 21,
-        flag: '🇨🇺',
-      });
+const allCities = [...cities, ...newCities];
 
-      setDoc(doc(db, 'countries/guatemala'), {
-        is_compilation: true,
-        slug: 'guatemala',
-        cities: [
-          {
-            name: 'Antigua Guatemala',
-            location_id: 1,
-            start: '2024-10-18',
-            longitude: -90.5150400237445,
-            slug: 'antigua-guatemala',
-            mapZoom: 9,
-            totals: {
-              stories: 10,
-              photos360: 0,
-              videos: 0,
-              shorts: 0,
-              posts: 0,
-              maps: 0,
-            },
-            latitude: 14.60801847910818,
-            order: 1,
-            end: '2024-10-24',
-            total: 332,
-          },
-          {
-            name: 'Panacharel',
-            location_id: 2,
-            start: '2024-10-22',
-            longitude: -82.35589375028586,
-            slug: 'panacharel',
-            mapZoom: 9,
-            totals: {
-              stories: 10,
-              photos360: 0,
-              videos: 0,
-              shorts: 0,
-              posts: 0,
-              maps: 0,
-            },
-            latitude: 23.138780256606104,
-            order: 1,
-            end: '2024-10-22',
-            total: 332,
-          },
-          {
-            name: 'Guatemala City',
-            location_id: 3,
-            start: '2024-10-24',
-            longitude: -90.5138083864683,
-            slug: 'guatemala-city',
-            mapZoom: 9,
-            totals: {
-              stories: 10,
-              photos360: 0,
-              videos: 0,
-              shorts: 0,
-              posts: 0,
-              maps: 0,
-            },
-            latitude: 14.61901964690062,
-            order: 1,
-            end: '2024-10-27',
-            total: 332,
-          },
-        ],
-        mapZoom: 3,
-        longitude: -90.1726113779432,
-        totals: {
-          posts: 0,
-          photos360: 0,
-          maps: 0,
-          stories: 10,
-          videos: 0,
-          shorts: 0,
-        },
-        iso: 'GT',
-        name: 'Guatemala',
-        latitude: 15.665783357617343,
-        total: 10,
-        order: 22,
-        flag: '🇬🇹',
-      });
+theBatch.update(doc(db, 'countries', 'united-states'), {
+    cities: allCities,
+});
 
-      theBatch.commit();
+theBatch.commit();
     </script>
   </body>
 </html>

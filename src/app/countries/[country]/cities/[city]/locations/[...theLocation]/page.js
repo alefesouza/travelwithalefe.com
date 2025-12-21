@@ -3,7 +3,11 @@ import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
 import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
-import { SITE_NAME, WEBSTORIES_ITEMS_PER_PAGE } from '@/app/utils/constants';
+import {
+  SITE_NAME,
+  WEBSTORIES_ITEMS_PER_PAGE,
+  USE_CACHE,
+} from '@/app/utils/constants';
 import Scroller from '@/app/components/scroller';
 import { notFound } from 'next/navigation';
 import Media from '@/app/components/media';
@@ -32,6 +36,9 @@ import {
   cachedLocations,
 } from '@/app/utils/cache-data';
 import countries from '@/app/utils/countries';
+import { cachedMedias } from '@/app/utils/cache-medias';
+import { theCachedLocations } from '@/app/utils/cache-locations';
+import arrayShuffle from '@/app/utils/array-shuffle';
 
 function getDataFromRoute(slug, searchParams) {
   const [location, path5, path6, path7, path8] = slug;
@@ -98,7 +105,7 @@ export async function generateMetadata({
   );
 
   if (
-    !cachedLocations.includes(location) ||
+    !theCachedLocations.find((l) => l.slug === location) ||
     !cachedCountries.includes(country) ||
     !cachedCities.includes(city)
   ) {
@@ -132,16 +139,24 @@ export async function generateMetadata({
     return notFound();
   }
 
-  const db = getFirestore();
-  const mediaRef = await db
-    .collection('countries')
-    .doc(country)
-    .collection('cities')
-    .doc(city)
-    .collection('locations')
-    .doc(location)
-    .get();
-  const theMedia = mediaRef.data();
+  let theMedia = null;
+
+  if (USE_CACHE) {
+    theMedia = theCachedLocations.find(
+      (m) => m.country === country && m.city === city && m.slug === location
+    );
+  } else {
+    const db = getFirestore();
+    const mediaRef = await db
+      .collection('countries')
+      .doc(country)
+      .collection('cities')
+      .doc(city)
+      .collection('locations')
+      .doc(location)
+      .get();
+    theMedia = mediaRef.data();
+  }
 
   if (!theMedia) {
     return notFound();
@@ -163,6 +178,7 @@ export async function generateMetadata({
   ]
     .filter((c) => c)
     .join(' - ');
+
   const description = i18n(
     'Photos and videos taken by Travel with Alefe in :location:',
     {
@@ -171,23 +187,56 @@ export async function generateMetadata({
   );
 
   const sort = getSort(searchParams, false, false);
-  let coverSnapshot = await db
-    .collectionGroup('medias')
-    .where('locations', 'array-contains', location)
-    .where('city', 'in', getPossibleCities(theCity))
-    .orderBy('date', sort)
-    .limit(isWebStories ? 1 : 2)
-    .get();
-
+  let coverSnapshot = null;
   let cover = null;
 
-  coverSnapshot.forEach((photo) => {
-    const data = photo.data();
+  if (USE_CACHE) {
+    coverSnapshot = cachedMedias.filter(
+      (m) =>
+        m.country === country &&
+        getPossibleCities(theCity).includes(m.city) &&
+        m.locations &&
+        m.locations.includes(location)
+    );
 
-    if ((cover && cover.type === 'post') || !cover) {
-      cover = data;
+    if (sort === 'desc') {
+      function sortByDateDesc(a, b) {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      }
+
+      coverSnapshot = coverSnapshot.sort(sortByDateDesc);
+    } else {
+      function sortByDateAsc(a, b) {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      }
+
+      coverSnapshot = coverSnapshot.sort(sortByDateAsc);
     }
-  });
+
+    coverSnapshot = coverSnapshot.slice(0, isWebStories ? 1 : 2);
+
+    coverSnapshot.forEach((data) => {
+      if ((cover && cover.type === 'post') || !cover) {
+        cover = data;
+      }
+    });
+  } else {
+    coverSnapshot = await db
+      .collectionGroup('medias')
+      .where('locations', 'array-contains', location)
+      .where('city', 'in', getPossibleCities(theCity))
+      .orderBy('date', sort)
+      .limit(isWebStories ? 1 : 2)
+      .get();
+
+    coverSnapshot.forEach((photo) => {
+      const data = photo.data();
+
+      if ((cover && cover.type === 'post') || !cover) {
+        cover = data;
+      }
+    });
+  }
 
   if (!cover) {
     return notFound();
@@ -241,7 +290,7 @@ export default async function Country({
 
   let theCity = countryData.cities.find((c) => c.slug === city);
 
-  let isRandom = false;
+  let isRandom = sort === 'random';
 
   if (isRandom) {
     sort = 'desc';
@@ -250,72 +299,108 @@ export default async function Country({
   let photos = [];
 
   const db = getFirestore();
+  let theMedia = null;
 
-  const mediaRef = await db
-    .collection('countries')
-    .doc(country)
-    .collection('cities')
-    .doc(city)
-    .collection('locations')
-    .doc(location)
-    .get();
-  let theMedia = mediaRef.data();
+  if (USE_CACHE) {
+    theMedia = theCachedLocations.find(
+      (m) => m.country === country && m.city === city && m.slug === location
+    );
+  } else {
+    const mediaRef = await db
+      .collection('countries')
+      .doc(country)
+      .collection('cities')
+      .doc(city)
+      .collection('locations')
+      .doc(location)
+      .get();
+    theMedia = mediaRef.data();
+  }
 
   if (!theMedia) {
     return notFound();
   }
 
-  const cacheRef = `/caches/locations/locations-cache/${city}-${location}/sort/${
-    sort === 'asc' ? 'asc' : 'desc'
-  }`;
+  if (USE_CACHE) {
+    let photosSnapshot = cachedMedias.filter(
+      (m) =>
+        m.country === country &&
+        getPossibleCities(theCity).includes(m.city) &&
+        m.locations &&
+        m.locations.includes(location)
+    );
 
-  let cache = null;
+    if (sort === 'desc') {
+      function sortByDateDesc(a, b) {
+        return new Date(b.date).getTime() - new Date(a.date).getTime();
+      }
 
-  if (editMode) {
-    cache = { exists: false };
-  } else {
-    cache = await db.doc(cacheRef).get();
-  }
+      photosSnapshot = photosSnapshot.sort(sortByDateDesc);
+    } else {
+      function sortByDateAsc(a, b) {
+        return new Date(a.date).getTime() - new Date(b.date).getTime();
+      }
 
-  if (!cache.exists || isWebStories) {
-    const photosSnapshot = await db
-      .collectionGroup('medias')
-      .where('locations', 'array-contains', location)
-      .where('city', 'in', getPossibleCities(theCity))
-      .orderBy('order', sort)
-      .get();
+      photosSnapshot = photosSnapshot.sort(sortByDateAsc);
+    }
 
-    photosSnapshot.forEach((photo) => {
-      const data = photo.data();
-      data.path = photo.ref.path;
+    photosSnapshot.forEach((data) => {
       photos = [...photos, data];
     });
-
-    if (!photos.length) {
-      return notFound();
-    }
-
-    if (!isRandom && !cache.exists && !isWebStories) {
-      db.doc(cacheRef).set({
-        photos,
-        last_update: new Date().toISOString().split('T')[0],
-        user_agent: headers().get('user-agent'),
-      });
-    }
   } else {
-    photos = cache.data().photos;
+    const cacheRef = `/caches/locations/locations-cache/${city}-${location}/sort/${
+      sort === 'asc' ? 'asc' : 'desc'
+    }`;
+
+    let cache = null;
+
+    if (editMode) {
+      cache = { exists: false };
+    } else {
+      cache = await db.doc(cacheRef).get();
+    }
+
+    if (!cache.exists || isWebStories) {
+      const photosSnapshot = await db
+        .collectionGroup('medias')
+        .where('locations', 'array-contains', location)
+        .where('city', 'in', getPossibleCities(theCity))
+        .orderBy('order', sort)
+        .get();
+
+      photosSnapshot.forEach((photo) => {
+        const data = photo.data();
+        data.path = photo.ref.path;
+        photos = [...photos, data];
+      });
+
+      if (!photos.length) {
+        return notFound();
+      }
+
+      if (!isRandom && !cache.exists && !isWebStories) {
+        db.doc(cacheRef).set({
+          photos,
+          last_update: new Date().toISOString().split('T')[0],
+          user_agent: headers().get('user-agent'),
+        });
+      }
+    } else {
+      photos = cache.data().photos;
+    }
+  }
+
+  if (!photos.length) {
+    return notFound();
   }
 
   if (isRandom) {
-    photos = photos
-      .map((value) => ({ value, sort: Math.random() }))
-      .sort((a, b) => a.sort - b.sort)
-      .map(({ value }) => value);
+    photos = arrayShuffle(photos);
+
     sort = 'random';
   }
 
   logAccess(
-    db,
     host((isWebStories ? '/webstories' : '') + '/locations/') +
       location +
       (expandGalleries ? '/expand' : '') +
@@ -461,6 +546,40 @@ export default async function Country({
       location +
       (page > 1 && page <= maxPages ? '/page/' + page : '')
   );
+
+  const placeSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'Place',
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: theMedia.latitude,
+      longitude: theMedia.longitude,
+    },
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: isBR && theCity.name_pt ? theCity.name_pt : theCity.name,
+      addressCountry: countryData.iso,
+    },
+    name: isBR && theMedia.name_pt ? theMedia.name_pt : theMedia.name,
+    hasMap: `https://www.google.com/maps/search/${encodeURIComponent(
+      theMedia.name
+    )}/@${theMedia.latitude},${theMedia.longitude},13z`,
+    latitude: theMedia.latitude,
+    longitude: theMedia.longitude,
+  };
+
+  const alternateName =
+    (theMedia.name_pt
+      ? (isBR ? theMedia.name : theMedia.name_pt) +
+        (theMedia.alternative_names ? ', ' : '')
+      : '') +
+    (theMedia.alternative_names && theMedia.alternative_names.length > 0
+      ? theMedia.alternative_names.join(', ')
+      : '');
+
+  if (alternateName) {
+    placeSchema.alternateName = alternateName;
+  }
 
   return (
     <div>
@@ -812,6 +931,14 @@ export default async function Country({
         <AdSense index={2} />
       </div>
 
+      <script
+        id="ld-place"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(placeSchema),
+        }}
+      ></script>
+
       <StructuredBreadcrumbs breadcrumbs={breadcrumbs} />
     </div>
   );
@@ -848,7 +975,7 @@ function getBreadcrumbs(
 
   let currentPath = `/countries/${country}/cities/${city}/locations/${theMedia.slug}`;
 
-  if (page > 0) {
+  if (page > 1) {
     currentPath += '/page/' + page;
     breadcrumbs.push({
       name: i18n('Page') + ' ' + page,

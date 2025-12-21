@@ -10,6 +10,8 @@ export default function SchemaData({
   isExpand = false,
   withOptional = false,
   includeVideoTags = false,
+  isJsonLd = false,
+  jsonLdExtra = {},
 }) {
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
@@ -17,6 +19,104 @@ export default function SchemaData({
 
   const { title, description, hashtags, locationDescription, embedVideo } =
     getMetadata(media, isBR);
+
+  if (isJsonLd) {
+    const data = {
+      '@context': 'http://schema.org',
+      name: title,
+      description: description,
+      creditText: i18n(SITE_NAME),
+      author: 'Alefe Souza',
+      creator: {
+        '@type': 'Person',
+        name: 'Alefe Souza',
+        image: host('/profile-photo-2x.jpg'),
+      },
+      copyrightNotice: i18n(SITE_NAME) + ' - @viajarcomale',
+      uploadDate: media.date
+        ? media.date.includes(',')
+          ? new Date(media.date).toISOString() + '+00:00'
+          : media.date.replace(' ', 'T') + '+03:00'
+        : media.cityData && media.cityData.end + 'T12:00:00+03:00',
+      license: 'https://creativecommons.org/licenses/by-nc/4.0/',
+      acquireLicensePage: host('/about'),
+      genre: 'Travel',
+      width: media.width,
+      height: media.height,
+      duration: media.duration
+        ? serialize({ seconds: Math.ceil(media.duration) })
+        : null,
+      keywords:
+        hashtags && hashtags.length > 0 ? '#' + hashtags.join(' #') : '',
+      ...jsonLdExtra,
+    };
+
+    const address = {
+      '@type': 'PostalAddress',
+      addressLocality:
+        media.cityData &&
+        (isBR && media.cityData.name_pt
+          ? media.cityData.name_pt
+          : media.cityData.name),
+      addressCountry: media.countryData && media.countryData.iso,
+    };
+
+    if (locationDescription) {
+      data.contentLocation = {
+        '@type': 'Place',
+        name: locationDescription,
+        address,
+      };
+    }
+
+    if (media.longitude || media.location_data?.[0]?.latitude) {
+      if (data.contentLocation) {
+        data.contentLocation = {
+          ...data.contentLocation,
+          geo: {
+            '@type': 'GeoCoordinates',
+            latitude: media.latitude,
+            longitude: media.longitude,
+          },
+        };
+      } else {
+        data.contentLocation = {
+          address,
+          geo: {
+            '@type': 'GeoCoordinates',
+            latitude: media.latitude,
+            longitude: media.longitude,
+          },
+        };
+      }
+    }
+
+    Object.keys(data).forEach((key) => {
+      if (!data[key]) {
+        delete data[key];
+      }
+    });
+
+    if (includeVideoTags) {
+      data.embedUrl = embedVideo;
+      data.thumbnailUrl =
+        media.type === 'youtube' ? media.image : FILE_DOMAIN + media.file;
+    }
+
+    if (media.type === 'youtube') {
+      delete data.contentUrl;
+    }
+
+    return (
+      <script
+        id="ld-content"
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(data),
+        }}
+      />
+    );
+  }
 
   const content = (
     <>

@@ -24,6 +24,20 @@ export default function middleware(req) {
   }
 
   if (
+    (pathname.startsWith('/medias') ||
+      pathname.startsWith('/360photos') ||
+      pathname.startsWith('/maps') ||
+      pathname.startsWith('/stories') ||
+      pathname.startsWith('/resize')) &&
+    (pathname.endsWith('.jpg') || pathname.endsWith('.png'))
+  ) {
+    return NextResponse.redirect(
+      'https://storage.googleapis.com/files.viajarcomale.com' + pathname,
+      { status: 301 }
+    );
+  }
+
+  if (
     pathname.endsWith('/webstories') &&
     searchParams.get('fixer') !== 'true'
   ) {

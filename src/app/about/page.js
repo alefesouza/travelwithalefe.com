@@ -26,7 +26,7 @@ export default async function About() {
   const aboutRef = await db.doc('/pages/about').get();
   const aboutData = aboutRef.data();
 
-  logAccess(db, host('/about'));
+  logAccess(host('/about'));
 
   return (
     <>

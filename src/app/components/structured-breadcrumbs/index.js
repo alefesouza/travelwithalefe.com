@@ -1,11 +1,10 @@
 import useHost from '@/app/hooks/use-host';
-import Script from 'next/script';
 
 export default function StructuredBreadcrumbs({ breadcrumbs }) {
   const host = useHost();
 
   return (
-    <Script
+    <script
       id="ld-breadcrumb"
       type="application/ld+json"
       dangerouslySetInnerHTML={{
@@ -20,6 +19,6 @@ export default function StructuredBreadcrumbs({ breadcrumbs }) {
           })),
         }),
       }}
-    ></Script>
+    ></script>
   );
 }

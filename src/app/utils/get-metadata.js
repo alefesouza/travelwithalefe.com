@@ -1,5 +1,6 @@
 import useI18n from '@/app/hooks/use-i18n';
 import { SITE_NAME } from './constants';
+import countries from '@/app/utils/countries';
 
 export default function getMetadata(media, isBR, position) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -103,6 +104,18 @@ export default function getMetadata(media, isBR, position) {
   ]
     .filter((c) => c)
     .join(' - ');
+
+  if (
+    (!media.latitude && !media.longitude) ||
+    !media.location_data ||
+    media.location_data.length === 0
+  ) {
+    const country = countries.find((c) => c.slug === media.country);
+    const city = country.cities.find((c) => c.slug === media.city);
+
+    media.latitude = city.latitude;
+    media.longitude = city.longitude;
+  }
 
   return {
     title,

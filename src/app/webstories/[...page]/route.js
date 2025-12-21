@@ -206,8 +206,7 @@ export async function GET(req) {
     html = contents;
   }
 
-  const db = getFirestore();
-  logAccess(db, host(pathname + ('?sort=' + sort)));
+  logAccess(host(pathname + ('?sort=' + sort)));
 
   if (ignoreAnalytics) {
     let $ = require('cheerio').load(html.toString());

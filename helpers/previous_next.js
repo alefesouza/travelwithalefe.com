@@ -1,3 +1,10 @@
+medias.forEach((media, i) => {
+  if (!media.id.includes(media.city) && !media.id.includes('-')) {
+    const split = media.path.split('/');
+    media.id = split[split.length - 1];
+  }
+});
+
 medias.sort((a, b) => {
   return a.id.localeCompare(b.id, 'en', { numeric: true });
 });
@@ -32,6 +39,7 @@ medias.forEach((media, i) => {
     theBatch.update(doc(db, media.path), {
       previous: media.previous || null,
       next: media.next || null,
+      id: media.id,
     });
   }
 });

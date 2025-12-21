@@ -22,6 +22,8 @@ import getTypeLabel from '@/app/utils/get-type-label';
 import useEditMode from '@/app/utils/use-edit-mode';
 import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
 import countries from '@/app/utils/countries';
+import { cachedMedias } from '@/app/utils/cache-medias';
+import { USE_CACHE } from '@/app/utils/constants';
 
 function getCountry(country, city) {
   const theCountry = countries.find((c) => c.slug === country);
@@ -115,15 +117,30 @@ export async function generateMetadata({ params: { country, city, media } }) {
   }
 
   const db = getFirestore();
-  const mediaRef = await db
-    .collection('countries')
-    .doc(country)
-    .collection('cities')
-    .doc(city)
-    .collection('medias')
-    .doc(media[0].includes(city + '-') ? media[0] : city + '-post-' + media[0])
-    .get();
-  let theMedia = mediaRef.data();
+  let theMedia = null;
+
+  if (USE_CACHE) {
+    theMedia = cachedMedias.find(
+      (m) =>
+        m.country === country &&
+        m.city === city &&
+        m.path.includes(
+          media[0].includes(city + '-') ? media[0] : city + '-post-' + media[0]
+        )
+    );
+  } else {
+    const mediaRef = await db
+      .collection('countries')
+      .doc(country)
+      .collection('cities')
+      .doc(city)
+      .collection('medias')
+      .doc(
+        media[0].includes(city + '-') ? media[0] : city + '-post-' + media[0]
+      )
+      .get();
+    theMedia = mediaRef.data();
+  }
 
   if (!theMedia) {
     return notFound();
@@ -139,7 +156,6 @@ export async function generateMetadata({ params: { country, city, media } }) {
   }
 
   const { selectedMedia } = getSelectedMedia(media, theMedia, country, city);
-
   theMedia = selectedMedia;
 
   const { title, description } = getMetadata(theMedia, isBR);
@@ -181,8 +197,6 @@ export default async function Country({
     );
   }
 
-  const db = getFirestore();
-
   if (
     !media[0].includes(city + '-story-') &&
     !media[0].includes(city + '-youtube-') &&
@@ -193,21 +207,15 @@ export default async function Country({
   ) {
     let base = '/countries/' + country + '/cities/' + city;
 
-    const mediaSnapshot = await db
-      .collection('countries')
-      .doc(country)
-      .collection('cities')
-      .doc(city)
-      .collection('medias')
-      .where('original_id', '==', media[0])
-      .get();
+    if (USE_CACHE) {
+      const data = cachedMedias.find(
+        (m) =>
+          m.country === country && m.city === city && m.original_id === media[0]
+      );
 
-    if (mediaSnapshot.size == 0) {
-      return notFound();
-    }
-
-    mediaSnapshot.forEach((doc) => {
-      const data = doc.data();
+      if (!data) {
+        return notFound();
+      }
 
       permanentRedirect(
         base +
@@ -215,7 +223,31 @@ export default async function Country({
           data.id.replace(city + '-post-', '') +
           (media[1] ? '/' + media[1] : '')
       );
-    });
+    } else {
+      const mediaSnapshot = await db
+        .collection('countries')
+        .doc(country)
+        .collection('cities')
+        .doc(city)
+        .collection('medias')
+        .where('original_id', '==', media[0])
+        .get();
+
+      if (mediaSnapshot.size == 0) {
+        return notFound();
+      }
+
+      mediaSnapshot.forEach((doc) => {
+        const data = doc.data();
+
+        permanentRedirect(
+          base +
+            '/posts/' +
+            data.id.replace(city + '-post-', '') +
+            (media[1] ? '/' + media[1] : '')
+        );
+      });
+    }
 
     return;
   }
@@ -232,21 +264,40 @@ export default async function Country({
     return notFound();
   }
 
-  const mediaRef = await db
-    .collection('countries')
-    .doc(country)
-    .collection('cities')
-    .doc(city)
-    .collection('medias')
-    .doc(media[0].includes(city + '-') ? media[0] : city + '-post-' + media[0])
-    .get();
-  let theMedia = mediaRef.data();
+  let theMedia = null;
+  let mediaRef = null;
+  const db = getFirestore();
+
+  if (USE_CACHE) {
+    theMedia = cachedMedias.find(
+      (m) =>
+        m.country === country &&
+        m.city === city &&
+        m.path.includes(
+          media[0].includes(city + '-') ? media[0] : city + '-post-' + media[0]
+        )
+    );
+  } else {
+    mediaRef = await db
+      .collection('countries')
+      .doc(country)
+      .collection('cities')
+      .doc(city)
+      .collection('medias')
+      .doc(
+        media[0].includes(city + '-') ? media[0] : city + '-post-' + media[0]
+      )
+      .get();
+    theMedia = mediaRef.data();
+  }
 
   if (!theMedia) {
     return notFound();
   }
 
-  theMedia.path = mediaRef.ref.path;
+  if (!USE_CACHE) {
+    theMedia.path = mediaRef.ref.path;
+  }
 
   let galleryLength = 0;
 
@@ -319,7 +370,6 @@ export default async function Country({
   const paginationBase = basePath + '/{page}';
 
   logAccess(
-    db,
     host(
       '/' +
         city +

@@ -1,11 +1,7 @@
 import Link from 'next/link';
 import useI18n from '@/app/hooks/use-i18n';
 
-export default function SortPicker({
-  type,
-  basePath,
-  sort,
-}) {
+export default function SortPicker({ type, basePath, sort }) {
   const i18n = useI18n();
 
   return (
@@ -16,15 +12,11 @@ export default function SortPicker({
         {[
           { name: 'Latest', value: 'desc' },
           { name: 'Oldest', value: 'asc' },
-          // { name: 'Random', value: 'random' },
+          { name: 'Random', value: 'random' },
         ].map((o) => (
           <Link
             key={o}
-            href={
-              o.value !== 'desc'
-                ? '?sort=' + o.value
-                : basePath
-            }
+            href={o.value !== 'desc' ? '?sort=' + o.value : basePath}
             scroll={false}
           >
             <label>

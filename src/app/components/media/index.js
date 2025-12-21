@@ -1,4 +1,4 @@
-import { FILE_DOMAIN, FILE_DOMAIN_500 } from '@/app/utils/constants';
+import { FILE_DOMAIN, FILE_DOMAIN_11968, FILE_DOMAIN_500 } from '@/app/utils/constants';
 import Hashtags from '../hashtags';
 import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
@@ -225,7 +225,6 @@ export default function Media({
         )}
 
         {!media.is_gallery &&
-          media.locations &&
           media.location_data &&
           media.location_data[0] && (
             <div
@@ -310,6 +309,30 @@ export default function Media({
           />
         )}
       </div>
+
+      {!isListing && (
+        <SchemaData
+          media={media}
+          isExpand={expandGalleries && !isMain}
+          includeVideoTags={isVideo && !isListing}
+          isJsonLd
+          jsonLdExtra={{
+            '@type': isVideo && !isListing ? 'VideoObject' : 'ImageObject',
+            contentUrl:
+              media.type === 'youtube'
+                ? media.link
+                : media.type === '360photo'
+                ? FILE_DOMAIN_11968 + media.photo
+                : FILE_DOMAIN + media.file,
+            thumbnailUrl:
+              media.type === '360photo'
+                ? FILE_DOMAIN + media.photo
+                : media.type !== 'youtube'
+                ? FILE_DOMAIN_500 + media.file.replace('.mp4', '-thumb.png')
+                : media.image,
+          }}
+        />
+      )}
     </div>
   );
 }

@@ -3,7 +3,7 @@ import Link from 'next/link';
 import ShareButton from '@/app/components/share-button';
 import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
-import { SITE_NAME } from '@/app/utils/constants';
+import { SITE_NAME, USE_CACHE } from '@/app/utils/constants';
 import defaultMetadata from '@/app/utils/default-metadata';
 import logAccess from '@/app/utils/log-access';
 import styles from '../page.module.css';
@@ -11,6 +11,7 @@ import styles from '../page.module.css';
 import AdSense from '@/app/components/adsense';
 import Editable from '@/app/components/editable/editable';
 import useEditMode from '@/app/utils/use-edit-mode';
+import { theCachedCoupons } from '@/app/utils/cache-coupons';
 import { cachedCoupons } from '@/app/utils/cache-data';
 import { notFound } from 'next/navigation';
 
@@ -21,18 +22,28 @@ export async function generateMetadata({ params: { coupon } }) {
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
 
-  if (!cachedCoupons.includes(coupon)) {
-    return notFound();
+  let couponData = null;
+
+  if (USE_CACHE) {
+    couponData = theCachedCoupons.find((c) => c.slug === coupon);
+
+    if (!couponData) {
+      return notFound();
+    }
+  } else {
+    if (!cachedCoupons.includes(coupon)) {
+      return notFound();
+    }
+
+    const db = getFirestore();
+    const couponRef = await db.collection('coupons').doc(coupon).get();
+
+    if (!couponRef.exists) {
+      return notFound();
+    }
+
+    couponData = couponRef.data();
   }
-
-  const db = getFirestore();
-  const couponRef = await db.collection('coupons').doc(coupon).get();
-
-  if (!couponRef.exists) {
-    return notFound();
-  }
-
-  const couponData = couponRef.data();
 
   const title =
     (isBR && couponData.title_pt ? couponData.title_pt : couponData.title) +
@@ -55,15 +66,25 @@ export default async function Coupons({ params: { coupon }, searchParams }) {
   const editMode = useEditMode(searchParams);
 
   const db = getFirestore();
-  const couponRef = await db.collection('coupons').doc(coupon).get();
+  let couponData = null;
 
-  if (!couponRef.exists) {
-    return notFound();
+  if (USE_CACHE) {
+    couponData = theCachedCoupons.find((c) => c.slug === coupon);
+
+    if (!couponData) {
+      return notFound();
+    }
+  } else {
+    const couponRef = await db.collection('coupons').doc(coupon).get();
+
+    if (!couponRef.exists) {
+      return notFound();
+    }
+
+    couponData = couponRef.data();
   }
 
-  const couponData = couponRef.data();
-
-  logAccess(db, host('/coupons/' + coupon));
+  logAccess(host('/coupons/' + coupon));
 
   return (
     <>

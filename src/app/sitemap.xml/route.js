@@ -1,11 +1,15 @@
 import { parse } from 'js2xmlparser';
 import useHost from '@/app/hooks/use-host';
-import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
-import { FILE_DOMAIN, ITEMS_PER_PAGE } from '../utils/constants';
+import { FILE_DOMAIN, ITEMS_PER_PAGE, USE_CACHE } from '../utils/constants';
 import { customInitApp } from '../firebase';
 import logAccess from '../utils/log-access';
 import getMetadata from '../utils/get-metadata';
+import { cachedMedias } from '../utils/cache-medias';
+import { theCachedLocations } from '../utils/cache-locations';
+import { theCachedHashtags } from '../utils/cache-hashtags';
+import countries from '../utils/countries';
+import { theCachedCoupons } from '../utils/cache-coupons';
 
 customInitApp();
 
@@ -16,63 +20,76 @@ export async function GET() {
   //   new URL(string, 'https://travelwithalefe.com/').toString();
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const lastmod = '2025-04-19';
+  const lastmod = '2025-08-31';
 
-  const db = getFirestore();
   const reference = host('sitemap.xml')
     .split('//')[1]
     .replaceAll('/', '-')
     .replace('www.', '');
 
   const storage = getStorage();
-  const cacheExists = await storage
-    .bucket('viajarcomale.appspot.com')
-    .file(reference)
-    .exists();
+  // const cacheExists = await storage
+  // .bucket('viajarcomale.appspot.com')
+  // .file(reference)
+  // .exists();
   // const cacheExists = [false];
 
   let obj = {};
 
-  if (!cacheExists[0]) {
-    const countriesSnapshot = await db.collection('countries').get();
-    let countries = [];
+  const save = false;
 
-    countriesSnapshot.forEach((country) => {
-      countries = [...countries, country.data()];
-    });
-
-    const mediasSnapshot = await db.collectionGroup('medias').get();
-    const medias = [];
-    mediasSnapshot.forEach((doc) => {
-      const data = doc.data();
-      data.path = doc.ref.path;
-      medias.push(data);
-    });
-    const locationsSnapshot = await db.collectionGroup('locations').get();
-    const locations = [];
-    locationsSnapshot.forEach((doc) => {
-      const data = doc.data();
-
-      if (data.is_placeholder) {
-        return;
-      }
-
-      locations.push(data);
-    });
-    const hashtagsSnapshot = await db.collectionGroup('hashtags').get();
+  // if (!cacheExists[0]) {
+  if (save) {
+    let medias = [];
+    let locations = [];
     let hashtags = [];
-    hashtagsSnapshot.forEach((doc) => {
-      hashtags.push(doc.data());
-    });
-    hashtags = hashtags.filter((h) => !h.is_country && !h.is_city);
-    const highlights = medias.filter((m) => m.is_highlight);
-    const couponsSnapshot = await db.collection('coupons').get();
-    const coupons = [];
-    couponsSnapshot.forEach((doc) => {
-      const data = doc.data();
-      data.path = doc.ref.path;
-      coupons.push(data);
-    });
+    let highlights = [];
+    let coupons = [];
+
+    if (USE_CACHE) {
+      medias = cachedMedias;
+      locations = theCachedLocations.filter((l) => !l.is_placeholder);
+      hashtags = theCachedHashtags.filter((h) => !h.is_country && !h.is_city);
+      highlights = medias.filter((m) => m.is_highlight);
+      coupons = theCachedCoupons;
+    } else {
+      const countriesSnapshot = await db.collection('countries').get();
+      let countries = [];
+
+      countriesSnapshot.forEach((country) => {
+        countries = [...countries, country.data()];
+      });
+
+      const mediasSnapshot = await db.collectionGroup('medias').get();
+      mediasSnapshot.forEach((doc) => {
+        const data = doc.data();
+        data.path = doc.ref.path;
+        medias.push(data);
+      });
+      const locationsSnapshot = await db.collectionGroup('locations').get();
+      locationsSnapshot.forEach((doc) => {
+        const data = doc.data();
+
+        if (data.is_placeholder) {
+          return;
+        }
+
+        locations.push(data);
+      });
+      const hashtagsSnapshot = await db.collectionGroup('hashtags').get();
+      let hashtags = [];
+      hashtagsSnapshot.forEach((doc) => {
+        hashtags.push(doc.data());
+      });
+      hashtags = hashtags.filter((h) => !h.is_country && !h.is_city);
+      highlights = medias.filter((m) => m.is_highlight);
+      const couponsSnapshot = await db.collection('coupons').get();
+      couponsSnapshot.forEach((doc) => {
+        const data = doc.data();
+        data.path = doc.ref.path;
+        coupons.push(data);
+      });
+    }
 
     const mediaProcessing = (media, gallery, position) => {
       const item = gallery || media;
@@ -533,9 +550,8 @@ export async function GET() {
 
     obj = parse('urlset', obj, { declaration: { encoding: 'UTF-8' } });
     storage.bucket('viajarcomale.appspot.com').file(reference).save(obj);
-  }
-
-  if (cacheExists[0]) {
+  } else {
+    // if (cacheExists[0]) {
     const contents = await storage
       .bucket('viajarcomale.appspot.com')
       .file(reference)
@@ -544,7 +560,6 @@ export async function GET() {
   }
 
   logAccess(
-    db,
     host('/sitemap.xml')
       .replace('https://viajarcomale', '')
       .replace('https://travelwithalefe', '')

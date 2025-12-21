@@ -3,7 +3,7 @@ import Link from 'next/link';
 import ShareButton from '@/app/components/share-button';
 import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
-import { SITE_NAME } from '@/app/utils/constants';
+import { SITE_NAME, USE_CACHE } from '@/app/utils/constants';
 import defaultMetadata from '@/app/utils/default-metadata';
 import logAccess from '@/app/utils/log-access';
 import styles from './page.module.css';
@@ -11,6 +11,8 @@ import styles from './page.module.css';
 import AdSense from '../components/adsense';
 import Editable from '../components/editable/editable';
 import useEditMode from '../utils/use-edit-mode';
+import { theCachedCoupons } from '../utils/cache-coupons';
+import { headers } from 'next/headers';
 
 const Coupon = ({ item, editMode }) => {
   const i18n = useI18n();
@@ -121,8 +123,6 @@ export default async function Coupons({ searchParams }) {
   const isBR = host().includes('viajarcomale.com.br');
   const editMode = useEditMode(searchParams);
 
-  const cacheRef = '/caches/static_pages/static_pages/coupons';
-
   const db = getFirestore();
 
   const couponsPageRef = await db.doc('/pages/coupons').get();
@@ -132,31 +132,37 @@ export default async function Coupons({ searchParams }) {
     return notFound();
   }
 
-  const cache = await db.doc(cacheRef).get();
-
   let coupons = [];
 
-  if (!cache.exists) {
-    const couponsSnapshot = await db
-      .collection('coupons')
-      .orderBy('order', 'desc')
-      .get();
-    couponsSnapshot.forEach((doc) => {
-      const data = doc.data();
-      data.id = data.slug;
-      coupons.push(data);
-    });
-
-    db.doc(cacheRef).set({
-      coupons,
-      last_update: new Date().toISOString().split('T')[0],
-      user_agent: headers().get('user-agent'),
-    });
+  if (USE_CACHE) {
+    coupons = theCachedCoupons;
   } else {
-    coupons = cache.data().coupons;
+    const cacheRef = '/caches/static_pages/static_pages/coupons';
+
+    const cache = await db.doc(cacheRef).get();
+
+    if (!cache.exists) {
+      const couponsSnapshot = await db
+        .collection('coupons')
+        .orderBy('order', 'desc')
+        .get();
+      couponsSnapshot.forEach((doc) => {
+        const data = doc.data();
+        data.id = data.slug;
+        coupons.push(data);
+      });
+
+      db.doc(cacheRef).set({
+        coupons,
+        last_update: new Date().toISOString().split('T')[0],
+        user_agent: headers().get('user-agent'),
+      });
+    } else {
+      coupons = cache.data().coupons;
+    }
   }
 
-  logAccess(db, host('/coupons'));
+  logAccess(host('/coupons'));
 
   if (!isBR) {
     coupons.sort((a, b) => {

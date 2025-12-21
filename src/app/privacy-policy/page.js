@@ -26,7 +26,7 @@ export default async function PrivacyPolicy() {
   const privacyPolicy = await db.doc('/pages/privacy-policy').get();
   const privacyPolicyData = privacyPolicy.data();
 
-  logAccess(db, host('/privacy-policy'));
+  logAccess(host('/privacy-policy'));
 
   return (
     <>
