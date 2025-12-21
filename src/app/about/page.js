@@ -6,6 +6,7 @@ import useI18n from '@/app/hooks/use-i18n';
 import { SITE_NAME } from '../utils/constants';
 import defaultMetadata from '../utils/default-metadata';
 import logAccess from '../utils/log-access';
+import { getLocalizedText } from '../utils/locale-helpers';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -20,7 +21,6 @@ export async function generateMetadata() {
 export default async function About() {
   const i18n = useI18n();
   const host = useHost();
-  const isBR = host().includes('viajarcomale.com.br');
 
   const db = getFirestore();
   const aboutRef = await db.doc('/pages/about').get();
@@ -37,19 +37,17 @@ export default async function About() {
               src={host('/images/back.svg')}
               alt={i18n('Back')}
               width="32px"
-            ></img>
+            />
           </Link>
-
           <ShareButton />
         </div>
       </div>
       <div
         className="page"
         dangerouslySetInnerHTML={{
-          __html:
-            isBR && aboutData.text_pt ? aboutData.text_pt : aboutData.text,
+          __html: getLocalizedText(host(), aboutData.text, aboutData.text_pt),
         }}
-      ></div>
+      />
     </>
   );
 }

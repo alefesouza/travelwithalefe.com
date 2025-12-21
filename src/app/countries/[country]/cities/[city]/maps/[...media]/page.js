@@ -1,16 +1,10 @@
-import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
+import { validateCountryCity } from '@/app/utils/validation-helpers';
 import Country, {
   generateMetadata as generateMediaMetadata,
 } from '../../posts/[...media]/page';
-import { notFound } from 'next/navigation';
 
 export async function generateMetadata({ params: { country, city, media } }) {
-  if (
-    !cachedCountries.includes(country) ||
-    (city && !cachedCities.includes(city))
-  ) {
-    return notFound();
-  }
+  validateCountryCity(country, city);
 
   return generateMediaMetadata({
     params: {
@@ -25,7 +19,7 @@ export default async function Video({
   params: { country, city, media },
   searchParams,
 }) {
-  return Country({
+  return MediaPage({
     params: {
       country,
       city,

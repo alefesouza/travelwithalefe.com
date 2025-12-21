@@ -22,19 +22,13 @@ import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
 import countries from '@/app/utils/countries';
 import { cachedMedias } from '@/app/utils/cache-medias';
 import { USE_CACHE } from '@/app/utils/constants';
-
-function getCountry(country, city) {
-  const theCountry = countries.find((c) => c.slug === country);
-
-  if (
-    !theCountry ||
-    (city && !theCountry.cities.find((c) => c.slug === city))
-  ) {
-    return false;
-  }
-
-  return theCountry;
-}
+import { getCountry } from '@/app/utils/route-helpers';
+import { validateCountryCity } from '@/app/utils/validation-helpers';
+import {
+  fetchMedia,
+  expandMediaGallery,
+  fetchMediaByOriginalId,
+} from '@/app/utils/posts-helpers';
 
 function getSelectedMedia(media, theMedia, country, city) {
   let mediaIndex = null;
@@ -68,12 +62,7 @@ function getSelectedMedia(media, theMedia, country, city) {
 }
 
 export async function generateMetadata({ params: { country, city, media } }) {
-  if (
-    !cachedCountries.includes(country) ||
-    (city && !cachedCities.includes(city))
-  ) {
-    return notFound();
-  }
+  validateCountryCity(country, city);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = useHost();
@@ -98,7 +87,7 @@ export async function generateMetadata({ params: { country, city, media } }) {
     redirect(cityPath + '/' + typePath + '/' + split[split.length - 1]);
   }
 
-  const countryData = getCountry(country, city);
+  const countryData = getCountry([country, 'cities', city], {});
 
   if (!countryData) {
     return notFound();
@@ -114,44 +103,13 @@ export async function generateMetadata({ params: { country, city, media } }) {
     return notFound();
   }
 
-  const db = getFirestore();
-  let theMedia = null;
-
-  if (USE_CACHE) {
-    theMedia = cachedMedias.find(
-      (m) =>
-        m.country === country &&
-        m.city === city &&
-        m.path.includes(
-          media[0].includes(city + '-') ? media[0] : city + '-post-' + media[0]
-        )
-    );
-  } else {
-    const mediaRef = await db
-      .collection('countries')
-      .doc(country)
-      .collection('cities')
-      .doc(city)
-      .collection('medias')
-      .doc(
-        media[0].includes(city + '-') ? media[0] : city + '-post-' + media[0]
-      )
-      .get();
-    theMedia = mediaRef.data();
-  }
+  let theMedia = await fetchMedia(USE_CACHE, country, city, media);
 
   if (!theMedia) {
     return notFound();
   }
 
-  if (theMedia.gallery && theMedia.gallery.length) {
-    theMedia.gallery = theMedia.gallery.map((g, i) => ({
-      ...theMedia,
-      ...g,
-      is_gallery: true,
-      img_index: i + 2,
-    }));
-  }
+  theMedia = expandMediaGallery(theMedia);
 
   const { selectedMedia } = getSelectedMedia(media, theMedia, country, city);
   theMedia = selectedMedia;
@@ -171,7 +129,7 @@ export async function generateMetadata({ params: { country, city, media } }) {
   );
 }
 
-export default async function Country({
+export default async function MediaPage({
   params: { country, city, media },
   searchParams,
 }) {
@@ -182,12 +140,7 @@ export default async function Country({
     new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
   const editMode = useEditMode(searchParams);
 
-  if (
-    !cachedCountries.includes(country) ||
-    (city && !cachedCities.includes(city))
-  ) {
-    return notFound();
-  }
+  validateCountryCity(country, city);
 
   if (media.length > 2) {
     redirect(
@@ -203,54 +156,29 @@ export default async function Country({
     !media[0].includes(city + '-maps-') &&
     isNaN(parseInt(media[0]))
   ) {
-    let base = '/countries/' + country + '/cities/' + city;
+    const base = '/countries/' + country + '/cities/' + city;
+    const data = await fetchMediaByOriginalId(
+      USE_CACHE,
+      country,
+      city,
+      media[0]
+    );
 
-    if (USE_CACHE) {
-      const data = cachedMedias.find(
-        (m) =>
-          m.country === country && m.city === city && m.original_id === media[0]
-      );
-
-      if (!data) {
-        return notFound();
-      }
-
-      permanentRedirect(
-        base +
-          '/posts/' +
-          data.id.replace(city + '-post-', '') +
-          (media[1] ? '/' + media[1] : '')
-      );
-    } else {
-      const mediaSnapshot = await db
-        .collection('countries')
-        .doc(country)
-        .collection('cities')
-        .doc(city)
-        .collection('medias')
-        .where('original_id', '==', media[0])
-        .get();
-
-      if (mediaSnapshot.size == 0) {
-        return notFound();
-      }
-
-      mediaSnapshot.forEach((doc) => {
-        const data = doc.data();
-
-        permanentRedirect(
-          base +
-            '/posts/' +
-            data.id.replace(city + '-post-', '') +
-            (media[1] ? '/' + media[1] : '')
-        );
-      });
+    if (!data) {
+      return notFound();
     }
+
+    permanentRedirect(
+      base +
+        '/posts/' +
+        data.id.replace(city + '-post-', '') +
+        (media[1] ? '/' + media[1] : '')
+    );
 
     return;
   }
 
-  const countryData = getCountry(country, city);
+  const countryData = getCountry([country, 'cities', city], searchParams);
 
   if (!countryData) {
     return notFound();
@@ -262,50 +190,16 @@ export default async function Country({
     return notFound();
   }
 
-  let theMedia = null;
-  let mediaRef = null;
-  const db = getFirestore();
-
-  if (USE_CACHE) {
-    theMedia = cachedMedias.find(
-      (m) =>
-        m.country === country &&
-        m.city === city &&
-        m.path.includes(
-          media[0].includes(city + '-') ? media[0] : city + '-post-' + media[0]
-        )
-    );
-  } else {
-    mediaRef = await db
-      .collection('countries')
-      .doc(country)
-      .collection('cities')
-      .doc(city)
-      .collection('medias')
-      .doc(
-        media[0].includes(city + '-') ? media[0] : city + '-post-' + media[0]
-      )
-      .get();
-    theMedia = mediaRef.data();
-  }
+  let theMedia = await fetchMedia(USE_CACHE, country, city, media);
 
   if (!theMedia) {
     return notFound();
   }
 
-  if (!USE_CACHE) {
-    theMedia.path = mediaRef.ref.path;
-  }
+  theMedia = expandMediaGallery(theMedia);
 
   let galleryLength = 0;
-
   if (theMedia.gallery && theMedia.gallery.length) {
-    theMedia.gallery = theMedia.gallery.map((g, i) => ({
-      ...theMedia,
-      ...g,
-      is_gallery: true,
-      img_index: i + 2,
-    }));
     galleryLength = theMedia.gallery.length + 1;
   }
 

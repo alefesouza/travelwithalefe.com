@@ -4,8 +4,8 @@ import Select, { components } from 'react-select';
 import useI18nClient from '@/app/hooks/use-i18n-client';
 import { useRouter } from 'next/navigation';
 import { useEffect, useState, useId } from 'react';
-import arrayShuffle from '@/app/utils/array-shuffle';
 import { ITEMS_PER_PAGE } from '@/app/utils/constants';
+import { shuffleArray } from '@/app/utils/media-sorting';
 
 export default function Autocomplete() {
   const router = useRouter();
@@ -41,7 +41,7 @@ export default function Autocomplete() {
 
   const updateRandomHashtags = (hashtags) => {
     const array = Array.from(Array(hashtags.length).keys());
-    const randomArray = arrayShuffle(array).slice(0, ITEMS_PER_PAGE);
+    const randomArray = shuffleArray(array).slice(0, ITEMS_PER_PAGE);
     const randomHashtags = randomArray.map((i) => hashtags[i]);
 
     setRandomHashtags(randomHashtags);

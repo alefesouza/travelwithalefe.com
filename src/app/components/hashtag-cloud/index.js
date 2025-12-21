@@ -5,7 +5,7 @@ import ReactWordcloud from '@/app/components/lib/react-wordcloud';
 import 'tippy.js/dist/tippy.css';
 import 'tippy.js/animations/scale.css';
 import { useState } from 'react';
-import shuffle from '@/app/utils/array-shuffle';
+import { shuffleArray } from '@/app/utils/media-sorting';
 
 export default function HashtagCloud({
   theHashtags,
@@ -30,7 +30,7 @@ export default function HashtagCloud({
       const hashtags = JSON.parse(localStorage.getItem('hashtags')).map(
         (h) => ({ text: '#' + h, value: 5 })
       );
-      setHashtags(shuffle(hashtags).slice(0, 100));
+      setHashtags(shuffleArray(hashtags).slice(0, 100));
       return;
     }
 
@@ -42,7 +42,7 @@ export default function HashtagCloud({
     setIsLoading(false);
 
     const hashtags = JSON.parse(data).map((h) => ({ text: '#' + h, value: 5 }));
-    setHashtags(shuffle(hashtags).slice(0, 100));
+    setHashtags(shuffleArray(hashtags).slice(0, 100));
 
     localStorage.setItem('hashtags', data);
     localStorage.setItem(

@@ -1,4 +1,5 @@
 import { getFirestore } from 'firebase-admin/firestore';
+import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import ShareButton from '@/app/components/share-button';
 import useHost from '@/app/hooks/use-host';
@@ -11,48 +12,55 @@ import Editable from '@/app/components/editable/editable';
 import useEditMode from '@/app/utils/use-edit-mode';
 import { theCachedCoupons } from '@/app/utils/cache-coupons';
 import { cachedCoupons } from '@/app/utils/cache-data';
-import { notFound } from 'next/navigation';
+import { getLocalizedText, isBrazilianHost } from '@/app/utils/locale-helpers';
 
-export async function generateMetadata({ params: { coupon } }) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = useI18n();
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+/**
+ * @typedef {import('@/typings/coupon').Coupon} Coupon
+ */
 
-  let couponData = null;
-
+/**
+ * Fetch coupon data from cache or Firestore
+ * @param {string} couponSlug - Coupon slug
+ * @returns {Promise<Coupon>}
+ */
+async function fetchCoupon(couponSlug) {
   if (USE_CACHE) {
-    couponData = theCachedCoupons.find((c) => c.slug === coupon);
-
-    if (!couponData) {
-      return notFound();
-    }
-  } else {
-    if (!cachedCoupons.includes(coupon)) {
-      return notFound();
-    }
-
-    const db = getFirestore();
-    const couponRef = await db.collection('coupons').doc(coupon).get();
-
-    if (!couponRef.exists) {
-      return notFound();
-    }
-
-    couponData = couponRef.data();
+    const couponData = theCachedCoupons.find((c) => c.slug === couponSlug);
+    if (!couponData) return notFound();
+    return couponData;
   }
 
+  if (!cachedCoupons.includes(couponSlug)) {
+    return notFound();
+  }
+
+  const db = getFirestore();
+  const couponRef = await db.collection('coupons').doc(couponSlug).get();
+
+  if (!couponRef.exists) {
+    return notFound();
+  }
+
+  return couponRef.data();
+}
+
+export async function generateMetadata({ params: { coupon } }) {
+  const i18n = useI18n();
+  const host = useHost();
+
+  const couponData = await fetchCoupon(coupon);
+
   const title =
-    (isBR && couponData.title_pt ? couponData.title_pt : couponData.title) +
+    getLocalizedText(host(), couponData.title, couponData.title_pt) +
     ' - ' +
     i18n('Coupons') +
     ' - ' +
     i18n(SITE_NAME);
-  const description =
-    isBR && couponData.description_pt
-      ? couponData.description_pt
-      : couponData.description;
+  const description = getLocalizedText(
+    host(),
+    couponData.description,
+    couponData.description_pt
+  );
 
   return defaultMetadata(title, description);
 }
@@ -60,27 +68,10 @@ export async function generateMetadata({ params: { coupon } }) {
 export default async function Coupons({ params: { coupon }, searchParams }) {
   const i18n = useI18n();
   const host = useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = isBrazilianHost(host());
   const editMode = useEditMode(searchParams);
 
-  const db = getFirestore();
-  let couponData = null;
-
-  if (USE_CACHE) {
-    couponData = theCachedCoupons.find((c) => c.slug === coupon);
-
-    if (!couponData) {
-      return notFound();
-    }
-  } else {
-    const couponRef = await db.collection('coupons').doc(coupon).get();
-
-    if (!couponRef.exists) {
-      return notFound();
-    }
-
-    couponData = couponRef.data();
-  }
+  const couponData = await fetchCoupon(coupon);
 
   logAccess(host('/coupons/' + coupon));
 
@@ -93,15 +84,14 @@ export default async function Coupons({ params: { coupon }, searchParams }) {
               src={host('/images/back.svg')}
               alt={i18n('Back')}
               width="32px"
-            ></img>
+            />
           </Link>
-
           <ShareButton />
         </div>
       </div>
       <div className="page container">
         <h2>
-          {isBR && couponData.title_pt ? couponData.title_pt : couponData.title}
+          {getLocalizedText(host(), couponData.title, couponData.title_pt)}
         </h2>
 
         {editMode.editMode && (
@@ -115,9 +105,11 @@ export default async function Coupons({ params: { coupon }, searchParams }) {
         <div className={'instagram_media_gallery_item ' + styles.coupon}>
           <div className={styles.coupon_body}>
             <div className={styles.coupon_body_padding}>
-              {isBR && couponData.description_pt
-                ? couponData.description_pt
-                : couponData.description}
+              {getLocalizedText(
+                host(),
+                couponData.description,
+                couponData.description_pt
+              )}
             </div>
             <div style={{ textAlign: 'center' }}>
               {couponData.link && (
@@ -150,9 +142,11 @@ export default async function Coupons({ params: { coupon }, searchParams }) {
               <div className={styles.coupon_body_padding}>
                 <b>{i18n('How I Use')}:</b>{' '}
                 {!isBR && couponData.isBR && '(Brazil only) '}
-                {isBR && couponData.how_i_use_pt
-                  ? couponData.how_i_use_pt
-                  : couponData.how_i_use}
+                {getLocalizedText(
+                  host(),
+                  couponData.how_i_use,
+                  couponData.how_i_use_pt
+                )}
                 {couponData.regulation && (
                   <div style={{ marginTop: 14, textAlign: 'center' }}>
                     <a href={couponData.regulation} target="_blank">

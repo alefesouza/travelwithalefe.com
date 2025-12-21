@@ -35,56 +35,21 @@ import {
 import countries from '@/app/utils/countries';
 import { cachedMedias } from '@/app/utils/cache-medias';
 import { theCachedLocations } from '@/app/utils/cache-locations';
-import arrayShuffle from '@/app/utils/array-shuffle';
-
-function getDataFromRoute(slug, searchParams) {
-  const [location, path5, path6, path7, path8] = slug;
-  // {country}/cities/{city}/locations/{location}
-  // {country}/cities/{city}/locations/{location}/expand
-  // {country}/cities/{city}/locations/{location}/page/{page}
-  // {country}/cities/{city}/locations/{location}/page/{page}/expand
-
-  let page = path5 === 'page' ? path6 : 1;
-  page = parseInt(page);
-  page = isNaN(page) ? 1 : page;
-
-  const expandGalleries = path5 === 'expand' || path7 === 'expand';
-  const isWebStories = path5 === 'webstories' || path7 === 'webstories';
-  const sort = getSort(searchParams, isWebStories);
-
-  return {
-    page,
-    expandGalleries,
-    sort,
-    isWebStories,
-    location: decodeURIComponent(location).toLowerCase(),
-  };
-}
-
-function getCountry(country, city) {
-  const theCountry = countries.find((c) => c.slug === country);
-
-  if (
-    !theCountry ||
-    (city && !theCountry.cities.find((c) => c.slug === city))
-  ) {
-    return false;
-  }
-
-  return theCountry;
-}
-
-function getPossibleCities(theCity) {
-  let possibleCities = [theCity.slug];
-
-  if (theCity.travel_number) {
-    for (let i = 2; i <= theCity.travel_number; i++) {
-      possibleCities.push(theCity.slug + '-' + i);
-    }
-  }
-
-  return possibleCities;
-}
+import {
+  getLocationDataFromRoute,
+  getPossibleCities,
+  getLocationBreadcrumbs,
+} from '@/app/utils/location-helpers';
+import {
+  fetchLocationMetadata,
+  fetchLocationMedia,
+} from '@/app/utils/locations-helpers';
+import { getCountry } from '@/app/utils/route-helpers';
+import {
+  sortByDateDesc,
+  sortByDateAsc,
+  shuffleArray,
+} from '@/app/utils/media-sorting';
 
 export async function generateMetadata({
   params: { country, city, theLocation },
@@ -96,9 +61,10 @@ export async function generateMetadata({
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
 
-  let { page, location, isWebStories } = getDataFromRoute(
+  let { page, location, isWebStories } = getLocationDataFromRoute(
     theLocation,
-    searchParams
+    searchParams,
+    false
   );
 
   if (
@@ -120,7 +86,7 @@ export async function generateMetadata({
   //   );
   // }
 
-  const countryData = getCountry(country, city);
+  const countryData = getCountry([country, 'cities', city], searchParams);
 
   if (!countryData) {
     return notFound();
@@ -196,19 +162,9 @@ export async function generateMetadata({
         m.locations.includes(location)
     );
 
-    if (sort === 'desc') {
-      function sortByDateDesc(a, b) {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      }
-
-      coverSnapshot = coverSnapshot.sort(sortByDateDesc);
-    } else {
-      function sortByDateAsc(a, b) {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
-      }
-
-      coverSnapshot = coverSnapshot.sort(sortByDateAsc);
-    }
+    coverSnapshot = coverSnapshot.sort(
+      sort === 'desc' ? sortByDateDesc : sortByDateAsc
+    );
 
     coverSnapshot = coverSnapshot.slice(0, isWebStories ? 1 : 2);
 
@@ -277,9 +233,9 @@ export default async function Country({
   const editMode = useEditMode(searchParams);
 
   let { page, expandGalleries, sort, location, isWebStories } =
-    getDataFromRoute(theLocation, searchParams);
+    getLocationDataFromRoute(theLocation, searchParams);
 
-  const countryData = getCountry(country, city);
+  const countryData = getCountry([country, 'cities', city], searchParams);
 
   if (!countryData) {
     return notFound();
@@ -293,106 +249,35 @@ export default async function Country({
     sort = 'desc';
   }
 
-  let photos = [];
-
-  const db = getFirestore();
-  let theMedia = null;
-
-  if (USE_CACHE) {
-    theMedia = theCachedLocations.find(
-      (m) => m.country === country && m.city === city && m.slug === location
-    );
-  } else {
-    const mediaRef = await db
-      .collection('countries')
-      .doc(country)
-      .collection('cities')
-      .doc(city)
-      .collection('locations')
-      .doc(location)
-      .get();
-    theMedia = mediaRef.data();
-  }
+  const theMedia = await fetchLocationMetadata(
+    USE_CACHE,
+    country,
+    city,
+    location
+  );
 
   if (!theMedia) {
     return notFound();
   }
 
-  if (USE_CACHE) {
-    let photosSnapshot = cachedMedias.filter(
-      (m) =>
-        m.country === country &&
-        getPossibleCities(theCity).includes(m.city) &&
-        m.locations &&
-        m.locations.includes(location)
-    );
-
-    if (sort === 'desc') {
-      function sortByDateDesc(a, b) {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      }
-
-      photosSnapshot = photosSnapshot.sort(sortByDateDesc);
-    } else {
-      function sortByDateAsc(a, b) {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
-      }
-
-      photosSnapshot = photosSnapshot.sort(sortByDateAsc);
-    }
-
-    photosSnapshot.forEach((data) => {
-      photos = [...photos, data];
-    });
-  } else {
-    const cacheRef = `/caches/locations/locations-cache/${city}-${location}/sort/${
-      sort === 'asc' ? 'asc' : 'desc'
-    }`;
-
-    let cache = null;
-
-    if (editMode) {
-      cache = { exists: false };
-    } else {
-      cache = await db.doc(cacheRef).get();
-    }
-
-    if (!cache.exists || isWebStories) {
-      const photosSnapshot = await db
-        .collectionGroup('medias')
-        .where('locations', 'array-contains', location)
-        .where('city', 'in', getPossibleCities(theCity))
-        .orderBy('order', sort)
-        .get();
-
-      photosSnapshot.forEach((photo) => {
-        const data = photo.data();
-        data.path = photo.ref.path;
-        photos = [...photos, data];
-      });
-
-      if (!photos.length) {
-        return notFound();
-      }
-
-      if (!isRandom && !cache.exists && !isWebStories) {
-        db.doc(cacheRef).set({
-          photos,
-          last_update: new Date().toISOString().split('T')[0],
-          user_agent: headers().get('user-agent'),
-        });
-      }
-    } else {
-      photos = cache.data().photos;
-    }
-  }
+  let photos = await fetchLocationMedia(
+    USE_CACHE,
+    country,
+    getPossibleCities(theCity),
+    location,
+    sort,
+    isRandom,
+    isWebStories,
+    city,
+    editMode
+  );
 
   if (!photos.length) {
     return notFound();
   }
 
   if (isRandom) {
-    photos = arrayShuffle(photos);
+    photos = shuffleArray(photos);
 
     sort = 'random';
   }
@@ -510,12 +395,14 @@ export default async function Country({
     );
   }
 
-  const breadcrumbs = getBreadcrumbs(
+  const breadcrumbs = getLocationBreadcrumbs(
     countryData,
     theCity,
     theMedia,
     page,
     expandGalleries,
+    i18n,
+    host,
     isBR
   );
 
@@ -661,10 +548,13 @@ export default async function Country({
       <div className={styles.galleries}>
         {instagramStories.length > 1 && (
           <SortPicker
-            type="stories"
-            basePath={basePath}
+            i18n={i18n}
             sort={sort}
+            paginationBase={paginationBase}
+            type="stories"
+            isRandom={isRandom}
             newShuffle={newShuffle}
+            useCache={USE_CACHE}
           />
         )}
 
@@ -703,10 +593,13 @@ export default async function Country({
 
         {shortVideos.length > 1 && (
           <SortPicker
-            type="short"
-            basePath={basePath}
+            i18n={i18n}
             sort={sort}
+            paginationBase={paginationBase}
+            type="short"
+            isRandom={isRandom}
             newShuffle={newShuffle}
+            useCache={USE_CACHE}
           />
         )}
 
@@ -732,10 +625,13 @@ export default async function Country({
 
         {youtubeVideos.length > 1 && (
           <SortPicker
-            type="youtube"
-            basePath={basePath}
+            i18n={i18n}
             sort={sort}
+            paginationBase={paginationBase}
+            type="youtube"
+            isRandom={isRandom}
             newShuffle={newShuffle}
+            useCache={USE_CACHE}
           />
         )}
 
@@ -761,10 +657,13 @@ export default async function Country({
 
         {_360photos.length > 1 && (
           <SortPicker
-            type="360photos"
-            basePath={basePath}
+            i18n={i18n}
             sort={sort}
+            paginationBase={paginationBase}
+            type="360photos"
+            isRandom={isRandom}
             newShuffle={newShuffle}
+            useCache={USE_CACHE}
           />
         )}
 
@@ -790,10 +689,13 @@ export default async function Country({
 
         {instagramPhotos.filter((p) => !p.file_type).length > 1 && (
           <SortPicker
-            type="photos"
-            basePath={basePath}
+            i18n={i18n}
             sort={sort}
+            paginationBase={paginationBase}
+            type="photos"
+            isRandom={isRandom}
             newShuffle={newShuffle}
+            useCache={USE_CACHE}
           />
         )}
 
@@ -851,10 +753,13 @@ export default async function Country({
 
         {mapsPhotos.filter((p) => !p.file_type).length > 1 && (
           <SortPicker
-            type="maps"
-            basePath={basePath}
+            i18n={i18n}
             sort={sort}
+            paginationBase={paginationBase}
+            type="maps"
+            isRandom={isRandom}
             newShuffle={newShuffle}
+            useCache={USE_CACHE}
           />
         )}
 
@@ -904,53 +809,4 @@ export default async function Country({
       <StructuredBreadcrumbs breadcrumbs={breadcrumbs} />
     </div>
   );
-}
-
-function getBreadcrumbs(
-  countryData,
-  theCity,
-  theMedia,
-  page,
-  expandGalleries,
-  isBR
-) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = useI18n();
-
-  const country = countryData.slug;
-  const city = theCity.slug;
-
-  const breadcrumbs = [
-    {
-      name: i18n(countryData.name),
-      item: `/countries/${country}`,
-    },
-    {
-      name: isBR && theCity.name_pt ? theCity.name_pt : theCity.name,
-      item: `/countries/${country}/cities/${city}`,
-    },
-    {
-      name: isBR && theMedia.name_pt ? theMedia.name_pt : theMedia.name,
-      item: `/countries/${country}/cities/${city}/locations/${theMedia.slug}`,
-    },
-  ];
-
-  let currentPath = `/countries/${country}/cities/${city}/locations/${theMedia.slug}`;
-
-  if (page > 1) {
-    currentPath += '/page/' + page;
-    breadcrumbs.push({
-      name: i18n('Page') + ' ' + page,
-      item: currentPath,
-    });
-  }
-
-  if (expandGalleries) {
-    breadcrumbs.push({
-      name: i18n('Expand Galleries'),
-      item: `${currentPath}/expand`,
-    });
-  }
-
-  return breadcrumbs;
 }

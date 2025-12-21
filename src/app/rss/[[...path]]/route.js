@@ -17,8 +17,12 @@ import { notFound, redirect } from 'next/navigation';
 import { customInitApp } from '@/app/firebase';
 import useEditMode from '@/app/utils/use-edit-mode';
 import { RSS_HASHTAGS } from '@/app/utils/rss-hashtags';
-import { cachedMedias } from '@/app/utils/cache-medias';
-import { theCachedHashtags } from '@/app/utils/cache-hashtags';
+import { findHashtag } from '@/app/utils/hashtag-page-helpers';
+import {
+  fetchHomeRSSFeed,
+  fetchHashtagRSSFeed,
+  expandGalleriesForRSS,
+} from '@/app/utils/rss-helpers';
 
 customInitApp();
 
@@ -46,59 +50,7 @@ export async function GET(req) {
       return notFound();
     }
 
-    if (USE_CACHE) {
-      let photosSnapshot = cachedMedias;
-
-      if (type) {
-        photosSnapshot = photosSnapshot.filter((m) => m.type === type);
-      }
-
-      photosSnapshot = photosSnapshot
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, ITEMS_PER_PAGE);
-
-      photosSnapshot.forEach((data) => {
-        photos.push(data);
-      });
-    } else {
-      const cacheRef = `/caches/feeds/pages/home${type ? '-' + type : ''}`;
-
-      let cache = null;
-
-      if (editMode) {
-        cache = { exists: false };
-      } else {
-        cache = await db.doc(cacheRef).get();
-      }
-
-      if (!cache.exists) {
-        let photosSnapshot = db
-          .collectionGroup('medias')
-          .limit(ITEMS_PER_PAGE)
-          .orderBy('createdAt', 'desc');
-
-        if (type) {
-          photosSnapshot = photosSnapshot.where('type', '==', type);
-        }
-
-        photosSnapshot = await photosSnapshot.get();
-
-        photosSnapshot.forEach((doc) => {
-          const data = doc.data();
-          data.path = doc.ref.path;
-
-          photos.push(data);
-        });
-
-        db.doc(cacheRef).set({
-          photos,
-          last_update: new Date().toISOString().split('T')[0],
-          user_agent: headers().get('user-agent'),
-        });
-      } else {
-        photos = cache.data().photos;
-      }
-    }
+    photos = await fetchHomeRSSFeed(USE_CACHE, type, editMode);
   } else {
     const split = pathname.split('/');
 
@@ -114,31 +66,7 @@ export async function GET(req) {
       return notFound();
     }
 
-    let hashtagPt = null;
-    let hashtagEn = null;
-
-    if (USE_CACHE) {
-      hashtagPt = theCachedHashtags.find((h) => h.name_pt === hashtag);
-
-      if (!hashtagPt) {
-        hashtagEn = theCachedHashtags.find((h) => h.name === hashtag);
-      }
-    } else {
-      const hashtagPtSnapshot = await db
-        .collection('hashtags')
-        .where('name_pt', '==', hashtag)
-        .get();
-
-      hashtagPtSnapshot.forEach((doc) => {
-        hashtagPt = doc.data();
-      });
-
-      if (!hashtagPt) {
-        const hashtagEnDoc = await db.collection('hashtags').doc(hashtag).get();
-        hashtagEn = hashtagEnDoc.data();
-      }
-    }
-
+    const { hashtagPt, hashtagEn } = await findHashtag(USE_CACHE, hashtag);
     finalHashtag = hashtagPt || hashtagEn;
 
     if (!finalHashtag) {
@@ -149,76 +77,16 @@ export async function GET(req) {
       return;
     }
 
-    if (USE_CACHE) {
-      finalHashtag.rss_limit = 300;
+    photos = await fetchHashtagRSSFeed(
+      USE_CACHE,
+      finalHashtag.name,
+      type,
+      finalHashtag.rss_limit,
+      editMode
+    );
 
-      let photosSnapshot = cachedMedias.filter(
-        (m) => m.hashtags && m.hashtags.includes(finalHashtag.name)
-      );
-
-      if (type) {
-        photosSnapshot = photosSnapshot.filter((m) => m.type === type);
-      }
-
-      photosSnapshot = photosSnapshot
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-        .slice(0, finalHashtag.rss_limit || ITEMS_PER_PAGE);
-
-      photosSnapshot.forEach((data) => {
-        photos.push(data);
-      });
-
-      if (photos.length === 0) {
-        return notFound();
-      }
-    } else {
-      const cacheRef = `/caches/feeds/hashtags-cache/${finalHashtag.name}${
-        type ? '-' + type : ''
-      }/sort/desc`;
-
-      let cache = null;
-
-      if (editMode) {
-        cache = { exists: false };
-      } else {
-        cache = await db.doc(cacheRef).get();
-      }
-
-      if (!cache.exists) {
-        let photosSnapshot = db
-          .collectionGroup('medias')
-          .where('hashtags', 'array-contains', finalHashtag.name);
-
-        if (type) {
-          photosSnapshot = photosSnapshot.where('type', '==', type);
-        }
-
-        photosSnapshot = await photosSnapshot
-          .limit(
-            finalHashtag.rss_limit ? finalHashtag.rss_limit : ITEMS_PER_PAGE
-          )
-          .orderBy('createdAt', 'desc')
-          .get();
-
-        photosSnapshot.forEach((doc) => {
-          const data = doc.data();
-          data.path = doc.ref.path;
-
-          photos.push(data);
-        });
-
-        if (photos.length === 0) {
-          return notFound();
-        }
-
-        db.doc(cacheRef).set({
-          photos,
-          last_update: new Date().toISOString().split('T')[0],
-          user_agent: headers().get('user-agent'),
-        });
-      } else {
-        photos = cache.data().photos;
-      }
+    if (photos.length === 0) {
+      return notFound();
     }
   }
 
@@ -240,51 +108,7 @@ export async function GET(req) {
     return new Date(b.date) - new Date(a.date);
   });
 
-  let expandedList = [];
-
-  instagramPhotos.forEach((item) => {
-    expandedList = [...expandedList, item];
-
-    if (item.gallery && item.gallery.length) {
-      const gallery = item.gallery.map((g, i) => ({
-        ...item,
-        ...g,
-        is_gallery: true,
-        img_index: i + 2,
-      }));
-      const itemWithHashtag = gallery.findIndex(
-        (g) =>
-          g.item_hashtags &&
-          finalHashtag &&
-          g.item_hashtags.includes(finalHashtag.name)
-      );
-
-      if (itemWithHashtag > -1) {
-        delete gallery[itemWithHashtag].is_gallery;
-        expandedList[expandedList.length - 1] = gallery[itemWithHashtag];
-
-        item.file_type = 'image';
-        gallery[itemWithHashtag] = item;
-      }
-
-      if (finalHashtag && finalHashtag.rss_limit === 2000) {
-        expandedList = [...expandedList, ...gallery];
-      } else {
-        if (item.rss && item.rss.includes(finalHashtag.name)) {
-          expandedList = [...expandedList, ...gallery];
-        } else {
-          expandedList = [
-            ...expandedList,
-            ...gallery.filter(
-              (g) => g.rss_include && g.rss_include.includes(finalHashtag.name)
-            ),
-          ];
-        }
-      }
-    }
-  });
-
-  instagramPhotos = expandedList;
+  instagramPhotos = expandGalleriesForRSS(instagramPhotos, finalHashtag);
 
   const title = hashtag
     ? '#' + hashtag + ' - Hashtags - ' + i18n(SITE_NAME)

@@ -30,31 +30,23 @@ import { RSS_HASHTAGS } from '@/app/utils/rss-hashtags';
 import { cachedHashtags } from '@/app/utils/cache-data';
 import { theCachedHashtags } from '../../utils/cache-hashtags';
 import { cachedMedias } from '../../utils/cache-medias';
-import arrayShuffle from '@/app/utils/array-shuffle';
-
-function getDataFromRoute(slug, searchParams) {
-  const [hashtag, path1, path2, path3] = slug;
-  // {hashtag}
-  // {hashtag}/page/{page}
-  // {hashtag}/expand
-  // {hashtag}/page/{page}/expand
-
-  let page = path1 === 'page' ? path2 : 1;
-  page = parseInt(page);
-  page = isNaN(page) ? 1 : page;
-
-  const expandGalleries = path1 === 'expand' || path3 === 'expand';
-  const isWebStories = path1 === 'webstories' || path3 === 'webstories';
-  const sort = getSort(searchParams);
-
-  return {
-    hashtag: removeDiacritics(decodeURIComponent(hashtag)).toLowerCase(),
-    page,
-    expandGalleries,
-    sort,
-    isWebStories,
-  };
-}
+import {
+  getHashtagDataFromRoute,
+  getHashtagBreadcrumbs,
+} from '@/app/utils/hashtag-helpers';
+import {
+  findHashtag,
+  findAlternateHashtag,
+  fetchHashtagCover,
+  fetchHashtagMedia,
+} from '@/app/utils/hashtag-page-helpers';
+import {
+  sortByDateDesc,
+  sortByDateAsc,
+  sortMediaArrays,
+  shuffleArray,
+} from '@/app/utils/media-sorting';
+import { expandMediaGalleries, paginateMedia } from '@/app/utils/media-helpers';
 
 export async function generateMetadata({
   params: { theHashtag },
@@ -66,10 +58,8 @@ export async function generateMetadata({
   const host = useHost();
   const isBR = host().includes('viajarcomale.com.br');
 
-  let { hashtag, page, expandGalleries, isWebStories } = getDataFromRoute(
-    theHashtag,
-    searchParams
-  );
+  let { hashtag, page, expandGalleries, isWebStories } =
+    getHashtagDataFromRoute(theHashtag, searchParams);
 
   if (USE_CACHE) {
     if (
@@ -110,51 +100,10 @@ export async function generateMetadata({
     }
   );
 
-  const db = getFirestore();
-
-  let hashtagPt = null;
-  let hashtagEn = null;
-
-  if (USE_CACHE) {
-    hashtagPt = theCachedHashtags.find((h) => h.name_pt === hashtag);
-
-    if (!hashtagPt) {
-      hashtagEn = theCachedHashtags.find((h) => h.name === hashtag);
-    }
-  } else {
-    const hashtagPtSnapshot = await db
-      .collection('hashtags')
-      .where('name_pt', '==', hashtag)
-      .get();
-
-    hashtagPtSnapshot.forEach((doc) => {
-      hashtagPt = doc.data();
-    });
-
-    if (!hashtagPt) {
-      const hashtagEnDoc = await db.collection('hashtags').doc(hashtag).get();
-      hashtagEn = hashtagEnDoc.data();
-    }
-  }
+  const { hashtagPt, hashtagEn } = await findHashtag(USE_CACHE, hashtag);
 
   if (!hashtagPt && !hashtagEn) {
-    let hashtagAlternate = null;
-
-    if (USE_CACHE) {
-      hashtagAlternate = theCachedHashtags.find(
-        (h) => h.alternate_tags && h.alternate_tags.includes(hashtag)
-      );
-    } else {
-      const hashtagAlternateDoc = await db
-        .collection('hashtags')
-        .where('alternate_tags', 'array-contains', hashtag)
-        .get();
-      hashtagAlternate = null;
-
-      hashtagAlternateDoc.forEach((doc) => {
-        hashtagAlternate = doc.data();
-      });
-    }
+    const hashtagAlternate = await findAlternateHashtag(USE_CACHE, hashtag);
 
     if (hashtagAlternate) {
       permanentRedirect(
@@ -191,65 +140,12 @@ export async function generateMetadata({
   }
 
   const sort = getSort(searchParams, false, false);
-  let cover = null;
-
-  if (USE_CACHE) {
-    let coverSnapshot = cachedMedias.filter(
-      (m) =>
-        m.highlight_hashtags && m.highlight_hashtags.includes(finalHashtag.name)
-    );
-
-    if (!coverSnapshot.length) {
-      coverSnapshot = cachedMedias.filter(
-        (m) => m.hashtags && m.hashtags.includes(finalHashtag.name)
-      );
-
-      if (sort === 'desc') {
-        function sortByDateDesc(a, b) {
-          return new Date(b.date).getTime() - new Date(a.date).getTime();
-        }
-
-        coverSnapshot = coverSnapshot.sort(sortByDateDesc);
-      } else {
-        function sortByDateAsc(a, b) {
-          return new Date(a.date).getTime() - new Date(b.date).getTime();
-        }
-
-        coverSnapshot = coverSnapshot.sort(sortByDateAsc);
-      }
-
-      coverSnapshot = coverSnapshot.slice(0, isWebStories ? 1 : 2);
-    }
-
-    coverSnapshot.forEach((data) => {
-      if ((cover && cover.type === 'post') || !cover) {
-        cover = data;
-      }
-    });
-  } else {
-    let coverSnapshot = await db
-      .collectionGroup('medias')
-      .where('highlight_hashtags', 'array-contains', finalHashtag.name)
-      .limit(1)
-      .get();
-
-    if (coverSnapshot.size === 0) {
-      coverSnapshot = await db
-        .collectionGroup('medias')
-        .where('hashtags', 'array-contains', finalHashtag.name)
-        .orderBy('date', sort)
-        .limit(isWebStories ? 1 : 2)
-        .get();
-    }
-
-    coverSnapshot.forEach((photo) => {
-      const data = photo.data();
-
-      if ((cover && cover.type === 'post') || !cover) {
-        cover = data;
-      }
-    });
-  }
+  const cover = await fetchHashtagCover(
+    USE_CACHE,
+    finalHashtag.name,
+    sort,
+    isWebStories
+  );
 
   if (!cover) {
     return notFound();
@@ -316,10 +212,8 @@ export default async function Country({
   const isBR = host().includes('viajarcomale.com.br');
   const editMode = useEditMode(searchParams);
 
-  let { hashtag, page, expandGalleries, isWebStories, sort } = getDataFromRoute(
-    theHashtag,
-    searchParams
-  );
+  let { hashtag, page, expandGalleries, isWebStories, sort } =
+    getHashtagDataFromRoute(theHashtag, searchParams);
 
   if (USE_CACHE) {
     if (
@@ -335,31 +229,7 @@ export default async function Country({
     }
   }
 
-  const db = getFirestore();
-  let hashtagPt = null;
-  let hashtagEn = null;
-
-  if (USE_CACHE) {
-    hashtagPt = theCachedHashtags.find((h) => h.name_pt === hashtag);
-
-    if (!hashtagPt) {
-      hashtagEn = theCachedHashtags.find((h) => h.name === hashtag);
-    }
-  } else {
-    const hashtagPtSnapshot = await db
-      .collection('hashtags')
-      .where('name_pt', '==', hashtag)
-      .get();
-
-    hashtagPtSnapshot.forEach((doc) => {
-      hashtagPt = doc.data();
-    });
-
-    if (!hashtagPt) {
-      const hashtagEnDoc = await db.collection('hashtags').doc(hashtag).get();
-      hashtagEn = hashtagEnDoc.data();
-    }
-  }
+  const { hashtagPt, hashtagEn } = await findHashtag(USE_CACHE, hashtag);
 
   const finalHashtag = hashtagPt || hashtagEn;
 
@@ -368,19 +238,6 @@ export default async function Country({
   }
 
   hashtag = finalHashtag.name;
-  let cache = null;
-
-  if (!USE_CACHE) {
-    const cacheRef = `/caches/hashtags/hashtags-cache/${hashtag}/sort/${
-      sort === 'asc' ? 'asc' : 'desc'
-    }`;
-
-    if (editMode) {
-      cache = { exists: false };
-    } else {
-      cache = await db.doc(cacheRef).get();
-    }
-  }
 
   let isRandom = sort === 'random';
 
@@ -388,82 +245,32 @@ export default async function Country({
     sort = 'desc';
   }
 
-  let photos = [];
+  let photos = await fetchHashtagMedia(
+    USE_CACHE,
+    hashtag,
+    sort,
+    isRandom,
+    isWebStories,
+    editMode
+  );
 
-  if (USE_CACHE) {
-    let photosSnapshot = cachedMedias.filter(
-      (m) => m.hashtags && m.hashtags.includes(hashtag)
-    );
+  if (!photos.length) {
+    const hashtagAlternate = await findAlternateHashtag(USE_CACHE, hashtag);
 
-    if (sort === 'desc') {
-      function sortByDateDesc(a, b) {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      }
-
-      photosSnapshot = photosSnapshot.sort(sortByDateDesc);
+    if (hashtagAlternate) {
+      permanentRedirect(
+        '/hashtags/' +
+          (isBR && hashtagAlternate.name_pt
+            ? hashtagAlternate.name_pt
+            : hashtagAlternate.name)
+      );
     } else {
-      function sortByDateAsc(a, b) {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
-      }
-
-      photosSnapshot = photosSnapshot.sort(sortByDateAsc);
-    }
-
-    photosSnapshot.forEach((data) => {
-      photos = [...photos, data];
-    });
-  } else {
-    if (!cache.exists || isWebStories) {
-      const photosSnapshot = await db
-        .collectionGroup('medias')
-        .where('hashtags', 'array-contains', hashtag)
-        .orderBy('date', sort)
-        .get();
-
-      photosSnapshot.forEach((photo) => {
-        const data = photo.data();
-        data.path = photo.ref.path;
-
-        photos = [...photos, data];
-      });
-
-      if (!photos.length) {
-        const hashtagAlternateDoc = await db
-          .collection('hashtags')
-          .where('alternate_tags', 'array-contains', hashtag)
-          .get();
-        let hashtagAlternate = null;
-
-        hashtagAlternateDoc.forEach((doc) => {
-          hashtagAlternate = doc.data();
-        });
-
-        if (hashtagAlternate) {
-          permanentRedirect(
-            '/hashtags/' +
-              (isBR && hashtagAlternate.name_pt
-                ? hashtagAlternate.name_pt
-                : hashtagAlternate.name)
-          );
-        } else {
-          return notFound();
-        }
-      }
-
-      if (!isRandom && !cache.exists) {
-        db.doc(cacheRef).set({
-          photos,
-          last_update: new Date().toISOString().split('T')[0],
-          user_agent: headers().get('user-agent'),
-        });
-      }
-    } else {
-      photos = cache.data().photos;
+      return notFound();
     }
   }
 
   if (isRandom) {
-    photos = arrayShuffle(photos);
+    photos = shuffleArray(photos);
 
     sort = 'random';
   }
@@ -593,10 +400,13 @@ export default async function Country({
     <>
       {_360photos.length > 1 && (
         <SortPicker
-          type="360photos"
-          basePath={basePath}
+          i18n={i18n}
           sort={sort}
+          paginationBase={paginationBase}
+          type="360photos"
+          isRandom={isRandom}
           newShuffle={newShuffle}
+          useCache={USE_CACHE}
         />
       )}
 
@@ -626,10 +436,13 @@ export default async function Country({
     <>
       {youtubeVideos.length > 1 && (
         <SortPicker
-          type="youtube"
-          basePath={basePath}
+          i18n={i18n}
           sort={sort}
+          paginationBase={paginationBase}
+          type="youtube"
+          isRandom={isRandom}
           newShuffle={newShuffle}
+          useCache={USE_CACHE}
         />
       )}
 
@@ -734,10 +547,13 @@ export default async function Country({
       <div className={styles.galleries}>
         {instagramStories.length > 1 && (
           <SortPicker
-            type="stories"
-            basePath={basePath}
+            i18n={i18n}
             sort={sort}
+            paginationBase={paginationBase}
+            type="stories"
+            isRandom={isRandom}
             newShuffle={newShuffle}
+            useCache={USE_CACHE}
           />
         )}
 
@@ -776,10 +592,13 @@ export default async function Country({
 
         {shortVideos.length > 1 && (
           <SortPicker
-            type="short"
-            basePath={basePath}
+            i18n={i18n}
             sort={sort}
+            paginationBase={paginationBase}
+            type="short"
+            isRandom={isRandom}
             newShuffle={newShuffle}
+            useCache={USE_CACHE}
           />
         )}
 
@@ -809,10 +628,13 @@ export default async function Country({
 
         {instagramPhotos.filter((p) => !p.file_type).length > 1 && (
           <SortPicker
-            type="photos"
-            basePath={basePath}
+            i18n={i18n}
             sort={sort}
+            paginationBase={paginationBase}
+            type="photos"
+            isRandom={isRandom}
             newShuffle={newShuffle}
+            useCache={USE_CACHE}
           />
         )}
 
@@ -870,10 +692,13 @@ export default async function Country({
 
         {mapsPhotos.filter((p) => !p.file_type).length > 1 && (
           <SortPicker
-            type="maps"
-            basePath={basePath}
+            i18n={i18n}
             sort={sort}
+            paginationBase={paginationBase}
+            type="maps"
+            isRandom={isRandom}
             newShuffle={newShuffle}
+            useCache={USE_CACHE}
           />
         )}
 

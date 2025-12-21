@@ -25,30 +25,27 @@ import expandDate from '@/app/utils/expand-date';
 import useEditMode from '@/app/utils/use-edit-mode';
 import countries from '@/app/utils/countries';
 import { cachedMedias } from '@/app/utils/cache-medias';
-import arrayShuffle from '@/app/utils/array-shuffle';
-
-function getCountry(country, city) {
-  const theCountry = countries.find((c) => c.slug === country);
-
-  if (
-    !theCountry ||
-    (city && !theCountry.cities.find((c) => c.slug === city))
-  ) {
-    return false;
-  }
-
-  return theCountry;
-}
+import { getCountry } from '@/app/utils/route-helpers';
+import {
+  sortByDateDesc,
+  sortByDateAsc,
+  shuffleArray,
+} from '@/app/utils/media-sorting';
+import { isBrazilianHost } from '@/app/utils/locale-helpers';
+import {
+  fetchStories,
+  expandPostsForWebStories,
+} from '@/app/utils/stories-helpers';
+import SortPicker from '@/app/components/sort-picker';
+import getSort from '@/app/utils/get-sort';
 
 export async function generateMetadata({ params: { country, city, stories } }) {
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
-  // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = isBrazilianHost(host());
   const isWebStories = stories && stories[stories.length - 1] === 'webstories';
 
-  const countryData = getCountry(country, city);
+  const countryData = getCountry([country, 'cities', city], {});
 
   if (!countryData) {
     return notFound();
@@ -155,18 +152,15 @@ export default async function Highlight({
 }) {
   const i18n = useI18n();
   const host = useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = isBrazilianHost(host());
   const isWindows =
     new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
   const editMode = useEditMode(searchParams);
 
-  let sort =
-    (searchParams.sort &&
-      ['asc', 'desc', 'random'].includes(searchParams.sort) &&
-      searchParams.sort) ||
-    'asc';
+  const isWebStories = stories && stories[stories.length - 1] === 'webstories';
+  let sort = getSort(searchParams, isWebStories, false, 'asc');
 
-  const countryData = getCountry(country, city);
+  const countryData = getCountry([country, 'cities', city], searchParams);
 
   if (!countryData) {
     return notFound();
@@ -175,7 +169,7 @@ export default async function Highlight({
   let theCity = countryData.cities.find((c) => c.slug === city);
 
   if (stories && stories[stories.length - 1] !== 'webstories') {
-    return Country({
+    return MediaPage({
       params: {
         country,
         city,
@@ -203,100 +197,28 @@ export default async function Highlight({
   }
 
   let isRandom = sort === 'random';
-  const isWebStories = stories && stories[stories.length - 1] === 'webstories';
 
   if (isRandom) {
     sort = 'desc';
   }
 
-  let photos = [];
-
-  if (USE_CACHE) {
-    let photosSnapshot = cachedMedias.filter(
-      (m) => m.country === country && m.city === city
-    );
-
-    if (!isWebStories) {
-      photosSnapshot = photosSnapshot.filter((m) => m.type === 'story');
-    }
-
-    if (sort === 'desc') {
-      function sortByDateDesc(a, b) {
-        return new Date(b.date).getTime() - new Date(a.date).getTime();
-      }
-
-      photosSnapshot = photosSnapshot.sort(sortByDateDesc);
-    } else {
-      function sortByDateAsc(a, b) {
-        return new Date(a.date).getTime() - new Date(b.date).getTime();
-      }
-
-      photosSnapshot = photosSnapshot.sort(sortByDateAsc);
-    }
-
-    photosSnapshot.forEach((data) => {
-      if (data.type === 'story') {
-        data.link =
-          'https://www.instagram.com/stories/highlights/' +
-          data.original_id +
-          '/';
-      }
-
-      photos = [...photos, data];
-    });
-  } else {
-    const db = getFirestore();
-
-    if (!cache.exists || isWebStories) {
-      let photosSnapshot = await db
-        .collection('countries')
-        .doc(country)
-        .collection('cities')
-        .doc(city)
-        .collection('medias');
-
-      if (!isWebStories) {
-        photosSnapshot = photosSnapshot.where('type', '==', 'story');
-      }
-
-      photosSnapshot = await photosSnapshot.orderBy('order', sort).get();
-
-      photosSnapshot.forEach((photo) => {
-        const data = photo.data();
-        data.path = photo.ref.path;
-
-        if (data.type === 'story') {
-          data.link =
-            'https://www.instagram.com/stories/highlights/' +
-            data.original_id +
-            '/';
-        }
-
-        photos = [...photos, data];
-      });
-
-      if (!photos.length) {
-        return notFound();
-      }
-
-      if (!isRandom && !isWebStories && !cache.exists) {
-        db.doc(cacheRef).set({
-          photos,
-          last_update: new Date().toISOString().split('T')[0],
-          user_agent: headers().get('user-agent'),
-        });
-      }
-    } else {
-      photos = cache.data().photos;
-    }
-  }
+  let photos = await fetchStories(
+    USE_CACHE,
+    country,
+    city,
+    isWebStories,
+    sort,
+    isRandom,
+    cache,
+    cacheRef
+  );
 
   if (!photos.length) {
     return notFound();
   }
 
   if (isRandom) {
-    photos = arrayShuffle(photos);
+    photos = shuffleArray(photos);
     sort = 'random';
   }
 
@@ -309,39 +231,8 @@ export default async function Highlight({
   let instagramStories = photos.filter((p) => p.type === 'story');
 
   if (isWebStories) {
-    let expandedList = [];
-    let posts = photos.filter((p) => p.type === 'post');
-
-    posts.forEach((item) => {
-      expandedList = [...expandedList, item];
-
-      if (item.gallery && item.gallery.length) {
-        const gallery = item.gallery.map((g, i) => ({
-          ...item,
-          ...g,
-          is_gallery: true,
-          img_index: i + 2,
-        }));
-        const itemWithHashtag = gallery.findIndex((g) => g.item_hashtags);
-
-        if (itemWithHashtag > -1) {
-          delete gallery[itemWithHashtag].is_gallery;
-          expandedList[expandedList.length - 1] = gallery[itemWithHashtag];
-
-          item.file_type = 'image';
-          gallery[itemWithHashtag] = item;
-        }
-
-        if (posts.length <= 5 || item.is_compilation) {
-          expandedList = [...expandedList, ...gallery];
-        } else if (gallery.some((g) => g.rss_include)) {
-          expandedList = [
-            ...expandedList,
-            ...gallery.filter((g) => g.rss_include),
-          ];
-        }
-      }
-    });
+    const posts = photos.filter((p) => p.type === 'post');
+    const expandedList = expandPostsForWebStories(posts);
 
     const page =
       stories[0] === 'page' && !isNaN(stories[1]) ? Number(stories[1]) : 1;
@@ -415,37 +306,6 @@ export default async function Highlight({
       item: basePath,
     },
   ];
-
-  const sortPicker = (type) => (
-    <div className="container-fluid">
-      <div className="sort_picker">
-        <span>{i18n('Sorting')}:</span>
-
-        {[
-          { name: 'Latest', value: 'desc' },
-          { name: 'Oldest', value: 'asc' },
-          { name: 'Random', value: 'random' },
-        ].map((o) => (
-          <Link
-            key={o}
-            href={o.value !== 'asc' ? '?sort=' + o.value : basePath}
-            scroll={false}
-          >
-            <label>
-              <input
-                type="radio"
-                name={'sort-' + type}
-                value={o.value}
-                checked={sort === o.value}
-                readOnly
-              />
-              {i18n(o.name)}
-            </label>
-          </Link>
-        ))}
-      </div>
-    </div>
-  );
 
   return (
     <div>
@@ -543,8 +403,17 @@ export default async function Highlight({
       </div>
 
       <div className={styles.galleries}>
-        {instagramStories.filter((p) => !p.file_type).length > 1 &&
-          sortPicker('photos')}
+        {instagramStories.filter((p) => !p.file_type).length > 1 && (
+          <SortPicker
+            i18n={i18n}
+            sort={sort}
+            paginationBase={basePath}
+            type="stories"
+            isRandom={isRandom}
+            newShuffle={newShuffle}
+            useCache={USE_CACHE}
+          />
+        )}
 
         {instagramStories.filter((p) => !p.file_type).length > 0 && (
           <div className="container-fluid">

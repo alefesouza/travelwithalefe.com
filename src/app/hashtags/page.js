@@ -1,16 +1,18 @@
 import { getFirestore } from 'firebase-admin/firestore';
+import { headers } from 'next/headers';
+import { UAParser } from 'ua-parser-js';
+import Link from 'next/link';
+import ShareButton from '../components/share-button';
+import HashtagCloud from '../components/hashtag-cloud';
 import logAccess from '../utils/log-access';
 import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
 import { SITE_NAME, USE_CACHE } from '../utils/constants';
-import Link from 'next/link';
-import ShareButton from '../components/share-button';
-import HashtagCloud from '../components/hashtag-cloud';
-import shuffle from '../utils/array-shuffle';
 import defaultMetadata from '../utils/default-metadata';
-import { headers } from 'next/headers';
-import { UAParser } from 'ua-parser-js';
-import { theCachedHashtags } from '../utils/cache-hashtags';
+import { isBrazilianHost } from '../utils/locale-helpers';
+import { fetchWithCache } from '../utils/cache-helpers';
+import { fetchHashtags } from '../utils/hashtags-helpers';
+import { shuffleArray } from '../utils/media-sorting';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -27,62 +29,15 @@ export async function generateMetadata() {
 export default async function MapPage() {
   const i18n = useI18n();
   const host = useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = isBrazilianHost(host());
   const isAndroid =
     new UAParser(headers().get('user-agent')).getOS().name === 'Android';
 
-  let hashtags = [];
-  let allHashtags = [];
-
-  if (USE_CACHE) {
-    hashtags = theCachedHashtags
-      .filter((h) => !h.is_place && !h.hide_on_cloud)
-      .sort((a, b) => b.total - a.total)
-      .slice(0, 100);
-
-    allHashtags = isBR
-      ? theCachedHashtags.map((h) => h.name_pt || h.name)
-      : theCachedHashtags.map((h) => h.name);
-  } else {
-    const cacheRef = '/caches/static_pages/static_pages/hashtags_page';
-
-    const db = getFirestore();
-    const cache = await db.doc(cacheRef).get();
-    // const cache = { exists: false }; // For testing purposes
-
-    if (!cache.exists) {
-      const hashtagsSnapshot = await db
-        .collection('hashtags')
-        .where('is_place', '==', false)
-        .where('hide_on_cloud', '==', false)
-        .limit(100)
-        .orderBy('total', 'desc')
-        .get();
-
-      hashtagsSnapshot.forEach((photo) => {
-        const data = photo.data();
-
-        hashtags = [...hashtags, data];
-      });
-
-      db.doc(cacheRef).set({
-        hashtags,
-        last_update: new Date().toISOString().split('T')[0],
-        user_agent: headers().get('user-agent'),
-      });
-    } else {
-      hashtags = cache.data().hashtags;
-    }
-
-    const allHashtagsRef = await db
-      .collection('caches')
-      .doc('static_pages')
-      .collection('static_pages')
-      .doc('hashtags')
-      .get();
-    const allHashtagsData = allHashtagsRef.data();
-    allHashtags = isBR ? allHashtagsData.hashtags_pt : allHashtagsData.hashtags;
-  }
+  const { hashtags, allHashtags } = await fetchHashtags(
+    USE_CACHE,
+    isBR,
+    fetchWithCache
+  );
 
   logAccess(host('/hashtags'));
 
@@ -95,9 +50,8 @@ export default async function MapPage() {
               src={host('/images/back.svg')}
               alt={i18n('Back')}
               width="32px"
-            ></img>
+            />
           </Link>
-
           <ShareButton />
         </div>
       </div>
@@ -125,7 +79,7 @@ export default async function MapPage() {
         <div>
           <h3>{i18n('Random Hashtags')}</h3>
           <HashtagCloud
-            theHashtags={shuffle(allHashtags)
+            theHashtags={shuffleArray(allHashtags)
               .slice(0, 100)
               .map((c) => ({ text: '#' + c, value: 5 }))}
             isBR={isBR}

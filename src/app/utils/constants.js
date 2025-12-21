@@ -16,4 +16,4 @@ export const FILE_DOMAIN_SQUARE =
 export const ITEMS_PER_PAGE = 20;
 export const WEBSTORIES_ITEMS_PER_PAGE = 100;
 
-export const USE_CACHE = false;
+export const USE_CACHE = true;
