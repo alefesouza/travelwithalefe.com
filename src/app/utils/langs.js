@@ -112,6 +112,9 @@ const langs = {
     "Travel with Alefe's website privacy policy.":
       'Política de Privacidade o site do Viajar com Alê.',
 
+    // GitHub
+    'Available on GitHub': 'Disponível no GitHub',
+
     // Hashtags
     'Main Hashtags': 'Hashtags principais',
     'Random Hashtags': 'Hashtags aleatórias',
@@ -158,8 +161,8 @@ const langs = {
     Belgium: 'Bélgica',
     'United Kingdom': 'Reino Unido',
     'Dominican Republic': 'República Dominicana',
-    'Italy': 'Itália',
-    'Vatican': 'Vaticano',
+    Italy: 'Itália',
+    Vatican: 'Vaticano',
 
     // Manifest
     'Access Travel with Alefe Albums': 'Acessar os álbuns do Viajar com Alê',

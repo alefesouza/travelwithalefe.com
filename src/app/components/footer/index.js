@@ -112,6 +112,15 @@ export default function Footer() {
                 : ''),
           }}
         />
+
+        <div style={{ marginTop: '4px' }}>
+          <a
+            href={host('https://github.com/alefesouza/travelwithalefe.com')}
+            target="_blank"
+          >
+            {i18n('Available on GitHub')}
+          </a>
+        </div>
       </div>
     </footer>
   );
