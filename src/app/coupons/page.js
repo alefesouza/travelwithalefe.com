@@ -56,9 +56,18 @@ export async function generateMetadata() {
   const i18n = useI18n();
   const host = useHost();
 
-  const db = getFirestore();
-  const couponsPageRef = await db.doc('/pages/coupons').get();
-  const couponsPageData = couponsPageRef.data();
+  let couponsPageData = {
+    description_pt:
+      'Nessa página você pode encontrar os meus cupons de desconto e links de indicação para os serviços que eu uso nas minhas viagens e no meu dia a dia.',
+    description:
+      'On this page you can find my discount coupons and referral links for the services I use in my travels and in my daily life.',
+  };
+
+  if (!USE_CACHE) {
+    const db = getFirestore();
+    const couponsPageRef = await db.doc('/pages/coupons').get();
+    couponsPageData = couponsPageRef.data();
+  }
 
   if (!couponsPageData) {
     return notFound();

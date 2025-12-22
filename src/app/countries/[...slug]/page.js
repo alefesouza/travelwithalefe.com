@@ -93,7 +93,6 @@ export async function generateMetadata({ params: { slug }, searchParams }) {
 
   let cover = null;
   let coverSnapshot = null;
-  const db = getFirestore();
 
   if (USE_CACHE) {
     if (city) {
@@ -112,6 +111,7 @@ export async function generateMetadata({ params: { slug }, searchParams }) {
       cover = countryMedias[0];
     }
   } else {
+    const db = getFirestore();
     if (city) {
       coverSnapshot = await db
         .collection('countries')
@@ -180,7 +180,6 @@ export default async function Country({ params: { slug }, searchParams }) {
     return notFound();
   }
 
-  const db = getFirestore();
   const countryData = getCountry(slug, searchParams);
 
   if (!countryData) {
@@ -227,6 +226,7 @@ export default async function Country({ params: { slug }, searchParams }) {
       city ? '/' + city : '/country'
     }/page/${page}/sort/${sort === 'asc' ? 'asc' : 'desc'}`;
 
+    const db = getFirestore();
     medias = await fetchMediasFromFirestore(
       db,
       country,
@@ -270,10 +270,6 @@ export default async function Country({ params: { slug }, searchParams }) {
       mapsPhotos,
     ] = sortMediaArrays(mediaArrays, sort);
   }
-
-  // Apply pagination
-  instagramPhotos = paginateMedia(instagramPhotos, page);
-  mapsPhotos = paginateMedia(mapsPhotos, page);
 
   // Apply pagination
   instagramPhotos = paginateMedia(instagramPhotos, page);
@@ -380,6 +376,7 @@ export default async function Country({ params: { slug }, searchParams }) {
   if (USE_CACHE) {
     locations = theCachedLocations.filter((l) => l.country === country);
   } else {
+    const db = getFirestore();
     const locationsCacheRef = '/caches/static_pages/static_pages/locations';
     const locationsCache = await db.doc(locationsCacheRef).get();
     locations = locationsCache

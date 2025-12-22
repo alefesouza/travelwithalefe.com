@@ -1,5 +1,5 @@
 import { validateCountryCity } from '@/app/utils/validation-helpers';
-import Country, {
+import MediaPage, {
   generateMetadata as generateMediaMetadata,
 } from '../../posts/[...media]/page';
 

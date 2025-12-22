@@ -17,7 +17,7 @@ import logAccess from '@/app/utils/log-access';
 import StructuredBreadcrumbs from '@/app/components/structured-breadcrumbs';
 import defaultMetadata from '@/app/utils/default-metadata';
 import { headers } from 'next/headers';
-import Country, {
+import MediaPage, {
   generateMetadata as generateMediaMetadata,
 } from '../../posts/[...media]/page';
 import { UAParser } from 'ua-parser-js';
@@ -63,8 +63,6 @@ export async function generateMetadata({ params: { country, city, stories } }) {
 
   let theMedia = null;
 
-  const db = getFirestore();
-
   if (USE_CACHE) {
     theMedia = cachedMedias.find(
       (m) =>
@@ -74,6 +72,8 @@ export async function generateMetadata({ params: { country, city, stories } }) {
         m.is_highlight
     );
   } else {
+    const db = getFirestore();
+
     const instagramHighLightsSnapshot = await db
       .collection('countries')
       .doc(country)

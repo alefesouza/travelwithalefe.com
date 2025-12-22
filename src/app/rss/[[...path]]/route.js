@@ -43,8 +43,6 @@ export async function GET(req) {
 
   let photos = [];
 
-  const db = getFirestore();
-
   if (pathname === '/rss') {
     if (type && type !== 'short-video' && type !== '360photo') {
       return notFound();
