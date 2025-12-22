@@ -403,12 +403,7 @@ export default function RootLayout({ children }) {
             </>
           )}
 
-          {/* eslint-disable-next-line @next/next/no-sync-scripts */}
-          <script
-            dangerouslySetInnerHTML={{
-              __html: process.env.rawAppJsFile,
-            }}
-          />
+          <script async src={host('/app.js')}></script>
           {editMode.editMode && (
             <>
               <script

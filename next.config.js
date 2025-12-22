@@ -39,9 +39,6 @@ const nextConfig = withPWA({
       },
     ];
   },
-  env: {
-    rawAppJsFile: fs.readFileSync('./public/app.js').toString(),
-  },
 });
 
 module.exports = nextConfig;
