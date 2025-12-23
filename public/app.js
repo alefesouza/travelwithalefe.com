@@ -530,7 +530,11 @@ const pageDetection = {
     });
 
     const languageSwitcherLink = utils.getCurrentLanguageSwitcherUrl();
-    document.querySelector('#language-switcher').href = languageSwitcherLink;
+
+    if (document.querySelector('#language-switcher')) {
+      document.querySelector('#language-switcher').href = languageSwitcherLink;
+    }
+
     if (document.querySelector('#portuguese-language-switcher a')) {
       document.querySelector('#portuguese-language-switcher a').href =
         languageSwitcherLink;

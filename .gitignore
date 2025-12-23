@@ -63,4 +63,4 @@ items.json
 /src/app/utils/cache-hashtags.js
 /src/app/utils/cache-medias.js
 
-/functions/social.js
+/functions/credentials.js

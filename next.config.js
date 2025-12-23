@@ -6,6 +6,8 @@ const withPWA = require('next-pwa')({
   runtimeCaching: require('./src/cache'),
 });
 
+const isDev = process.env.NODE_ENV !== 'production';
+
 /** @type {import('next').NextConfig} */
 const nextConfig = withPWA({
   reactStrictMode: false,
@@ -26,6 +28,20 @@ const nextConfig = withPWA({
       },
     ],
   },
+  exclude: [
+    ({ asset }) => {
+      if (
+        asset.name.startsWith('server/') ||
+        asset.name.match(/^((app-|^)build-manifest\.json)$/)
+      ) {
+        return true;
+      }
+      if (isDev && !asset.name.startsWith('static/runtime/')) {
+        return true;
+      }
+      return false;
+    },
+  ],
   async headers() {
     return [
       {
