@@ -99,10 +99,11 @@ const navigation = {
     };
 
     const navIndex = navItemSelectors[pathname];
+
     if (navIndex) {
       document
-        .querySelector(`.navbar .nav-item:nth-child(${navIndex})`)
-        ?.classList.add('active');
+        .querySelectorAll(`.navbar .nav-item:nth-child(${navIndex})`)
+        .forEach((item) => item.classList.add('active'));
       document
         .querySelector(`#title-bar .nav-item:nth-child(${navIndex})`)
         ?.classList.add('active');
