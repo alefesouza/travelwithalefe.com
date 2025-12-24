@@ -4,7 +4,7 @@ import useHost from '@/app/hooks/use-host';
 import getMetadata from '@/app/utils/get-metadata';
 import useI18n from '@/app/hooks/use-i18n';
 
-export default function SchemaData({
+export default async function SchemaData({
   media,
   isWebStories = false,
   isExpand = false,
@@ -13,7 +13,7 @@ export default function SchemaData({
   isJsonLd = false,
   jsonLdExtra = {},
 }) {
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const i18n = useI18n();
 

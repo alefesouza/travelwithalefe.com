@@ -30,9 +30,9 @@ export default async function WebStories({
   firstPagePath,
 }) {
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const headersList = headers();
+  const headersList = await headers();
   const isWindows =
     new UAParser(headersList.get('user-agent')).getOS().name === 'Windows';
 

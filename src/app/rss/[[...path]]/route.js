@@ -28,11 +28,11 @@ customInitApp();
 
 export async function GET(req) {
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   let { pathname, searchParams } = new URL(req.url);
 
-  const editMode = useEditMode(searchParams);
+  const editMode = await useEditMode(searchParams);
 
   let type = searchParams.get('type');
 

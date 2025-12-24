@@ -3,7 +3,7 @@ import useI18n from '../hooks/use-i18n';
 import { SITE_NAME } from '../utils/constants';
 
 export async function GET() {
-  const host = useHost();
+  const host = await useHost();
   const i18n = useI18n();
 
   const icons = [36, 48, 72, 96, 144, 192, 288, 512];

@@ -62,7 +62,7 @@ let couponsPageData = {
 
 export async function generateMetadata() {
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
 
   if (!USE_CACHE) {
     const db = getFirestore();
@@ -86,9 +86,9 @@ export async function generateMetadata() {
 
 export default async function Coupons({ searchParams }) {
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = isBrazilianHost(host());
-  const editMode = useEditMode(searchParams);
+  const editMode = await useEditMode(searchParams);
 
   let coupons = [];
 

@@ -18,7 +18,7 @@ export async function GET() {
   //   new URL(string, 'https://viajarcomale.com.br/').toString();
   // const host = (string = '') =>
   //   new URL(string, 'https://travelwithalefe.com/').toString();
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const lastmod = '2025-08-31';
 

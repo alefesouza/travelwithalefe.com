@@ -17,9 +17,9 @@ import styles from '../../coupons/page.module.css';
  * @param {EditModeProps} props.editMode - Edit mode configuration
  * @returns {JSX.Element}
  */
-export default function CouponCard({ item, editMode }) {
+export default async function CouponCard({ item, editMode }) {
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
 
   return (

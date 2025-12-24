@@ -1,7 +1,7 @@
 import { headers } from 'next/headers';
 
-export default function useHost() {
-  const headersList = headers();
+export default async function useHost() {
+  const headersList = await headers();
 
   const firebaseURL = headersList.get('x-forwarded-host');
   const protocol =

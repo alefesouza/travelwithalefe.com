@@ -16,7 +16,7 @@ import getTypePath from '@/app/utils/get-type-path';
 import Photo360 from '../photo-360';
 import Editable from '../editable/editable';
 
-export default function Media({
+export default async function Media({
   media,
   expandGalleries,
   isBR,
@@ -27,7 +27,7 @@ export default function Media({
   showMapIcon,
   editMode,
 }) {
-  const host = useHost();
+  const host = await useHost();
   const i18n = useI18n();
 
   const [, country, , city] = media.path.split('/');

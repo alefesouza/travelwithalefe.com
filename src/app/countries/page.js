@@ -22,11 +22,12 @@ export async function generateMetadata() {
   return defaultMetadata(title, description);
 }
 
-export default function Countries() {
+export default async function Countries() {
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isWindows =
-    new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
+    new UAParser((await headers()).get('user-agent')).getOS().name ===
+    'Windows';
 
   logAccess(host('/countries'));
 

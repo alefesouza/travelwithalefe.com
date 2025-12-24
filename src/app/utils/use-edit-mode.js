@@ -1,9 +1,9 @@
 import getCookie from './get-cookies';
 
-const useEditMode = ({ edit_mode: editMode }) => {
-  const editModeCookie = getCookie('edit_mode');
-  const autoOpenEdit = getCookie('auto_open_edit');
-  const forceEditTextMode = getCookie('force_edit_text_mode');
+const useEditMode = async ({ edit_mode: editMode }) => {
+  const editModeCookie = await getCookie('edit_mode');
+  const autoOpenEdit = await getCookie('auto_open_edit');
+  const forceEditTextMode = await getCookie('force_edit_text_mode');
 
   return {
     editMode:

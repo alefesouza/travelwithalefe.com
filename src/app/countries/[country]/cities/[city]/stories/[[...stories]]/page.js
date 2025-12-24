@@ -40,9 +40,11 @@ import SortPicker from '@/app/components/sort-picker';
 import getSort from '@/app/utils/get-sort';
 import RandomPostButton from '@/app/components/random-post-button';
 
-export async function generateMetadata({ params: { country, city, stories } }) {
+export async function generateMetadata({ params: paramsPromise }) {
+  const { country, city, stories } = await paramsPromise;
+
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = isBrazilianHost(host());
   const isWebStories = stories && stories[stories.length - 1] === 'webstories';
 
@@ -148,15 +150,19 @@ export async function generateMetadata({ params: { country, city, stories } }) {
 }
 
 export default async function Highlight({
-  params: { country, city, stories },
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }) {
+  const { country, city, stories } = await paramsPromise;
+  const searchParams = await searchParamsPromise;
+
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = isBrazilianHost(host());
   const isWindows =
-    new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
-  const editMode = useEditMode(searchParams);
+    new UAParser((await headers()).get('user-agent')).getOS().name ===
+    'Windows';
+  const editMode = await useEditMode(searchParams);
 
   const isWebStories = stories && stories[stories.length - 1] === 'webstories';
   let sort = getSort(searchParams, isWebStories, false, 'asc');

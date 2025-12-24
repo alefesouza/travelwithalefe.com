@@ -3,13 +3,13 @@ import { headers } from 'next/headers';
 import useHost from '@/app/hooks/use-host';
 import getCookie from './get-cookies';
 
-export default function logAccess(path) {
+export default async function logAccess(path) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = useHost();
-  const headersList = headers();
+  const host = await useHost();
+  const headersList = await headers();
   const userAgent = headersList.get('user-agent') || '';
   const ignoreAnalytics =
-    getCookie('ignore_analytics') ||
+    (await getCookie('ignore_analytics')) ||
     host().includes('localhost') ||
     (headersList.get('x-pathname').includes('/webstories') &&
       headersList.get('x-searchparams').includes('ignore_analytics=true'));

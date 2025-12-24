@@ -8,7 +8,7 @@ import { USE_CACHE } from '@/app/utils/constants';
 customInitApp();
 
 export async function GET() {
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
 
   let theHashtags = [];

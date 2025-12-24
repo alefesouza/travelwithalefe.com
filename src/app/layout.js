@@ -17,11 +17,11 @@ export async function generateMetadata() {
   return defaultMetadata();
 }
 
-export default function RootLayout({ children }) {
-  const host = useHost();
+export default async function RootLayout({ children }) {
+  const host = await useHost();
   const i18n = useI18n();
   const isBR = host().includes('viajarcomale.com.br');
-  const headersList = headers();
+  const headersList = await headers();
   const pathname = headersList.get('x-pathname');
   const isAMP = pathname.includes('/webstories');
 
@@ -46,9 +46,9 @@ export default function RootLayout({ children }) {
   const isSubPage = pathname !== '/';
 
   const ignoreAnalytics =
-    getCookie('ignore_analytics') || host().includes('localhost');
+    (await getCookie('ignore_analytics')) || host().includes('localhost');
 
-  const editMode = useEditMode({
+  const editMode = await useEditMode({
     edit_mode: headersList.get('x-searchparams').includes('edit_mode=true'),
   });
 
@@ -290,7 +290,7 @@ export default function RootLayout({ children }) {
           className={[
             isSubPage ? 'sub-page' : null,
             isMediaSingle ? 'single-media-page' : null,
-            getCookie('window_controls_overlay')
+            (await getCookie('window_controls_overlay'))
               ? 'window-controls-overlay'
               : null,
           ]
@@ -315,7 +315,7 @@ export default function RootLayout({ children }) {
 
           <div className="background"></div>
 
-          <nav className="navbar mobile-navbar">
+          <nav className="navbar mobile-navbar" suppressHydrationWarning>
             <div
               className="container"
               style={{

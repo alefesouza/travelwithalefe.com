@@ -53,13 +53,16 @@ import {
 import RandomPostButton from '@/app/components/random-post-button';
 
 export async function generateMetadata({
-  params: { country, city, theLocation },
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }) {
+  const { country, city, theLocation } = await paramsPromise;
+  const searchParams = await searchParamsPromise;
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
 
   let { page, location, isWebStories } = getLocationDataFromRoute(
@@ -223,15 +226,19 @@ export async function generateMetadata({
 }
 
 export default async function Country({
-  params: { country, city, theLocation },
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }) {
+  const { country, city, theLocation } = await paramsPromise;
+  const searchParams = await searchParamsPromise;
+
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const isWindows =
-    new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
-  const editMode = useEditMode(searchParams);
+    new UAParser((await headers()).get('user-agent')).getOS().name ===
+    'Windows';
+  const editMode = await useEditMode(searchParams);
 
   let { page, expandGalleries, sort, location, isWebStories } =
     getLocationDataFromRoute(theLocation, searchParams);

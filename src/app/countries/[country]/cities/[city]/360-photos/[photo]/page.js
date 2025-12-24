@@ -3,7 +3,9 @@ import MediaPage, {
   generateMetadata as generateMediaMetadata,
 } from '../../posts/[...media]/page';
 
-export async function generateMetadata({ params: { country, city, photo } }) {
+export async function generateMetadata({ params: paramsPromise }) {
+  const { country, city, photo } = await paramsPromise;
+
   validateCountryCity(country, city);
 
   return generateMediaMetadata({
@@ -16,9 +18,12 @@ export async function generateMetadata({ params: { country, city, photo } }) {
 }
 
 export default async function Video({
-  params: { country, city, photo },
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }) {
+  const { country, city, photo } = await paramsPromise;
+  const searchParams = await searchParamsPromise;
+
   validateCountryCity(country, city);
 
   return MediaPage({

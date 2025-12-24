@@ -13,7 +13,7 @@ import expandDate from '@/app/utils/expand-date';
 import getTypePath from '@/app/utils/get-type-path';
 import Editable from '../editable/editable';
 
-export default function Scroller({
+export default async function Scroller({
   title,
   items,
   isShortVideos,
@@ -27,7 +27,7 @@ export default function Scroller({
   editMode,
 }) {
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
 
   return (
@@ -52,6 +52,7 @@ export default function Scroller({
             data-minimize={'scroller_scroller_items'}
             data-maxtext={i18n('Maximize')}
             data-mintext={i18n('Minimize')}
+            suppressHydrationWarning
           >
             {i18n('Maximize')}
           </a>

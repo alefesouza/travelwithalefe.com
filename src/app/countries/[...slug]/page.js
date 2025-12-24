@@ -44,11 +44,17 @@ import MainLocations from '@/app/components/main-locations';
 import MediaSection from '@/app/components/media-section';
 import RandomPostButton from '@/app/components/random-post-button';
 
-export async function generateMetadata({ params: { slug }, searchParams }) {
+export async function generateMetadata({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}) {
+  const { slug } = await paramsPromise;
+  const searchParams = await searchParamsPromise;
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
 
   const countryData = getCountry(slug, searchParams);
@@ -169,13 +175,20 @@ export async function generateMetadata({ params: { slug }, searchParams }) {
   };
 }
 
-export default async function Country({ params: { slug }, searchParams }) {
+export default async function Country({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}) {
+  const { slug } = await paramsPromise;
+  const searchParams = await searchParamsPromise;
+
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const isWindows =
-    new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
-  const editMode = useEditMode(searchParams);
+    new UAParser((await headers()).get('user-agent')).getOS().name ===
+    'Windows';
+  const editMode = await useEditMode(searchParams);
 
   if (slug.length > 6) {
     return notFound();

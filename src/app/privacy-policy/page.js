@@ -21,7 +21,7 @@ export async function generateMetadata() {
 
 export default async function PrivacyPolicy() {
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
 
   const db = getFirestore();
   const privacyPolicy = await db.doc('/pages/privacy-policy').get();

@@ -45,9 +45,11 @@ async function fetchCoupon(couponSlug) {
   return couponRef.data();
 }
 
-export async function generateMetadata({ params: { coupon } }) {
+export async function generateMetadata({ params: paramsPromise }) {
+  const { coupon } = await paramsPromise;
+
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
 
   const couponData = await fetchCoupon(coupon);
 
@@ -66,11 +68,17 @@ export async function generateMetadata({ params: { coupon } }) {
   return defaultMetadata(title, description);
 }
 
-export default async function Coupons({ params: { coupon }, searchParams }) {
+export default async function Coupons({
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
+}) {
+  const { coupon } = await paramsPromise;
+  const searchParams = await searchParamsPromise;
+
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = isBrazilianHost(host());
-  const editMode = useEditMode(searchParams);
+  const editMode = await useEditMode(searchParams);
 
   const couponData = await fetchCoupon(coupon);
 

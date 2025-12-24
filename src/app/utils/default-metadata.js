@@ -4,13 +4,18 @@ import { headers } from 'next/headers';
 import { FILE_DOMAIN, FILE_DOMAIN_SQUARE, SITE_NAME } from './constants';
 import getMetadata from './get-metadata';
 
-export default function defaultMetadata(title, description, media, isSingle) {
+export default async function defaultMetadata(
+  title,
+  description,
+  media,
+  isSingle
+) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const headersList = headers();
+  const headersList = await headers();
   const isWebStories = headersList.get('x-pathname').includes('/webstories');
   let pathname =
     (isWebStories ? '/webstories' : '') +

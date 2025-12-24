@@ -2,8 +2,8 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import useI18n from '@/app/hooks/use-i18n';
 
-const NavbarLinks = () => {
-  const headersList = headers();
+const NavbarLinks = async () => {
+  const headersList = await headers();
   const i18n = useI18n();
 
   return (

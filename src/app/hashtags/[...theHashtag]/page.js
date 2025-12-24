@@ -1,7 +1,6 @@
 import useI18n from '../../hooks/use-i18n';
 import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
-import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
 import {
   SITE_NAME,
@@ -14,7 +13,6 @@ import Media from '@/app/components/media';
 import ShareButton from '@/app/components/share-button';
 import randomIntFromInterval from '@/app/utils/random-int';
 import WebStories from '@/app/components/webstories';
-import removeDiacritics from '@/app/utils/remove-diacritics';
 import logAccess from '@/app/utils/log-access';
 import getSort from '@/app/utils/get-sort';
 import StructuredBreadcrumbs from '@/app/components/structured-breadcrumbs';
@@ -35,23 +33,20 @@ import {
   fetchHashtagCover,
   fetchHashtagMedia,
 } from '@/app/utils/hashtag-page-helpers';
-import {
-  sortByDateDesc,
-  sortByDateAsc,
-  sortMediaArrays,
-  shuffleArray,
-} from '@/app/utils/media-sorting';
-import { expandMediaGalleries, paginateMedia } from '@/app/utils/media-helpers';
+import { shuffleArray } from '@/app/utils/media-sorting';
 import RandomPostButton from '@/app/components/random-post-button';
 
 export async function generateMetadata({
-  params: { theHashtag },
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }) {
+  const { theHashtag } = await paramsPromise;
+  const searchParams = await searchParamsPromise;
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
 
   let { hashtag, page, expandGalleries, isWebStories } =
@@ -196,13 +191,16 @@ export async function generateMetadata({
 }
 
 export default async function Country({
-  params: { theHashtag },
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }) {
+  const { theHashtag } = await paramsPromise;
+  const searchParams = await searchParamsPromise;
+
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const editMode = useEditMode(searchParams);
+  const editMode = await useEditMode(searchParams);
 
   let { hashtag, page, expandGalleries, isWebStories, sort } =
     getHashtagDataFromRoute(theHashtag, searchParams);
@@ -377,7 +375,7 @@ export default async function Country({
     expandGalleries ? '/expand' : ''
   }`;
 
-  const breadcrumbs = getBreadcrumbs(
+  const breadcrumbs = await getBreadcrumbs(
     basePath,
     currentHashtag,
     page,
@@ -732,11 +730,11 @@ export default async function Country({
   );
 }
 
-function getBreadcrumbs(basePath, currentHashtag, page, expandGalleries) {
+async function getBreadcrumbs(basePath, currentHashtag, page, expandGalleries) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = useHost();
+  const host = await useHost();
 
   let currentPath = basePath;
 

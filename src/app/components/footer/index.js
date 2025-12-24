@@ -5,13 +5,14 @@ import { UAParser } from 'ua-parser-js';
 import styles from './index.module.css';
 import Link from 'next/link';
 
-export default function Footer() {
-  const host = useHost();
+export default async function Footer() {
+  const host = await useHost();
   const i18n = useI18n();
   const isBR = host().includes('viajarcomale.com.br');
-  const headersList = headers();
+  const headersList = await headers();
   const isWindows =
-    new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
+    new UAParser((await headers()).get('user-agent')).getOS().name ===
+    'Windows';
 
   return (
     <footer>

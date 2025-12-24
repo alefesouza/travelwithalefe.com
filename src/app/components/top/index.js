@@ -6,11 +6,12 @@ import Link from 'next/link';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 
-export default function Top() {
-  const host = useHost();
+export default async function Top() {
+  const host = await useHost();
   const i18n = useI18n();
   const isWindows =
-    new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
+    new UAParser((await headers()).get('user-agent')).getOS().name ===
+    'Windows';
 
   return (
     <div className="profile">

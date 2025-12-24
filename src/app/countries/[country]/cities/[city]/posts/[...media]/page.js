@@ -62,11 +62,13 @@ function getSelectedMedia(media, theMedia, country, city) {
   };
 }
 
-export async function generateMetadata({ params: { country, city, media } }) {
+export async function generateMetadata({ params: paramsPromise }) {
+  const { country, city, media } = await paramsPromise;
+
   validateCountryCity(country, city);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const headerList = headers();
 
@@ -131,15 +133,19 @@ export async function generateMetadata({ params: { country, city, media } }) {
 }
 
 export default async function MediaPage({
-  params: { country, city, media },
-  searchParams,
+  params: paramsPromise,
+  searchParams: searchParamsPromise,
 }) {
+  const { country, city, media } = await paramsPromise;
+  const searchParams = await searchParamsPromise;
+
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const isWindows =
-    new UAParser(headers().get('user-agent')).getOS().name === 'Windows';
-  const editMode = useEditMode(searchParams);
+    new UAParser((await headers()).get('user-agent')).getOS().name ===
+    'Windows';
+  const editMode = await useEditMode(searchParams);
 
   validateCountryCity(country, city);
 

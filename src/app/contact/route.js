@@ -3,7 +3,7 @@ import { cookies } from 'next/headers';
 import useHost from '@/app/hooks/use-host';
 
 export async function GET(req) {
-  const host = useHost();
+  const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const { searchParams } = new URL(req.url);
 

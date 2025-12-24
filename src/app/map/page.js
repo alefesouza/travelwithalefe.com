@@ -24,8 +24,8 @@ export async function generateMetadata() {
 
 export default async function MapPage({ searchParams }) {
   const i18n = useI18n();
-  const host = useHost();
-  const editMode = useEditMode(searchParams);
+  const host = await useHost();
+  const editMode = await useEditMode(searchParams);
 
   const locations = await fetchLocations(USE_CACHE, editMode);
 

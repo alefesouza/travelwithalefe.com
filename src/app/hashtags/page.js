@@ -29,10 +29,11 @@ export async function generateMetadata() {
 
 export default async function MapPage() {
   const i18n = useI18n();
-  const host = useHost();
+  const host = await useHost();
   const isBR = isBrazilianHost(host());
   const isAndroid =
-    new UAParser(headers().get('user-agent')).getOS().name === 'Android';
+    new UAParser((await headers()).get('user-agent')).getOS().name ===
+    'Android';
 
   const { hashtags, allHashtags } = await fetchHashtags(
     USE_CACHE,
