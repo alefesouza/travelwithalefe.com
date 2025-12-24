@@ -533,7 +533,6 @@ const pageDetection = {
     document
       .querySelectorAll('.random-post-button')
       .forEach(function (randomPostButton) {
-        console.log(randomPostButton);
         randomPostButton.removeEventListener('click', navigation.showSpinner);
         randomPostButton.addEventListener('click', navigation.showSpinner);
       });
