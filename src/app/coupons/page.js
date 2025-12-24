@@ -53,16 +53,16 @@ function sortCouponsByRegion(coupons, isBR) {
   });
 }
 
+let couponsPageData = {
+  description_pt:
+    'Nessa página você pode encontrar os meus cupons de desconto e links de indicação para os serviços que eu uso nas minhas viagens e no meu dia a dia.',
+  description:
+    'On this page you can find my discount coupons and referral links for the services I use in my travels and in my daily life.',
+};
+
 export async function generateMetadata() {
   const i18n = useI18n();
   const host = useHost();
-
-  let couponsPageData = {
-    description_pt:
-      'Nessa página você pode encontrar os meus cupons de desconto e links de indicação para os serviços que eu uso nas minhas viagens e no meu dia a dia.',
-    description:
-      'On this page you can find my discount coupons and referral links for the services I use in my travels and in my daily life.',
-  };
 
   if (!USE_CACHE) {
     const db = getFirestore();
@@ -90,19 +90,15 @@ export default async function Coupons({ searchParams }) {
   const isBR = isBrazilianHost(host());
   const editMode = useEditMode(searchParams);
 
-  const db = getFirestore();
-  const couponsPageRef = await db.doc('/pages/coupons').get();
-  const couponsPageData = couponsPageRef.data();
-
-  if (!couponsPageData) {
-    return notFound();
-  }
-
   let coupons = [];
 
   if (USE_CACHE) {
     coupons = theCachedCoupons;
   } else {
+    const db = getFirestore();
+    const couponsPageRef = await db.doc('/pages/coupons').get();
+    couponsPageData = couponsPageRef.data();
+
     const cacheRef = '/caches/static_pages/static_pages/coupons';
     const cacheData = await fetchWithCache(cacheRef, fetchCouponsFromFirestore);
     coupons = cacheData.coupons;
@@ -129,16 +125,18 @@ export default async function Coupons({ searchParams }) {
           <ShareButton />
         </div>
       </div>
-      <div
-        dangerouslySetInnerHTML={{
-          __html: getLocalizedText(
-            host(),
-            couponsPageData.text,
-            couponsPageData.text_pt
-          ),
-        }}
-      />
       <div className="container">
+        <div style={{ marginBottom: 20 }}>
+          <h2 style={{ marginBottom: 0 }}>{i18n('Discount Coupons')}</h2>
+          <div>
+            {getLocalizedText(
+              host(),
+              couponsPageData.description,
+              couponsPageData.description_pt
+            )}
+          </div>
+        </div>
+
         <div style={{ marginBottom: 20 }}>
           <b>{i18n('Quick Access')}</b>:{' '}
           {coupons.map((c, i) => (

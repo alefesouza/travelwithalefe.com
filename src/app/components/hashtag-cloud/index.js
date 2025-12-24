@@ -17,9 +17,6 @@ export default function HashtagCloud({
   const [hashtags, setHashtags] = useState(theHashtags);
 
   const callbacks = {
-    onWordClick: () => {
-      document.querySelector('#loader-spinner').style.display = 'block';
-    },
     getWordTooltip: (word) => `${word.text}`,
   };
 

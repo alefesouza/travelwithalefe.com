@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { JsonEditor } from 'json-edit-react';
 
 const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
-  const params = new URLSearchParams(window.location.search);
+  const params = new URLSearchParams(
+    typeof window === 'object' && window.location.search
+  );
 
   const search = params.get('search') || '';
   const height = params.get('height') || 'auto';

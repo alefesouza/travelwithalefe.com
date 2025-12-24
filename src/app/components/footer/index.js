@@ -75,6 +75,7 @@ export default function Footer() {
                 headersList.get('x-pathname')
               }
               id="language-switcher"
+              suppressHydrationWarning
             >
               {isBR ? 'English Website' : 'Site em Português'}
             </a>

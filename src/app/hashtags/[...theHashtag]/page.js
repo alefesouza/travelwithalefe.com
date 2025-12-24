@@ -27,13 +27,8 @@ import Pagination from '@/app/components/pagination';
 import useEditMode from '@/app/utils/use-edit-mode';
 import Editable from '@/app/components/editable/editable';
 import { RSS_HASHTAGS } from '@/app/utils/rss-hashtags';
-import { cachedHashtags } from '@/app/utils/cache-data';
 import { theCachedHashtags } from '../../utils/cache-hashtags';
-import { cachedMedias } from '../../utils/cache-medias';
-import {
-  getHashtagDataFromRoute,
-  getHashtagBreadcrumbs,
-} from '@/app/utils/hashtag-helpers';
+import { getHashtagDataFromRoute } from '@/app/utils/hashtag-helpers';
 import {
   findHashtag,
   findAlternateHashtag,
@@ -68,10 +63,6 @@ export async function generateMetadata({
         (h) => h.name === hashtag || h.name_pt === hashtag
       )
     ) {
-      return notFound();
-    }
-  } else {
-    if (!cachedHashtags.includes(hashtag)) {
       return notFound();
     }
   }
@@ -222,10 +213,6 @@ export default async function Country({
         (h) => h.name === hashtag || h.name_pt === hashtag
       )
     ) {
-      return notFound();
-    }
-  } else {
-    if (!cachedHashtags.includes(hashtag)) {
       return notFound();
     }
   }

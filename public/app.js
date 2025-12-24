@@ -43,32 +43,6 @@ const utils = {
 
 // Navigation utilities
 const navigation = {
-  showSpinner: (e) => {
-    const link = e?.target?.href || e?.target?.closest('a')?.href;
-
-    if ((e?.target?.closest('a')?.target || e?.target?.target) === '_blank') {
-      return;
-    }
-
-    if (e?.metaKey || !link) {
-      return;
-    }
-
-    if (
-      !link.includes(window.location.origin + '/') ||
-      link.includes(window.location.origin + window.location.pathname + '#') ||
-      link === window.location.href
-    ) {
-      return;
-    }
-
-    document.querySelector('#loader-spinner').style.display = 'block';
-  },
-
-  hideSpinner: () => {
-    document.querySelector('#loader-spinner').style.display = 'none';
-  },
-
   firstPage: window.location.pathname,
 
   onBackClick: function (e) {
@@ -498,45 +472,7 @@ const pageDetection = {
     });
   });
 
-  const registerServiceWorker = async () => {
-    if ('serviceWorker' in navigator) {
-      try {
-        const registration = await navigator.serviceWorker.register(
-          '/serviceworker.js',
-          {
-            scope: '/',
-          }
-        );
-        const states = {
-          installing: 'Service worker installing',
-          waiting: 'Service worker installed',
-          active: 'Service worker active',
-        };
-        for (const [state, message] of Object.entries(states)) {
-          if (registration[state]) console.log(message);
-        }
-      } catch (error) {
-        console.error(`Registration failed with ${error}`);
-      }
-    }
-  };
-
-  registerServiceWorker();
-
   function setupLinks(tag) {
-    const routeLinks = [...document.querySelectorAll(tag + ' a')];
-    routeLinks.forEach((a) => {
-      a.removeEventListener('click', navigation.showSpinner);
-      a.addEventListener('click', navigation.showSpinner);
-    });
-
-    document
-      .querySelectorAll('.random-post-button')
-      .forEach(function (randomPostButton) {
-        randomPostButton.removeEventListener('click', navigation.showSpinner);
-        randomPostButton.addEventListener('click', navigation.showSpinner);
-      });
-
     const languageSwitcherLink = utils.getCurrentLanguageSwitcherUrl();
 
     if (document.querySelector('#language-switcher')) {
@@ -640,7 +576,6 @@ const pageDetection = {
     if (panoramaEl) {
       if (!panoramaEl.classList.contains('pnlm-container')) {
         panorama.init();
-        navigation.hideSpinner();
       }
       return;
     }
@@ -648,8 +583,6 @@ const pageDetection = {
     if (document.querySelector('.tiktok-embed iframe')) {
       return;
     }
-
-    navigation.hideSpinner();
 
     setupLinks('body');
 
@@ -706,8 +639,6 @@ const pageDetection = {
       );
     });
   }
-
-  window.addEventListener('pageshow', navigation.hideSpinner);
 
   navigation.initNavbarLinkClick();
 

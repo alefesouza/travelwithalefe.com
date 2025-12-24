@@ -1,4 +1,8 @@
-import { FILE_DOMAIN, FILE_DOMAIN_11968, FILE_DOMAIN_500 } from '@/app/utils/constants';
+import {
+  FILE_DOMAIN,
+  FILE_DOMAIN_11968,
+  FILE_DOMAIN_500,
+} from '@/app/utils/constants';
 import Hashtags from '../hashtags';
 import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
@@ -224,72 +228,69 @@ export default function Media({
           <div style={{ marginTop: 4 }}>{expandDate(media.date, isBR)}</div>
         )}
 
-        {!media.is_gallery &&
-          media.location_data &&
-          media.location_data[0] && (
-            <div
-              style={{
-                marginTop: 4,
-              }}
-              className={
-                'instagram_media_location' +
-                (withMapIcon ? ' instagram_media_map_icon' : '')
-              }
-            >
+        {!media.is_gallery && media.location_data && media.location_data[0] && (
+          <div
+            style={{
+              marginTop: 4,
+            }}
+            className={
+              'instagram_media_location' +
+              (withMapIcon ? ' instagram_media_map_icon' : '')
+            }
+          >
+            <span>
+              {i18n(media.location_data.length > 1 ? 'Places' : 'Place')}:{' '}
               <span>
-                {i18n(media.location_data.length > 1 ? 'Places' : 'Place')}:{' '}
-                <span>
-                  {media.location_data.map((location, i) => (
-                    <>
-                      <Link
-                        href={
-                          '/countries/' +
-                          media.country +
-                          '/cities/' +
-                          (media.cityData.travel_number
-                            ? media.city.replace(
-                                '-' + media.cityData.travel_number,
-                                ''
-                              )
-                            : media.city) +
-                          '/locations/' +
-                          location.slug
-                        }
-                        key={location.slug}
-                        prefetch={false}
-                      >
-                        {isBR && location.name_pt
-                          ? location.name_pt
-                          : location.name}
-                        {location.alternative_names &&
-                          location.alternative_names.length > 0 &&
-                          ' (' + location.alternative_names.join(', ') + ')'}
-                      </Link>
-                      {i < media.location_data.length - 1 ? ', ' : ''}
-                    </>
-                  ))}
-                </span>
+                {media.location_data.map((location, i) => (
+                  <span key={location.slug}>
+                    <Link
+                      href={
+                        '/countries/' +
+                        media.country +
+                        '/cities/' +
+                        (media.cityData.travel_number
+                          ? media.city.replace(
+                              '-' + media.cityData.travel_number,
+                              ''
+                            )
+                          : media.city) +
+                        '/locations/' +
+                        location.slug
+                      }
+                      prefetch={false}
+                    >
+                      {isBR && location.name_pt
+                        ? location.name_pt
+                        : location.name}
+                      {location.alternative_names &&
+                        location.alternative_names.length > 0 &&
+                        ' (' + location.alternative_names.join(', ') + ')'}
+                    </Link>
+                    {i < media.location_data.length - 1 ? ', ' : ''}
+                  </span>
+                ))}
               </span>
-              {withMapIcon && (
-                <a
-                  href={`https://www.google.com/maps/search/${
-                    media.location_data[0].name
-                  }/@${media.latitude || media.location_data[0].latitude},${
-                    media.longitude || media.location_data[0].longitude
-                  },13z`}
-                  target="_blank"
-                  title={i18n('Open in Google Maps')}
-                >
-                  <img
-                    src={host('/images/google-maps.svg')}
-                    width={16}
-                    height={16}
-                    alt={i18n('Google Maps logo')}
-                  />
-                </a>
-              )}
-            </div>
-          )}
+            </span>
+            {withMapIcon && (
+              <a
+                href={`https://www.google.com/maps/search/${
+                  media.location_data[0].name
+                }/@${media.latitude || media.location_data[0].latitude},${
+                  media.longitude || media.location_data[0].longitude
+                },13z`}
+                target="_blank"
+                title={i18n('Open in Google Maps')}
+              >
+                <img
+                  src={host('/images/google-maps.svg')}
+                  width={16}
+                  height={16}
+                  alt={i18n('Google Maps logo')}
+                />
+              </a>
+            )}
+          </div>
+        )}
 
         {!media.is_gallery && media.hashtags && media.hashtags.length > 0 && (
           <Hashtags item={media} isBR={isBR} />

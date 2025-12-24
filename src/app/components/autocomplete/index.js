@@ -97,10 +97,6 @@ export default function Autocomplete() {
     }
 
     router.push('/hashtags/' + e.value.replace('#', ''));
-
-    setTimeout(() => {
-      document.querySelector('#loader-spinner').style.display = 'block';
-    }, 100);
   };
 
   const onInputChange = (e) => {
@@ -224,6 +220,7 @@ export default function Autocomplete() {
   return (
     <div className="autocomplete">
       <Select
+        suppressHydrationWarning
         options={allOptions}
         placeholder={i18n('Hashtag Search')}
         onInputChange={onInputChange}

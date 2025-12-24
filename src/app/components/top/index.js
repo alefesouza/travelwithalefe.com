@@ -33,7 +33,7 @@ export default function Top() {
         {countries
           .sort((a, b) => a.order - b.order)
           .map((c, i) => (
-            <>
+            <span key={i}>
               <Link href={'/countries/' + c.slug} key={c.name} prefetch={false}>
                 {isWindows ? (
                   <>
@@ -50,7 +50,7 @@ export default function Top() {
                 )}
               </Link>
               {i % 14 === 0 && i > 0 && <br />}
-            </>
+            </span>
           ))}
       </span>
     </div>

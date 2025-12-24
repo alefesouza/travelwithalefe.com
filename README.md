@@ -15,7 +15,7 @@ Also some search engine optimizations like:
 
 You can check the indexed content by searching `site:travelwithalefe.com`.
 
-The website is built using Next.js and hosted on Firebase Hosting with full SSR support using Firestore and Firebase Cloud Storage, the Portuguese version (Viajar com Alê, same project with domain comparison) is hosted on [https://viajarcomale.com.br](https://viajarcomale.com.br).
+The website is built using Next.js and hosted on Firebase App Hosting with full SSR support using Firestore and Firebase Cloud Storage, the Portuguese version (Viajar com Alê, same project with domain comparison) is hosted on [https://viajarcomale.com.br](https://viajarcomale.com.br).
 
 The website uses Firebase Cloud Firestore as its database. The [./helpers](./helpers/) directory contains helper functions that convert the Instagram archive to JSON for uploading to Firestore.
 

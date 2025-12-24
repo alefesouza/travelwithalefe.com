@@ -1,15 +1,7 @@
-const fs = require('fs');
-const withPWA = require('next-pwa')({
-  dest: 'public',
-  sw: 'serviceworker.js',
-  register: false,
-  runtimeCaching: require('./src/cache'),
-});
-
 const isDev = process.env.NODE_ENV !== 'production';
 
 /** @type {import('next').NextConfig} */
-const nextConfig = withPWA({
+const nextConfig = {
   reactStrictMode: false,
   images: {
     unoptimized: true,
@@ -55,6 +47,6 @@ const nextConfig = withPWA({
       },
     ];
   },
-});
+};
 
 module.exports = nextConfig;

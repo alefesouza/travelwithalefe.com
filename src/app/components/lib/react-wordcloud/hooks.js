@@ -11,12 +11,10 @@ export function useResponsiveSvgSelection(minSize, initialSize, svgAttributes) {
     const element = elementRef.current;
 
     // Set svg selection
-    let svg = select(element)
-      .append('svg')
-      .style('display', 'block'); // Native inline svg leaves undesired white space
+    let svg = select(element).append('svg').style('display', 'block'); // Native inline svg leaves undesired white space
 
     if (typeof svgAttributes === 'object') {
-      Object.keys(svgAttributes).forEach(key => {
+      Object.keys(svgAttributes).forEach((key) => {
         svg = svg.attr(key, svgAttributes[key]);
       });
     }
@@ -41,12 +39,12 @@ export function useResponsiveSvgSelection(minSize, initialSize, svgAttributes) {
       [width, height] = initialSize;
     }
 
-    width = Math.max(width, minSize[0]);
-    height = Math.max(height, minSize[1]);
+    width = Math.max(width, minSize && minSize[0] ? minSize[0] : 0);
+    height = Math.max(height, minSize && minSize[1] ? minSize[1] : 0);
     updateSize(width, height);
 
     // Update resize using a resize observer
-    const resizeObserver = new ResizeObserver(entries => {
+    const resizeObserver = new ResizeObserver((entries) => {
       if (!entries || entries.length === 0) {
         return;
       }
@@ -61,9 +59,7 @@ export function useResponsiveSvgSelection(minSize, initialSize, svgAttributes) {
     // Cleanup
     return () => {
       resizeObserver.unobserve(element);
-      select(element)
-        .selectAll('*')
-        .remove();
+      select(element).selectAll('*').remove();
     };
   }, [initialSize, minSize, svgAttributes]);
 

@@ -315,10 +315,6 @@ export default function RootLayout({ children }) {
 
           <div className="background"></div>
 
-          <div id="loader-spinner">
-            <span className="loader"></span>
-          </div>
-
           <nav className="navbar mobile-navbar">
             <div
               className="container"
@@ -336,7 +332,9 @@ export default function RootLayout({ children }) {
                   height={48}
                   alt={i18n('Travel with Alefe Icon')}
                 />
-                <span className="site-name">{i18n(SITE_NAME)}</span>
+                <span className="site-name" suppressHydrationWarning>
+                  {i18n(SITE_NAME)}
+                </span>
               </Link>
 
               <NavbarLinks />

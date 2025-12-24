@@ -369,7 +369,7 @@ export default function Scroller({
                         {i18n(p.location_data.length > 1 ? 'Places' : 'Place')}:{' '}
                         <span>
                           {p.location_data.map((location, i) => (
-                            <>
+                            <span key={location.slug}>
                               <Link
                                 href={
                                   '/countries/' +
@@ -397,7 +397,7 @@ export default function Scroller({
                                     ')'}
                               </Link>
                               {i < p.location_data.length - 1 ? ', ' : ''}
-                            </>
+                            </span>
                           ))}
                         </span>
                       </div>

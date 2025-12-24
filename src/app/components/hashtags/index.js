@@ -60,11 +60,11 @@ export default function Hashtags({ item, isBR }) {
           }
 
           return (
-            <>
-              <Link href={link} key={h} prefetch={false}>
+            <span key={h}>
+              <Link href={link} prefetch={false}>
                 #{h}
               </Link>{' '}
-            </>
+            </span>
           );
         })}
       </span>
