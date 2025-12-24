@@ -58,9 +58,4 @@ items.json
 /data
 /images
 
-/src/app/utils/cache-coupons.js
-/src/app/utils/cache-locations.js
-/src/app/utils/cache-hashtags.js
-/src/app/utils/cache-medias.js
-
 /functions/credentials.js

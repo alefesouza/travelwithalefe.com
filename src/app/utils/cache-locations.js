@@ -1,0 +1,3 @@
+const theCachedLocations = [];
+
+export { theCachedLocations };

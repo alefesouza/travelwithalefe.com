@@ -1,0 +1,3 @@
+const theCachedCoupons = [];
+
+export { theCachedCoupons };

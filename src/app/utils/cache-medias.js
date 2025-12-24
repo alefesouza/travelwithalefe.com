@@ -1,0 +1,3 @@
+const cachedMedias = [];
+
+export { cachedMedias };

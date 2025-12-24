@@ -1,0 +1,3 @@
+const theCachedHashtags = [];
+
+export { theCachedHashtags };
