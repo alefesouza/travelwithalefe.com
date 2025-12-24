@@ -15,6 +15,7 @@ const langs = {
     '#observationdeck': '#mirante',
     '#favorites': '#favoritos',
     'My photos and videos by country': 'Minhas fotos e vídeos de cada país',
+    'Random post': 'Post aleatório',
 
     // Albums
     'Select Country': 'Selecione o país',

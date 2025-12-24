@@ -530,6 +530,14 @@ const pageDetection = {
       a.addEventListener('click', navigation.showSpinner);
     });
 
+    document
+      .querySelectorAll('.random-post-button')
+      .forEach(function (randomPostButton) {
+        console.log(randomPostButton);
+        randomPostButton.removeEventListener('click', navigation.showSpinner);
+        randomPostButton.addEventListener('click', navigation.showSpinner);
+      });
+
     const languageSwitcherLink = utils.getCurrentLanguageSwitcherUrl();
 
     if (document.querySelector('#language-switcher')) {

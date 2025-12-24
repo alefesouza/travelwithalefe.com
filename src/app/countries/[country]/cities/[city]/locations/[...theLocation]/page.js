@@ -50,6 +50,7 @@ import {
   sortByDateAsc,
   shuffleArray,
 } from '@/app/utils/media-sorting';
+import RandomPostButton from '@/app/components/random-post-button';
 
 export async function generateMetadata({
   params: { country, city, theLocation },
@@ -471,6 +472,8 @@ export default async function Country({
           >
             <img src="/images/back.svg" alt={i18n('Back')} width="32px"></img>
           </Link>
+
+          <RandomPostButton text={i18n('Random post')} />
 
           <div style={{ display: 'flex', gap: 16 }}>
             {theMedia.latitude !== 0 && theMedia.longitude !== 0 && (

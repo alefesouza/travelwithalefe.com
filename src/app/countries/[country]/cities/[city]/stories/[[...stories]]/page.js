@@ -38,6 +38,7 @@ import {
 } from '@/app/utils/stories-helpers';
 import SortPicker from '@/app/components/sort-picker';
 import getSort from '@/app/utils/get-sort';
+import RandomPostButton from '@/app/components/random-post-button';
 
 export async function generateMetadata({ params: { country, city, stories } }) {
   const i18n = useI18n();
@@ -319,6 +320,8 @@ export default async function Highlight({
           >
             <img src="/images/back.svg" alt={i18n('Back')} width="32px"></img>
           </Link>
+
+          <RandomPostButton text={i18n('Random post')} />
 
           <div style={{ display: 'flex', gap: 16 }}>
             {

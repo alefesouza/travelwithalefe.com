@@ -12,6 +12,7 @@ import useEditMode from '../utils/use-edit-mode';
 import { theCachedCoupons } from '../utils/cache-coupons';
 import { getLocalizedText, isBrazilianHost } from '../utils/locale-helpers';
 import { fetchWithCache } from '../utils/cache-helpers';
+import RandomPostButton from '../components/random-post-button';
 
 /**
  * @typedef {import('@/typings/coupon').Coupon} Coupon
@@ -115,13 +116,16 @@ export default async function Coupons({ searchParams }) {
     <>
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Link href="/" id="back-button" scroll={false}>
+          <Link href="/" id="back-button" scroll={false} prefetch={false}>
             <img
               src={host('/images/back.svg')}
               alt={i18n('Back')}
               width="32px"
             />
           </Link>
+
+          <RandomPostButton text={i18n('Random post')} />
+
           <ShareButton />
         </div>
       </div>
@@ -139,7 +143,9 @@ export default async function Coupons({ searchParams }) {
           <b>{i18n('Quick Access')}</b>:{' '}
           {coupons.map((c, i) => (
             <span key={c.slug}>
-              <Link href={host('/coupons/' + c.slug)}>{c.name}</Link>
+              <Link href={host('/coupons/' + c.slug)} prefetch={false}>
+                {c.name}
+              </Link>
               {i < coupons.length - 1 && ', '}
             </span>
           ))}

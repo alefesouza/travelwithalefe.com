@@ -42,6 +42,7 @@ import SortPicker from '@/app/components/sort-picker';
 import CityTabs from '@/app/components/city-tabs';
 import MainLocations from '@/app/components/main-locations';
 import MediaSection from '@/app/components/media-section';
+import RandomPostButton from '@/app/components/random-post-button';
 
 export async function generateMetadata({ params: { slug }, searchParams }) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -399,13 +400,15 @@ export default async function Country({ params: { slug }, searchParams }) {
     <div>
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Link href="/" id="back-button" scroll={false}>
+          <Link href="/" id="back-button" scroll={false} prefetch={false}>
             <img
               src={host('/images/back.svg')}
               alt={i18n('Back')}
               width="32px"
             ></img>
           </Link>
+
+          <RandomPostButton text={i18n('Random post')} />
 
           <ShareButton />
         </div>

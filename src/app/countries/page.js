@@ -10,6 +10,7 @@ import { headers } from 'next/headers';
 import logAccess from '../utils/log-access';
 import { getFirestore } from 'firebase-admin/firestore';
 import { UAParser } from 'ua-parser-js';
+import RandomPostButton from '../components/random-post-button';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -32,9 +33,12 @@ export default function Countries() {
   return (
     <div className="container">
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Link href="/" id="back-button" scroll={false}>
+        <Link href="/" id="back-button" scroll={false} prefetch={false}>
           <img src={host('/images/back.svg')} alt={i18n('Back')} width="32px" />
         </Link>
+
+        <RandomPostButton text={i18n('Random post')} />
+
         <ShareButton />
       </div>
 

@@ -14,7 +14,7 @@ export default function Top() {
 
   return (
     <div className="profile">
-      <Link href={host('/')}>
+      <Link href={host('/')} prefetch={false}>
         <img
           src={host('profile-photo.jpg')}
           srcSet={host('profile-photo-2x.jpg') + ' 2x'}
@@ -25,7 +25,7 @@ export default function Top() {
         />
       </Link>
 
-      <Link href={host('/')}>
+      <Link href={host('/')} prefetch={false}>
         <span className="profile_name">{i18n(SITE_NAME)}</span>
       </Link>
 

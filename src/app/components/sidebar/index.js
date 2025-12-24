@@ -13,6 +13,7 @@ import Autocomplete from '@/app/components/autocomplete';
 import NavbarLinks from '@/app/components/navbar-links';
 import { SITE_NAME } from '@/app/utils/constants';
 import socialLinks from '@/app/utils/social-links';
+import RandomPostButton from '@/app/components/random-post-button';
 
 export default async function Sidebar({ isSubPage }) {
   const host = useHost();
@@ -23,13 +24,6 @@ export default async function Sidebar({ isSubPage }) {
 
   return (
     <>
-      <div
-        dangerouslySetInnerHTML={{
-          __html: `<!-- ${isWindows ? 's' : 'n'}---
-        ${headers().get('user-agent')}---
-        ${new UAParser(headers().get('user-agent')).getOS().name} -->`,
-        }}
-      ></div>
       <nav className="navbar">
         <div
           className="container"
@@ -40,7 +34,7 @@ export default async function Sidebar({ isSubPage }) {
             paddingRight: 0,
           }}
         >
-          <Link className="navbar-brand" href="/">
+          <Link className="navbar-brand" href="/" prefetch={false}>
             <img
               src="/icons/96x96.png"
               width={48}
@@ -59,9 +53,20 @@ export default async function Sidebar({ isSubPage }) {
 
       <Top />
       <div className="container">
-        <h2 className={styles.headline}>
-          {i18n('My photos and videos by country')}
-        </h2>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexWrap: 'wrap',
+            marginBottom: '16px',
+          }}
+        >
+          <h2 className={styles.headline}>
+            {i18n('My photos and videos by country')}
+          </h2>
+          <RandomPostButton text={i18n('Random post')} />
+        </div>
         <div className={styles.country_selector}>
           {countries
             .sort((a, b) => a.order - b.order)

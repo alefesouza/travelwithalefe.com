@@ -29,6 +29,7 @@ import {
   expandMediaGallery,
   fetchMediaByOriginalId,
 } from '@/app/utils/posts-helpers';
+import RandomPostButton from '@/app/components/random-post-button';
 
 function getSelectedMedia(media, theMedia, country, city) {
   let mediaIndex = null;
@@ -350,6 +351,8 @@ export default async function MediaPage({
           >
             <img src="/images/back.svg" alt={i18n('Back')} width="32px"></img>
           </Link>
+
+          <RandomPostButton text={i18n('Random post')} />
 
           <ShareButton />
         </div>

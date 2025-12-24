@@ -1,0 +1,43 @@
+.randomButton {
+  background: #2096cc;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.randomButton:hover {
+  background: #1a87b9;
+}
+
+.randomButton:disabled {
+  background: #71b6d5;
+}
+
+.randomButtonContainer {
+  flex: 1;
+  text-align: center;
+}
+
+@media (min-width: 380px) {
+  .randomButton {
+    font-size: 15px;
+    padding: 10px 18px;
+  }
+}
+
+@media (min-width: 510px) {
+  .randomButtonContainer {
+    flex: initial;
+    text-align: end;
+  }
+}

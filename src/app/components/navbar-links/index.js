@@ -13,7 +13,7 @@ const NavbarLinks = () => {
           'nav-item' + (headersList.get('x-pathname') === '/' ? ' active' : '')
         }
       >
-        <Link className="nav-link" href="/">
+        <Link className="nav-link" href="/" prefetch={false}>
           {i18n('Home')}
         </Link>
       </li>
@@ -23,7 +23,7 @@ const NavbarLinks = () => {
           (headersList.get('x-pathname') === '/map' ? ' active' : '')
         }
       >
-        <Link className="nav-link" href="/map">
+        <Link className="nav-link" href="/map" prefetch={false}>
           {i18n('Map')}
         </Link>
       </li>
@@ -33,7 +33,7 @@ const NavbarLinks = () => {
           (headersList.get('x-pathname') === '/hashtags' ? ' active' : '')
         }
       >
-        <Link className="nav-link" href="/hashtags">
+        <Link className="nav-link" href="/hashtags" prefetch={false}>
           {i18n('Hashtags')}
         </Link>
       </li>
@@ -43,7 +43,7 @@ const NavbarLinks = () => {
           (headersList.get('x-pathname') === '/coupons' ? ' active' : '')
         }
       >
-        <Link className="nav-link" href="/coupons">
+        <Link className="nav-link" href="/coupons" prefetch={false}>
           {i18n('Coupons')}
         </Link>
       </li>
@@ -53,7 +53,7 @@ const NavbarLinks = () => {
           (headersList.get('x-pathname') === '/about' ? ' active' : '')
         }
       >
-        <Link className="nav-link" href="/about">
+        <Link className="nav-link" href="/about" prefetch={false}>
           {i18n('About')}
         </Link>
       </li>

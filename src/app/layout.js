@@ -329,7 +329,7 @@ export default function RootLayout({ children }) {
                 paddingRight: 0,
               }}
             >
-              <Link className="navbar-brand" href="/">
+              <Link className="navbar-brand" href="/" prefetch={false}>
                 <img
                   src="/icons/96x96.png"
                   width={48}

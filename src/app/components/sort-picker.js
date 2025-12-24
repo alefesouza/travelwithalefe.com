@@ -38,7 +38,7 @@ export default function SortPicker({
         <span>{i18n('Sorting')}:</span>
 
         {sortOptions.map((option) => (
-          <Link key={option.value} href={getHref(option.value)} scroll={false}>
+          <Link key={option.value} href={getHref(option.value)} scroll={false} prefetch={false}>
             <label>
               <input
                 type="radio"

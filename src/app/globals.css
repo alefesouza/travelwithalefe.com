@@ -81,7 +81,7 @@ body {
   text-align: inherit;
 }
 
-.list-group-item + .list-group-item {
+.list-group-item+.list-group-item {
   border-top-width: 0;
 }
 
@@ -265,12 +265,14 @@ body {
   margin-bottom: 0;
   list-style: none;
 }
+
 .nav-tabs .nav-item.show .nav-link,
 .nav-tabs .nav-link.active {
   color: #495057;
   background-color: #fff;
   border-color: #dee2e6 #dee2e6 #fff;
 }
+
 .nav-tabs .nav-link {
   margin-bottom: -1px;
   background-color: transparent;
@@ -278,6 +280,7 @@ body {
   border-top-left-radius: 0.25rem;
   border-top-right-radius: 0.25rem;
 }
+
 .nav-link {
   display: block;
   padding: 0.5rem 1rem;
@@ -318,6 +321,7 @@ body {
   0% {
     transform: rotate(0deg);
   }
+
   100% {
     transform: rotate(360deg);
   }
@@ -371,7 +375,7 @@ button:not(:disabled) {
   justify-content: flex-end;
 }
 
-.autocomplete > div {
+.autocomplete>div {
   width: 75%;
 }
 
@@ -382,12 +386,10 @@ button:not(:disabled) {
   top: env(titlebar-area-y, 0);
   height: calc(env(titlebar-area-height, 50px));
   width: env(titlebar-area-width, 100%);
-  background: linear-gradient(
-    to right,
-    #2096cc,
-    rgba(32, 150, 204, 0.5),
-    #2096cc
-  );
+  background: linear-gradient(to right,
+      #2096cc,
+      rgba(32, 150, 204, 0.5),
+      #2096cc);
   backdrop-filter: saturate(180%) blur(20px);
   align-items: center;
   gap: 6px;
@@ -433,7 +435,7 @@ button:not(:disabled) {
   max-width: calc(env(titlebar-area-height, 38px) - 2px);
 }
 
-.window-controls-overlay .autocomplete > div {
+.window-controls-overlay .autocomplete>div {
   width: 100%;
   -webkit-app-region: no-drag;
   app-region: no-drag;
@@ -463,12 +465,10 @@ button:not(:disabled) {
   align-items: center;
   justify-content: center;
   padding: 0rem 0.5rem;
-  background: linear-gradient(
-    to right,
-    rgba(248, 249, 250, 0),
-    rgba(248, 249, 250, 0.15),
-    rgba(248, 249, 250, 0)
-  );
+  background: linear-gradient(to right,
+      rgba(248, 249, 250, 0),
+      rgba(248, 249, 250, 0.15),
+      rgba(248, 249, 250, 0));
 }
 
 .navbar-brand {
@@ -553,6 +553,7 @@ button:not(:disabled) {
 .media_navigation {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 
 .window-controls-overlay .media_navigation {
@@ -637,6 +638,7 @@ button:not(:disabled) {
 }
 
 @media (min-width: 424px) {
+
   .instagram_media_gallery_item.instagram_media_portrait img,
   .instagram_media_gallery_item.instagram_media_portrait video {
     max-width: 400px;
@@ -719,12 +721,10 @@ a:hover {
 }
 
 .page {
-  background: linear-gradient(
-    to right,
-    rgba(248, 249, 250, 0),
-    rgba(248, 249, 250, 0.15),
-    rgba(248, 249, 250, 0)
-  );
+  background: linear-gradient(to right,
+      rgba(248, 249, 250, 0),
+      rgba(248, 249, 250, 0.15),
+      rgba(248, 249, 250, 0));
   padding-bottom: 16px;
 }
 
@@ -808,11 +808,6 @@ video {
   text-align: center;
 }
 
-.scroller_scroller_item.scroller_ad {
-  flex: 0 0 336px !important;
-  text-align: center;
-}
-
 @media (min-width: 644px) {
   .scroller_scroller_item {
     flex: 0 0 300px;
@@ -872,22 +867,12 @@ video {
   object-fit: cover;
 }
 
-.scroller_is_gallery:not(.scroller_ad)::after {
+.scroller_is_gallery::after {
   content: url('/images/gallery.svg');
   position: absolute;
   top: 10px;
   right: 10px;
   pointer-events: none;
-}
-
-.scroller_instagram_highlights_items .scroller_ad {
-  grid-column: 1 / 3;
-}
-
-@media (min-width: 1420px) {
-  .scroller_instagram_highlights_items .scroller_ad {
-    grid-column: 1 / 2;
-  }
 }
 
 .scroller_instagram_highlights_items .scroller_scroller_item {
@@ -975,7 +960,7 @@ body:not(.sub-page) .mobile-autocomplete {
 }
 
 @media (min-width: 644px) {
-  .main.home-page .autocomplete > div {
+  .main.home-page .autocomplete>div {
     width: 50%;
   }
 
@@ -1049,35 +1034,25 @@ body:not(.sub-page) .mobile-autocomplete {
   padding-left: calc(1.5rem * 0.5);
 }
 
-.sidebar_ad {
-  width: 320px;
-  height: 50px;
-  margin: 0 auto;
+.sidebar .random-post-button-container {
+  flex: 1;
+  text-align: center;
 }
 
-.top_banner_ad {
-  width: 320px;
-  height: 50px;
-  margin: 0 auto;
+.sidebar .random-post-button {
+  margin-top: 10px;
 }
 
-@media (min-width: 500px) {
-  .top_banner_ad {
-    width: 468px;
-    height: 60px;
+@media (max-width: 860px) and (min-width: 510px) {
+  .sidebar .random-post-button-container {
+    flex: initial;
+  }
+
+  .sidebar .random-post-button {
+    margin-top: 0px;
   }
 }
 
-@media (min-width: 800px) {
-  .top_banner_ad {
-    width: 728px;
-    height: 90px;
-  }
-}
-
-@media (min-width: 1080px) {
-  .top_banner_ad {
-    width: 728px;
-    height: 90px;
-  }
+#back-button {
+  display: flex;
 }

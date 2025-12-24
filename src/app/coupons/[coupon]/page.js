@@ -13,6 +13,7 @@ import useEditMode from '@/app/utils/use-edit-mode';
 import { theCachedCoupons } from '@/app/utils/cache-coupons';
 import { cachedCoupons } from '@/app/utils/cache-data';
 import { getLocalizedText, isBrazilianHost } from '@/app/utils/locale-helpers';
+import RandomPostButton from '@/app/components/random-post-button';
 
 /**
  * @typedef {import('@/typings/coupon').Coupon} Coupon
@@ -79,13 +80,21 @@ export default async function Coupons({ params: { coupon }, searchParams }) {
     <>
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Link href="/coupons" id="back-button" scroll={false}>
+          <Link
+            href="/coupons"
+            id="back-button"
+            scroll={false}
+            prefetch={false}
+          >
             <img
               src={host('/images/back.svg')}
               alt={i18n('Back')}
               width="32px"
             />
           </Link>
+
+          <RandomPostButton text={i18n('Random post')} />
+
           <ShareButton />
         </div>
       </div>
