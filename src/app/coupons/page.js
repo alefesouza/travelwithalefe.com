@@ -146,15 +146,7 @@ export default async function Coupons({ searchParams }) {
           ))}
         </div>
         <div className="instagram_highlights_items">
-          {coupons.slice(0, 8).map((item) => (
-            <CouponCard item={item} key={item.slug} editMode={editMode} />
-          ))}
-        </div>
-      </div>
-
-      <div className="container">
-        <div className="instagram_highlights_items">
-          {coupons.slice(8).map((item) => (
+          {coupons.map((item) => (
             <CouponCard item={item} key={item.slug} editMode={editMode} />
           ))}
         </div>

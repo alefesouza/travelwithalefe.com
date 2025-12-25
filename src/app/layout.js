@@ -367,6 +367,7 @@ export default async function RootLayout({ children }) {
           <div className="main-container">
             <aside
               className={'sidebar' + (pathname === '/' ? ' home-page' : '')}
+              suppressHydrationWarning
             >
               <Sidebar isSubPage={isSubPage} />
             </aside>

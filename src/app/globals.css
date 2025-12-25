@@ -1043,6 +1043,10 @@ body:not(.sub-page) .mobile-autocomplete {
   margin-top: 10px;
 }
 
+.sub-page .main .random-post-button {
+  margin-top: 0px;
+}
+
 @media (max-width: 860px) and (min-width: 510px) {
   .sidebar .random-post-button-container {
     flex: initial;
