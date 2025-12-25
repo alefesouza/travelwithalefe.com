@@ -64,3 +64,6 @@ items.json
 /src/app/utils/cache-medias.js
 
 /functions/credentials.js
+
+public/sw*
+public/swe-worker*

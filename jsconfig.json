@@ -2,6 +2,9 @@
   "compilerOptions": {
     "paths": {
       "@/*": ["./src/*"]
-    }
-  }
+    },
+    "types": ["@serwist/next/typings"],
+    "lib": ["webworker"]
+  },
+  "exclude": ["public/sw.js"]
 }
