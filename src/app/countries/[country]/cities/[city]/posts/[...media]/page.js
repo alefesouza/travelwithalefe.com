@@ -70,7 +70,7 @@ export async function generateMetadata({ params: paramsPromise }) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const headerList = headers();
+  const headerList = await headers();
 
   const cityPath = '/countries/' + country + '/cities/' + city;
 

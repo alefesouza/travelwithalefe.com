@@ -120,8 +120,6 @@ export default async function Coupons({ searchParams }) {
             />
           </Link>
 
-          <RandomPostButton text={i18n('Random post')} />
-
           <ShareButton />
         </div>
       </div>

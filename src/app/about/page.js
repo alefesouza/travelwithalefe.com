@@ -41,8 +41,6 @@ export default async function About() {
             />
           </Link>
 
-          <RandomPostButton text={i18n('Random post')} />
-
           <ShareButton />
         </div>
       </div>

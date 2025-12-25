@@ -114,7 +114,9 @@ export async function generateMetadata({
   }
 
   if (finalHashtag.is_city && finalHashtag?.metadata?.city_slug) {
-    const hasWebStories = headers().get('x-pathname').includes('/webstories');
+    const hasWebStories = (await headers())
+      .get('x-pathname')
+      .includes('/webstories');
 
     permanentRedirect(
       (hasWebStories ? '/webstories' : '') +

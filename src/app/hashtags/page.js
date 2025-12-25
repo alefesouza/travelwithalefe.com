@@ -55,8 +55,6 @@ export default async function MapPage() {
             />
           </Link>
 
-          <RandomPostButton text={i18n('Random post')} />
-
           <ShareButton />
         </div>
       </div>

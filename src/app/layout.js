@@ -315,6 +315,10 @@ export default async function RootLayout({ children }) {
 
           <div className="background"></div>
 
+          <div id="loader-spinner" suppressHydrationWarning>
+            <span className="loader"></span>
+          </div>
+
           <nav className="navbar mobile-navbar" suppressHydrationWarning>
             <div
               className="container"
