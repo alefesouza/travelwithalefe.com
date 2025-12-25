@@ -1,4 +1,3 @@
-import { getFirestore } from 'firebase-admin/firestore';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import Link from 'next/link';
@@ -13,11 +12,10 @@ import { isBrazilianHost } from '../utils/locale-helpers';
 import { fetchWithCache } from '../utils/cache-helpers';
 import { fetchHashtags } from '../utils/hashtags-helpers';
 import { shuffleArray } from '../utils/media-sorting';
-import RandomPostButton from '../components/random-post-button';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = useI18n();
+  const i18n = await useI18n();
 
   const title = 'Hashtags - ' + i18n(SITE_NAME);
   const description = i18n(
@@ -28,7 +26,7 @@ export async function generateMetadata() {
 }
 
 export default async function MapPage() {
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const isBR = isBrazilianHost(host());
   const isAndroid =

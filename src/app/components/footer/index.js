@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 export default async function Footer() {
   const host = await useHost();
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const isBR = host().includes('viajarcomale.com.br');
   const headersList = await headers();
   const isWindows =

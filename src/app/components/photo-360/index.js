@@ -6,8 +6,8 @@ import {
 import styles from './index.module.css';
 import useI18n from '@/app/hooks/use-i18n';
 
-export default function Photo360({ media }) {
-  const i18n = useI18n();
+export default async function Photo360({ media }) {
+  const i18n = await useI18n();
 
   return (
     <>

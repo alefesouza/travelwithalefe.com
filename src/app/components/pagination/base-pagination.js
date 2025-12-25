@@ -2,16 +2,15 @@ import Link from 'next/link';
 import styles from './index.module.css';
 import useI18n from '@/app/hooks/use-i18n';
 
-export default function BasePagination({
+export default async function BasePagination({
   pageNumber,
   currentPage,
   base,
   isGallery,
   maxPages,
   withLabel,
-  itemsToShow = 5,
 }) {
-  const i18n = useI18n();
+  const i18n = await useI18n();
 
   let pages = Array.from({ length: pageNumber }, (_, i) => i + 1);
 

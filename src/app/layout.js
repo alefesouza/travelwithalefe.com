@@ -19,7 +19,7 @@ export async function generateMetadata() {
 
 export default async function RootLayout({ children }) {
   const host = await useHost();
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const isBR = host().includes('viajarcomale.com.br');
   const headersList = await headers();
   const pathname = headersList.get('x-pathname');

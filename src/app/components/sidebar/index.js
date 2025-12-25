@@ -17,7 +17,7 @@ import RandomPostButton from '@/app/components/random-post-button';
 
 export default async function Sidebar({ isSubPage }) {
   const host = await useHost();
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const isBR = host().includes('viajarcomale.com.br');
   const isWindows =
     new UAParser((await headers()).get('user-agent')).getOS().name ===

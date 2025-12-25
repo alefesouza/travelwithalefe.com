@@ -3,7 +3,7 @@ import styles from './index.module.css';
 import { ITEMS_PER_PAGE } from '@/app/utils/constants';
 import BasePagination from './base-pagination';
 
-export default function Pagination({
+export default async function Pagination({
   base,
   currentPage,
   pageNumber,
@@ -12,7 +12,7 @@ export default function Pagination({
   isGallery,
   label,
 }) {
-  const i18n = useI18n();
+  const i18n = await useI18n();
 
   const pageTotal = currentPage * ITEMS_PER_PAGE;
   const totalText = (

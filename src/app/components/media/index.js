@@ -28,7 +28,7 @@ export default async function Media({
   editMode,
 }) {
   const host = await useHost();
-  const i18n = useI18n();
+  const i18n = await useI18n();
 
   const [, country, , city] = media.path.split('/');
 

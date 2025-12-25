@@ -1,11 +1,8 @@
-import useI18n from '@/app/hooks/use-i18n';
 import { SITE_NAME } from './constants';
 import countries from '@/app/utils/countries';
 
-export default function getMetadata(media, isBR, position) {
+export default function getMetadata(i18n, media, isBR, position) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = useI18n();
-
   const locationCity = [
     media.cityData &&
       (isBR && media.cityData.name_pt

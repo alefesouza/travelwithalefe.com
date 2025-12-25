@@ -1,5 +1,3 @@
-import { getFirestore } from 'firebase-admin/firestore';
-import { headers } from 'next/headers';
 import Link from 'next/link';
 import LocationsMap from '../components/locations-map';
 import ShareButton from '../components/share-button';
@@ -10,11 +8,10 @@ import { SITE_NAME, USE_CACHE } from '../utils/constants';
 import defaultMetadata from '../utils/default-metadata';
 import useEditMode from '@/app/utils/use-edit-mode';
 import { fetchLocations } from '../utils/map-helpers';
-import RandomPostButton from '../components/random-post-button';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = useI18n();
+  const i18n = await useI18n();
 
   const title = i18n('Map') + ' - ' + i18n(SITE_NAME);
   const description = i18n('The map of the places I have been.');
@@ -23,7 +20,7 @@ export async function generateMetadata() {
 }
 
 export default async function MapPage({ searchParams }) {
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const editMode = await useEditMode(searchParams);
 

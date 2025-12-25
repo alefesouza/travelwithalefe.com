@@ -1,8 +1,8 @@
 import Link from 'next/link';
 import useI18n from '@/app/hooks/use-i18n';
 
-export default function SortPicker({ type, basePath, sort }) {
-  const i18n = useI18n();
+export default async function SortPicker({ type, basePath, sort }) {
+  const i18n = await useI18n();
 
   return (
     <div className="container-fluid">

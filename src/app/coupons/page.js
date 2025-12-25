@@ -12,7 +12,6 @@ import useEditMode from '../utils/use-edit-mode';
 import { theCachedCoupons } from '../utils/cache-coupons';
 import { getLocalizedText, isBrazilianHost } from '../utils/locale-helpers';
 import { fetchWithCache } from '../utils/cache-helpers';
-import RandomPostButton from '../components/random-post-button';
 
 /**
  * @typedef {import('@/typings/coupon').Coupon} Coupon
@@ -61,7 +60,7 @@ let couponsPageData = {
 };
 
 export async function generateMetadata() {
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
 
   if (!USE_CACHE) {
@@ -85,7 +84,7 @@ export async function generateMetadata() {
 }
 
 export default async function Coupons({ searchParams }) {
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const isBR = isBrazilianHost(host());
   const editMode = await useEditMode(searchParams);

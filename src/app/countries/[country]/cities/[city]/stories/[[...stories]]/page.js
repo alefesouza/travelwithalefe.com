@@ -43,7 +43,7 @@ import RandomPostButton from '@/app/components/random-post-button';
 export async function generateMetadata({ params: paramsPromise }) {
   const { country, city, stories } = await paramsPromise;
 
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const isBR = isBrazilianHost(host());
   const isWebStories = stories && stories[stories.length - 1] === 'webstories';
@@ -156,7 +156,7 @@ export default async function Highlight({
   const { country, city, stories } = await paramsPromise;
   const searchParams = await searchParamsPromise;
 
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const isBR = isBrazilianHost(host());
   const isWindows =

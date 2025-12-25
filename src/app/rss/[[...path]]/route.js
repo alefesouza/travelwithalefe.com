@@ -1,18 +1,11 @@
 import { parse } from 'js2xmlparser';
 import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
-import { getFirestore } from 'firebase-admin/firestore';
-import {
-  FILE_DOMAIN,
-  ITEMS_PER_PAGE,
-  SITE_NAME,
-  USE_CACHE,
-} from '@/app/utils/constants';
+import { FILE_DOMAIN, SITE_NAME, USE_CACHE } from '@/app/utils/constants';
 import removeDiacritics from '@/app/utils/remove-diacritics';
 import getMetadata from '@/app/utils/get-metadata';
 import getTypePath from '@/app/utils/get-type-path';
 import logAccess from '@/app/utils/log-access';
-import { headers } from 'next/headers';
 import { notFound, redirect } from 'next/navigation';
 import { customInitApp } from '@/app/firebase';
 import useEditMode from '@/app/utils/use-edit-mode';
@@ -27,7 +20,7 @@ import {
 customInitApp();
 
 export async function GET(req) {
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   let { pathname, searchParams } = new URL(req.url);
@@ -169,7 +162,7 @@ export async function GET(req) {
       item: items
         .filter((c) => !c.rss_ignore)
         .map((p) => {
-          let { title, description } = getMetadata(p, isBR);
+          let { title, description } = getMetadata(i18n, p, isBR);
           description += p.hashtags
             ? ' - Hashtags: #' +
               (isBR && p.hashtags_pt ? p.hashtags_pt : p.hashtags).join(' #')

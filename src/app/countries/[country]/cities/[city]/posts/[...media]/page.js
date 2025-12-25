@@ -1,6 +1,5 @@
 import useI18n from '@/app/hooks/use-i18n';
 import useHost from '@/app/hooks/use-host';
-import { getFirestore } from 'firebase-admin/firestore';
 import styles from './page.module.css';
 import { notFound, permanentRedirect, redirect } from 'next/navigation';
 import Media from '@/app/components/media';
@@ -18,9 +17,6 @@ import expandDate from '@/app/utils/expand-date';
 import getTypePath from '@/app/utils/get-type-path';
 import getTypeLabel from '@/app/utils/get-type-label';
 import useEditMode from '@/app/utils/use-edit-mode';
-import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
-import countries from '@/app/utils/countries';
-import { cachedMedias } from '@/app/utils/cache-medias';
 import { USE_CACHE } from '@/app/utils/constants';
 import { getCountry } from '@/app/utils/route-helpers';
 import { validateCountryCity } from '@/app/utils/validation-helpers';
@@ -70,6 +66,7 @@ export async function generateMetadata({ params: paramsPromise }) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
+  const i18n = await useI18n();
   const headerList = await headers();
 
   const cityPath = '/countries/' + country + '/cities/' + city;
@@ -117,7 +114,7 @@ export async function generateMetadata({ params: paramsPromise }) {
   const { selectedMedia } = getSelectedMedia(media, theMedia, country, city);
   theMedia = selectedMedia;
 
-  const { title, description } = getMetadata(theMedia, isBR);
+  const { title, description } = getMetadata(i18n, theMedia, isBR);
 
   return defaultMetadata(
     title,
@@ -139,7 +136,7 @@ export default async function MediaPage({
   const { country, city, media } = await paramsPromise;
   const searchParams = await searchParamsPromise;
 
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const isWindows =
@@ -219,7 +216,7 @@ export default async function MediaPage({
   theMedia = selectedMedia;
 
   const { shortDescription, locationDescription, cityDescription } =
-    getMetadata(theMedia);
+    getMetadata(i18n, theMedia, isBR);
 
   const breadcrumbs = [
     {

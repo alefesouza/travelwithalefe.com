@@ -48,7 +48,7 @@ async function fetchCoupon(couponSlug) {
 export async function generateMetadata({ params: paramsPromise }) {
   const { coupon } = await paramsPromise;
 
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
 
   const couponData = await fetchCoupon(coupon);
@@ -75,7 +75,7 @@ export default async function Coupons({
   const { coupon } = await paramsPromise;
   const searchParams = await searchParamsPromise;
 
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const isBR = isBrazilianHost(host());
   const editMode = await useEditMode(searchParams);

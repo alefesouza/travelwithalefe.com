@@ -11,7 +11,7 @@ export default async function defaultMetadata(
   isSingle
 ) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = useI18n();
+  const i18n = await useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
@@ -36,7 +36,7 @@ export default async function defaultMetadata(
   let metadata = {};
 
   if (media) {
-    metadata = getMetadata(media, isBR);
+    metadata = getMetadata(i18n, media, isBR);
   }
 
   if (media) {

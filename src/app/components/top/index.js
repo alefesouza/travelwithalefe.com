@@ -8,7 +8,7 @@ import { UAParser } from 'ua-parser-js';
 
 export default async function Top() {
   const host = await useHost();
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const isWindows =
     new UAParser((await headers()).get('user-agent')).getOS().name ===
     'Windows';

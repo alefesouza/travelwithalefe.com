@@ -32,7 +32,6 @@ import {
 } from '@/app/utils/media-fetcher';
 import {
   expandMediaGalleries,
-  applyRandomSort,
   paginateMedia,
   buildPaginationBase,
   getOrderedDates,
@@ -52,7 +51,7 @@ export async function generateMetadata({
   const searchParams = await searchParamsPromise;
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = useI18n();
+  const i18n = await useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
@@ -182,7 +181,7 @@ export default async function Country({
   const { slug } = await paramsPromise;
   const searchParams = await searchParamsPromise;
 
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const isWindows =

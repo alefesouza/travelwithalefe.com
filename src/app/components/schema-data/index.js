@@ -15,10 +15,10 @@ export default async function SchemaData({
 }) {
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
-  const i18n = useI18n();
+  const i18n = await useI18n();
 
   const { title, description, hashtags, locationDescription, embedVideo } =
-    getMetadata(media, isBR);
+    getMetadata(i18n, media, isBR);
 
   if (isJsonLd) {
     const data = {

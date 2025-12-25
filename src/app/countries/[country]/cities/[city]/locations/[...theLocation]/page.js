@@ -27,12 +27,7 @@ import SortPicker from '@/app/components/sort-picker';
 import Pagination from '@/app/components/pagination';
 import useEditMode from '@/app/utils/use-edit-mode';
 import Editable from '@/app/components/editable/editable';
-import {
-  cachedCities,
-  cachedCountries,
-  cachedLocations,
-} from '@/app/utils/cache-data';
-import countries from '@/app/utils/countries';
+import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
 import { cachedMedias } from '@/app/utils/cache-medias';
 import { theCachedLocations } from '@/app/utils/cache-locations';
 import {
@@ -60,7 +55,7 @@ export async function generateMetadata({
   const searchParams = await searchParamsPromise;
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = useI18n();
+  const i18n = await useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
@@ -232,7 +227,7 @@ export default async function Country({
   const { country, city, theLocation } = await paramsPromise;
   const searchParams = await searchParamsPromise;
 
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const isWindows =

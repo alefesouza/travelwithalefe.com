@@ -91,7 +91,7 @@ export async function GET() {
       });
     }
 
-    const mediaProcessing = (media, gallery, position) => {
+    const mediaProcessing = async (media, gallery, position) => {
       const item = gallery || media;
 
       if (!item) {
@@ -104,6 +104,7 @@ export async function GET() {
         item.file.includes('.mp4')
       ) {
         const { title, description, embedVideo, image } = getMetadata(
+          i18n,
           media,
           isBR,
           position

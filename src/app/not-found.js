@@ -1,8 +1,8 @@
 import './error.css';
 import useI18n from './hooks/use-i18n';
 
-export default function Custom404() {
-  const i18n = useI18n();
+export default async function Custom404() {
+  const i18n = await useI18n();
 
   return (
     <div className="error-message">

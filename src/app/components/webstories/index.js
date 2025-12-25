@@ -29,7 +29,7 @@ export default async function WebStories({
   maxPages,
   firstPagePath,
 }) {
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
   const headersList = await headers();
@@ -54,19 +54,19 @@ export default async function WebStories({
 
   const needSplit = storyTitle.split(' ').length == 1;
 
-  const { description } = getMetadata(firstItem, isBR);
+  const { description } = getMetadata(i18n, firstItem, isBR);
 
   let nextPageItemDescription = null;
 
   if (nextPageItem) {
-    const { description } = getMetadata(nextPageItem, isBR);
+    const { description } = getMetadata(i18n, nextPageItem, isBR);
     nextPageItemDescription = description;
   }
 
   let previousPageItemDescription = null;
 
   if (previousPageItem) {
-    const { description } = getMetadata(previousPageItem, isBR);
+    const { description } = getMetadata(i18n, previousPageItem, isBR);
     previousPageItemDescription = description;
   }
 
@@ -207,7 +207,7 @@ export default async function WebStories({
       </amp-story-page>
       {items.map((item) => {
         const { description, shortDescription, locationDescription } =
-          getMetadata(item, isBR);
+          getMetadata(i18n, item, isBR);
         const [, country, , city] = item.path.split('/');
 
         const originalId =

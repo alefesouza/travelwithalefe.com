@@ -26,7 +26,7 @@ export default async function Scroller({
   children,
   editMode,
 }) {
-  const i18n = useI18n();
+  const i18n = await useI18n();
   const host = await useHost();
   const isBR = host().includes('viajarcomale.com.br');
 
@@ -73,7 +73,12 @@ export default async function Scroller({
       {children}
 
       <div style={{ position: 'relative' }}>
-        <div className={'scroller_scroller_left_arrow'}>‹</div>
+        <div
+          className={'scroller_scroller_left_arrow'}
+          suppressHydrationWarning
+        >
+          ‹
+        </div>
 
         <div
           className={
@@ -423,7 +428,12 @@ export default async function Scroller({
           })}
         </div>
 
-        <div className={'scroller_scroller_right_arrow'}>›</div>
+        <div
+          className={'scroller_scroller_right_arrow'}
+          suppressHydrationWarning
+        >
+          ›
+        </div>
       </div>
     </div>
   );
