@@ -1,5 +1,5 @@
-import { defaultCache } from "@serwist/next/worker";
-import { Serwist } from "serwist";
+import { defaultCache } from '@serwist/next/worker';
+import { Serwist } from 'serwist';
 import cache from './cache';
 
 const serwist = new Serwist({
@@ -7,16 +7,13 @@ const serwist = new Serwist({
   skipWaiting: true,
   clientsClaim: true,
   navigationPreload: false,
-  runtimeCaching: {
-    ...defaultCache,
-    ...cache,
-  },
+  runtimeCaching: [...defaultCache, ...cache],
   fallbacks: {
     entries: [
       {
-        url: "/~offline",
+        url: '/',
         matcher({ request }) {
-          return request.destination === "document";
+          return request.destination === 'document';
         },
       },
     ],

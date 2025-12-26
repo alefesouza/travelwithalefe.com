@@ -9,7 +9,7 @@ const revision =
   crypto.randomUUID();
 
 const withSerwist = withSerwistInit({
-  additionalPrecacheEntries: [{ url: '/~offline', revision }],
+  additionalPrecacheEntries: [{ url: '/', revision }],
   // Note: This is only an example. If you use Pages Router,
   // use something else that works, such as "service-worker/index.ts".
   swSrc: 'src/sw.js',
