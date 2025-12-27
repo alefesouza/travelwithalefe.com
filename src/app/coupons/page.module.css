@@ -36,3 +36,23 @@
 .coupon_body_padding {
   padding: 0px 16px;
 }
+
+.coupons_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 10px;
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
+@media (min-width: 400px) {
+  .coupons_grid {
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  }
+}
+
+@media (min-width: 584px) {
+  .coupons_grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}

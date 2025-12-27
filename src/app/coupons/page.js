@@ -12,6 +12,7 @@ import useEditMode from '../utils/use-edit-mode';
 import { theCachedCoupons } from '../utils/cache-coupons';
 import { getLocalizedText, isBrazilianHost } from '../utils/locale-helpers';
 import { fetchWithCache } from '../utils/cache-helpers';
+import styles from './page.module.css';
 
 /**
  * @typedef {import('@/typings/coupon').Coupon} Coupon
@@ -145,7 +146,7 @@ export default async function Coupons({ searchParams }) {
             </span>
           ))}
         </div>
-        <div className="instagram_highlights_items">
+        <div className={styles.coupons_grid}>
           {coupons.map((item) => (
             <CouponCard item={item} key={item.slug} editMode={editMode} />
           ))}
