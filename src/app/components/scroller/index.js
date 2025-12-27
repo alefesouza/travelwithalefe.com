@@ -50,11 +50,11 @@ export default async function Scroller({
             }}
             data-maximize={'scroller_instagram_highlights_items'}
             data-minimize={'scroller_scroller_items'}
-            data-maxtext={i18n('Maximize')}
+            data-maxtext={i18n('Expand')}
             data-mintext={i18n('Minimize')}
             suppressHydrationWarning
           >
-            {i18n('Maximize')}
+            {i18n('Expand')}
           </a>
         </div>
       </div>

@@ -58,7 +58,7 @@ export default function MediaSection({
           <div className="center_link">
             <Link href={getExpandLink()} scroll={false} prefetch={false}>
               {expandGalleries
-                ? i18n('Minimize Galleries')
+                ? i18n('Collapse Galleries')
                 : i18n('Expand Galleries')}
             </Link>
           </div>

@@ -734,7 +734,7 @@ export default async function Country({
                     prefetch={false}
                   >
                     {expandGalleries
-                      ? i18n('Minimize Galleries')
+                      ? i18n('Collapse Galleries')
                       : i18n('Expand Galleries')}
                   </Link>
                 </div>
