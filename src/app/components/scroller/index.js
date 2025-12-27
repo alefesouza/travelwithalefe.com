@@ -31,7 +31,7 @@ export default async function Scroller({
   const isBR = host().includes('viajarcomale.com.br');
 
   return (
-    <div data-scroller>
+    <div data-scroller data-only-stories={isStories ? 'true' : 'false'}>
       <div className="container-fluid">
         <div
           style={{

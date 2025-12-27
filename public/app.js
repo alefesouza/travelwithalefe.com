@@ -201,9 +201,12 @@ const shuffle = {
 // Scroller functionality
 const scroller = {
   setup: () => {
-    const highlightVideoItems = document.querySelectorAll('[data-scroller]');
+    const pageScrollerItems = document.querySelectorAll('[data-scroller]');
+    const onlyStories =
+      pageScrollerItems.length === 1 &&
+      pageScrollerItems[0].dataset.onlyStories === 'true';
 
-    Array.from(highlightVideoItems).forEach((theScroller) => {
+    Array.from(pageScrollerItems).forEach((theScroller) => {
       const scrollElement = theScroller.querySelector('[data-scroller-scroll]');
       const scrollLeft = scrollElement.previousElementSibling;
       const scrollRight = scrollElement.nextElementSibling;
@@ -213,7 +216,18 @@ const scroller = {
         return;
       }
 
-      if (
+      // Auto-expand if only stories on the page
+      if (onlyStories) {
+        scrollElement.dataset.maximized = 'yes';
+        scrollElement.classList.add('scroller_instagram_highlights_items');
+        scrollElement.classList.add('instagram_highlights_items');
+        scrollElement.classList.add('container-fluid');
+        scrollElement.classList.remove('scroller_scroller_items');
+        maximizeButton.textContent = maximizeButton.dataset.mintext;
+        maximizeButton.style.display = 'flex';
+        scrollRight.style.display = 'none';
+        scrollLeft.style.display = 'none';
+      } else if (
         scrollElement.scrollLeft + scrollElement.clientWidth <
         scrollElement.scrollWidth
       ) {
