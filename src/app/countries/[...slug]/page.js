@@ -412,7 +412,12 @@ export default async function Country({
     <div>
       <div className="container">
         <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-          <Link href="/" id="back-button" scroll={false} prefetch={false}>
+          <Link
+            href={city ? `/countries/${country}` : `/`}
+            id="back-button"
+            scroll={false}
+            prefetch={false}
+          >
             <img
               src={host('/images/back.svg')}
               alt={i18n('Back')}

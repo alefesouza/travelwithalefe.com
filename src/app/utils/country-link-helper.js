@@ -12,7 +12,7 @@ export function getCountryLink(country) {
     country.cities &&
     country.cities.length === 1 &&
     country.cities[0].totals.stories > 0 &&
-    !country.cities[0].totals.posts &&
+    country.cities[0].totals.posts < 3 &&
     !country.cities[0].totals.photos360 &&
     !country.cities[0].totals.videos &&
     !country.cities[0].totals.shorts &&

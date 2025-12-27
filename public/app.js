@@ -69,18 +69,6 @@ const navigation = {
     document.querySelector('#loader-spinner').style.display = 'none';
   },
 
-  firstPage: window.location.pathname,
-
-  onBackClick: function (e) {
-    if (window.location.pathname === this.firstPage) {
-      this.firstPage = e.target.parentElement.pathname;
-      return;
-    }
-
-    e.preventDefault();
-    history.back();
-  },
-
   updateNavbarActiveState: () => {
     const navLinks = [
       ...document.querySelectorAll('.navbar .nav-link'),
@@ -521,18 +509,6 @@ const pageDetection = {
     if (document.querySelector('#portuguese-language-switcher a')) {
       document.querySelector('#portuguese-language-switcher a').href =
         languageSwitcherLink;
-    }
-
-    const backButton = document.querySelector('#back-button');
-    if (backButton) {
-      backButton.removeEventListener(
-        'click',
-        navigation.onBackClick.bind(navigation)
-      );
-      backButton.addEventListener(
-        'click',
-        navigation.onBackClick.bind(navigation)
-      );
     }
 
     if (utils.isStandaloneMode()) {

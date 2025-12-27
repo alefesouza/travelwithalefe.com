@@ -67,7 +67,7 @@ export default function MediaSection({
         <div className="instagram_highlights_items">
           {medias.map((media) => (
             <Media
-              key={media.id}
+              key={media.city + media.id}
               media={media}
               isBR={isBR}
               expandGalleries={expandGalleries}

@@ -102,7 +102,7 @@ export default async function Scroller({
 
             return (
               <div
-                key={originalId}
+                key={p.city + originalId}
                 className={[
                   'scroller_scroller_item',
                   is360Photos || isYouTubeVideos
