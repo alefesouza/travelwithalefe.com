@@ -5,6 +5,7 @@ import useHost from '@/app/hooks/use-host';
 import Link from 'next/link';
 import styles from '@/app/page.module.css';
 import countries from '@/app/utils/countries';
+import { getCountryLink } from '@/app/utils/country-link-helper';
 import { UAParser } from 'ua-parser-js';
 import { headers } from 'next/headers';
 import Top from '@/app/components/top';
@@ -73,7 +74,7 @@ export default async function Sidebar({ isSubPage }) {
             .sort((a, b) => a.order - b.order)
             .map((c) => (
               <Link
-                href={`/countries/${c.slug}`}
+                href={getCountryLink(c)}
                 key={c.name}
                 className={styles.country}
                 prefetch={false}

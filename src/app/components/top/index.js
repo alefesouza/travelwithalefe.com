@@ -2,6 +2,7 @@ import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
 import { SITE_NAME } from '@/app/utils/constants';
 import countries from '@/app/utils/countries';
+import { getCountryLink } from '@/app/utils/country-link-helper';
 import Link from 'next/link';
 import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
@@ -35,7 +36,7 @@ export default async function Top() {
           .sort((a, b) => a.order - b.order)
           .map((c, i) => (
             <span key={i}>
-              <Link href={'/countries/' + c.slug} key={c.name} prefetch={false}>
+              <Link href={getCountryLink(c)} key={c.name} prefetch={false}>
                 {isWindows ? (
                   <>
                     <img
