@@ -135,6 +135,7 @@ export default async function Sidebar() {
             id="add-to-home"
             className="list-group-item list-group-item-action"
             style={{ display: 'none' }}
+            suppressHydrationWarning
           >
             {i18n('Add to Home Screen')}
           </a>

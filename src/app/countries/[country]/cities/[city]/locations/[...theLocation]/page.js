@@ -18,7 +18,6 @@ import logAccess from '@/app/utils/log-access';
 import getSort from '@/app/utils/get-sort';
 import StructuredBreadcrumbs from '@/app/components/structured-breadcrumbs';
 import defaultMetadata from '@/app/utils/default-metadata';
-import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 import expandPosts from '@/app/utils/expand-posts';
 import getItemsPagination from '@/app/utils/get-items-pagination';
@@ -62,7 +61,7 @@ export async function generateMetadata({
   );
 
   if (
-    !theCachedLocations.find((l) => l.slug === location) ||
+    (USE_CACHE && !theCachedLocations.find((l) => l.slug === location)) ||
     !cachedCountries.includes(country) ||
     !cachedCities.includes(city)
   ) {
@@ -168,6 +167,8 @@ export async function generateMetadata({
       }
     });
   } else {
+    const db = getFirestore();
+
     coverSnapshot = await db
       .collectionGroup('medias')
       .where('locations', 'array-contains', location)
