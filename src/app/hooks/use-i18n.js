@@ -1,6 +1,6 @@
 import langs from '../utils/langs';
 
-export default async function useI18n() {
+export default function useI18n() {
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   return (string, options = {}) => {

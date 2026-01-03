@@ -8,7 +8,7 @@ export default async function logAccess(path) {
   // }
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = await useHost();
+  const host = useHost();
   const headersList = await headers();
   const userAgent = headersList.get('user-agent') || '';
 

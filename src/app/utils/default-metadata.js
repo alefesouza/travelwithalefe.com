@@ -10,9 +10,9 @@ export default async function defaultMetadata(
   isSingle
 ) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = await useI18n();
+  const i18n = useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = await useHost();
+  const host = useHost();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   const defaultTitle = i18n(SITE_NAME);

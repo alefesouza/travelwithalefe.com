@@ -8,7 +8,7 @@ import { USE_CACHE } from '@/app/utils/constants';
 customInitApp();
 
 export async function GET() {
-  const host = await useHost();
+  const host = useHost();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   let theHashtags = [];

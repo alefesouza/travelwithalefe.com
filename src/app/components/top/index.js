@@ -6,8 +6,8 @@ import { getCountryLink } from '@/app/utils/country-link-helper';
 import Link from 'next/link';
 
 export default async function Top() {
-  const host = await useHost();
-  const i18n = await useI18n();
+  const host = useHost();
+  const i18n = useI18n();
 
   return (
     <div className="profile">

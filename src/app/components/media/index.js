@@ -27,8 +27,8 @@ export default async function Media({
   showMapIcon,
   editMode,
 }) {
-  const host = await useHost();
-  const i18n = await useI18n();
+  const host = useHost();
+  const i18n = useI18n();
 
   const [, country, , city] = media.path.split('/');
 

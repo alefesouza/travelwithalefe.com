@@ -2,7 +2,7 @@ import Link from 'next/link';
 import useI18n from '@/app/hooks/use-i18n';
 
 const NavbarLinks = async () => {
-  const i18n = await useI18n();
+  const i18n = useI18n();
 
   return (
     <ul className="navbar-nav">

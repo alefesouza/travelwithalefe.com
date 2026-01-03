@@ -26,8 +26,8 @@ export default async function Scroller({
   children,
   editMode,
 }) {
-  const i18n = await useI18n();
-  const host = await useHost();
+  const i18n = useI18n();
+  const host = useHost();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   return (

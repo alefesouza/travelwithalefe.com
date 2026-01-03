@@ -13,7 +13,7 @@ import { shuffleArray } from '../utils/media-sorting';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = await useI18n();
+  const i18n = useI18n();
 
   const title = 'Hashtags - ' + i18n(SITE_NAME);
   const description = i18n(
@@ -24,8 +24,8 @@ export async function generateMetadata() {
 }
 
 export default async function MapPage() {
-  const i18n = await useI18n();
-  const host = await useHost();
+  const i18n = useI18n();
+  const host = useHost();
   const isBR = isBrazilianHost(host());
 
   const { hashtags, allHashtags } = await fetchHashtags(USE_CACHE, isBR);

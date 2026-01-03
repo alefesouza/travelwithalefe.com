@@ -15,8 +15,8 @@ import socialLinks from '@/app/utils/social-links';
 import RandomPostButton from '@/app/components/random-post-button';
 
 export default async function Sidebar() {
-  const host = await useHost();
-  const i18n = await useI18n();
+  const host = useHost();
+  const i18n = useI18n();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   return (

@@ -10,7 +10,7 @@ export default async function BasePagination({
   maxPages,
   withLabel,
 }) {
-  const i18n = await useI18n();
+  const i18n = useI18n();
 
   let pages = Array.from({ length: pageNumber }, (_, i) => i + 1);
 

@@ -42,9 +42,9 @@ export async function generateMetadata({
   const searchParams = await searchParamsPromise;
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = await useI18n();
+  const i18n = useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = await useHost();
+  const host = useHost();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   let { hashtag, page, expandGalleries, isWebStories } =
@@ -188,8 +188,8 @@ export default async function Country({
   const { theHashtag } = await paramsPromise;
   const searchParams = await searchParamsPromise;
 
-  const i18n = await useI18n();
-  const host = await useHost();
+  const i18n = useI18n();
+  const host = useHost();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   const editMode = await useEditMode(searchParams);
 
@@ -698,9 +698,9 @@ export default async function Country({
 
 async function getBreadcrumbs(basePath, currentHashtag, page, expandGalleries) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = await useI18n();
+  const i18n = useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = await useHost();
+  const host = useHost();
 
   let currentPath = basePath;
 

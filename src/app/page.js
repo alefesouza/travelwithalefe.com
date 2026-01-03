@@ -4,7 +4,7 @@ import Sidebar from './components/sidebar';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = await useHost();
+  const host = useHost();
 
   const defaultMeta = defaultMetadata();
 

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import getTypePath from '@/app/utils/get-type-path';
 import { getFirestore } from 'firebase-admin/firestore';
+import { customInitApp } from '../../firebase';
+
+customInitApp();
 
 // Disable caching for this route
 export const dynamic = 'force-dynamic';

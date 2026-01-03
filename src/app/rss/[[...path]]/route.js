@@ -20,8 +20,8 @@ import {
 customInitApp();
 
 export async function GET(req) {
-  const i18n = await useI18n();
-  const host = await useHost();
+  const i18n = useI18n();
+  const host = useHost();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   let { pathname, searchParams } = new URL(req.url);
 

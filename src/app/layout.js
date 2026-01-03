@@ -16,8 +16,8 @@ export async function generateMetadata() {
 }
 
 export default async function RootLayout({ children }) {
-  const host = await useHost();
-  const i18n = await useI18n();
+  const host = useHost();
+  const i18n = useI18n();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   const ignoreAnalytics = process.env.NODE_ENV === 'development';

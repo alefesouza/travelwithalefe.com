@@ -11,7 +11,7 @@ import { fetchLocations } from '../utils/map-helpers';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = await useI18n();
+  const i18n = useI18n();
 
   const title = i18n('Map') + ' - ' + i18n(SITE_NAME);
   const description = i18n('The map of the places I have been.');
@@ -20,8 +20,8 @@ export async function generateMetadata() {
 }
 
 export default async function MapPage({ searchParams }) {
-  const i18n = await useI18n();
-  const host = await useHost();
+  const i18n = useI18n();
+  const host = useHost();
   const editMode = await useEditMode(searchParams);
 
   const locations = await fetchLocations(USE_CACHE, editMode);

@@ -10,7 +10,7 @@ import { getLocalizedText } from '../utils/locale-helpers';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = await useI18n();
+  const i18n = useI18n();
 
   const title = i18n('About') + ' - ' + i18n(SITE_NAME);
   const description = i18n('About Travel with Alefe website.');
@@ -19,8 +19,8 @@ export async function generateMetadata() {
 }
 
 export default async function About() {
-  const i18n = await useI18n();
-  const host = await useHost();
+  const i18n = useI18n();
+  const host = useHost();
 
   const db = getFirestore();
   const aboutRef = await db.doc('/pages/about').get();

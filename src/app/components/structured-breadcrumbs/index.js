@@ -1,7 +1,7 @@
 import useHost from '@/app/hooks/use-host';
 
 export default async function StructuredBreadcrumbs({ breadcrumbs }) {
-  const host = await useHost();
+  const host = useHost();
 
   return (
     <script

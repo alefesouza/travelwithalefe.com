@@ -12,7 +12,7 @@ import RandomPostButton from '../components/random-post-button';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = await useI18n();
+  const i18n = useI18n();
 
   const title = i18n('Albums') + ' - ' + i18n(SITE_NAME);
   const description = i18n('Choose which country to Travel with Alefe.');
@@ -21,8 +21,8 @@ export async function generateMetadata() {
 }
 
 export default async function Countries() {
-  const i18n = await useI18n();
-  const host = await useHost();
+  const i18n = useI18n();
+  const host = useHost();
 
   logAccess(host('/countries'));
 

@@ -13,9 +13,9 @@ export default async function SchemaData({
   isJsonLd = false,
   jsonLdExtra = {},
 }) {
-  const host = await useHost();
+  const host = useHost();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
-  const i18n = await useI18n();
+  const i18n = useI18n();
 
   const { title, description, hashtags, locationDescription, embedVideo } =
     getMetadata(i18n, media, isBR);

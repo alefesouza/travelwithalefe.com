@@ -11,7 +11,7 @@ import RandomPostButton from '../components/random-post-button';
 
 export async function generateMetadata() {
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const i18n = await useI18n();
+  const i18n = useI18n();
 
   const title = i18n('Privacy Policy') + ' - ' + i18n(SITE_NAME);
   const description = i18n("Travel with Alefe's website privacy policy.");
@@ -20,8 +20,8 @@ export async function generateMetadata() {
 }
 
 export default async function PrivacyPolicy() {
-  const i18n = await useI18n();
-  const host = await useHost();
+  const i18n = useI18n();
+  const host = useHost();
 
   const db = getFirestore();
   const privacyPolicy = await db.doc('/pages/privacy-policy').get();

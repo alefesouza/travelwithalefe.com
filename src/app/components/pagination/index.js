@@ -12,7 +12,7 @@ export default async function Pagination({
   isGallery,
   label,
 }) {
-  const i18n = await useI18n();
+  const i18n = useI18n();
 
   const pageTotal = currentPage * ITEMS_PER_PAGE;
   const totalText = (

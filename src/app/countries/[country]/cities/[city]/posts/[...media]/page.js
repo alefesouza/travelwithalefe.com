@@ -62,9 +62,9 @@ export async function generateMetadata({ params: paramsPromise }) {
   validateCountryCity(country, city);
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
-  const host = await useHost();
+  const host = useHost();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
-  const i18n = await useI18n();
+  const i18n = useI18n();
 
   const countryData = getCountry([country, 'cities', city], {});
 
@@ -115,8 +115,8 @@ export default async function MediaPage({
   const { country, city, media } = await paramsPromise;
   const searchParams = await searchParamsPromise;
 
-  const i18n = await useI18n();
-  const host = await useHost();
+  const i18n = useI18n();
+  const host = useHost();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   const editMode = await useEditMode(searchParams);
 

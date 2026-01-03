@@ -7,7 +7,7 @@ customInitApp();
 
 // Remove Next.js assets from Web Stories pages.
 export async function GET(req) {
-  const host = await useHost();
+  const host = useHost();
   let { pathname, searchParams } = new URL(req.url);
   let sort = searchParams.get('sort');
   sort = sort === 'asc' ? 'asc' : 'desc';
