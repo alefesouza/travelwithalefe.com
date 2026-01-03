@@ -11,7 +11,6 @@ import logAccess from '@/app/utils/log-access';
 import useEditMode from '../utils/use-edit-mode';
 import { theCachedCoupons } from '../utils/cache-coupons';
 import { getLocalizedText, isBrazilianHost } from '../utils/locale-helpers';
-import { fetchWithCache } from '../utils/cache-helpers';
 import styles from './page.module.css';
 
 /**
@@ -99,8 +98,7 @@ export default async function Coupons({ searchParams }) {
     const couponsPageRef = await db.doc('/pages/coupons').get();
     couponsPageData = couponsPageRef.data();
 
-    const cacheRef = '/caches/static_pages/static_pages/coupons';
-    const cacheData = await fetchWithCache(cacheRef, fetchCouponsFromFirestore);
+    const cacheData = await fetchCouponsFromFirestore(db);
     coupons = cacheData.coupons;
   }
 

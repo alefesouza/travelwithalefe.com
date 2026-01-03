@@ -78,33 +78,14 @@ async function fetchLocationsFromFirestore(db) {
 /**
  * Fetch locations with proper caching
  * @param {boolean} useCache - Whether to use cache
- * @param {boolean} editMode - Whether in edit mode
  * @returns {Promise<Location[]>}
  */
-export async function fetchLocations(useCache, editMode) {
+export async function fetchLocations(useCache) {
   if (useCache) {
     return getLocationsFromCache();
   }
 
   const db = getFirestore();
-  const cacheRef = '/caches/static_pages/static_pages/locations';
 
-  if (editMode) {
-    return fetchLocationsFromFirestore(db);
-  }
-
-  const cache = await db.doc(cacheRef).get();
-
-  if (!cache.exists) {
-    const locations = await fetchLocationsFromFirestore(db);
-
-    await db.doc(cacheRef).set({
-      locations,
-      last_update: new Date().toISOString().split('T')[0],
-    });
-
-    return locations;
-  }
-
-  return cache.data().locations;
+  return fetchLocationsFromFirestore(db);
 }

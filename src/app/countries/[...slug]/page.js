@@ -229,10 +229,6 @@ export default async function Country({
   if (USE_CACHE) {
     medias = fetchMediasFromCache(country, city, page);
   } else {
-    const cacheRef = `/caches/countries/countries-cache/${country}/caches${
-      city ? '/' + city : '/country'
-    }/page/${page}/sort/${sort === 'asc' ? 'asc' : 'desc'}`;
-
     const db = getFirestore();
     medias = await fetchMediasFromFirestore(
       db,
@@ -241,9 +237,7 @@ export default async function Country({
       page,
       sort,
       totalPhotos,
-      totalMapsPhotos,
-      cacheRef,
-      editMode
+      totalMapsPhotos
     );
   }
 

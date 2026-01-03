@@ -46,8 +46,6 @@ export function fetchMediasFromCache(country, city, page) {
  * @param {'asc' | 'desc'} sort
  * @param {number} totalPhotos
  * @param {number} totalMapsPhotos
- * @param {string} cacheRef
- * @param {boolean} editMode
  * @returns {Promise<{instagramHighLights: import('@/typings/media').Media[], shortVideos: import('@/typings/media').Media[], youtubeVideos: import('@/typings/media').Media[], _360photos: import('@/typings/media').Media[], instagramPhotos: import('@/typings/media').Media[], mapsPhotos: import('@/typings/media').Media[]}>}
  */
 export async function fetchMediasFromFirestore(
@@ -57,30 +55,8 @@ export async function fetchMediasFromFirestore(
   page,
   sort,
   totalPhotos,
-  totalMapsPhotos,
-  cacheRef,
-  editMode
+  totalMapsPhotos
 ) {
-  let cache = null;
-
-  if (editMode) {
-    cache = { exists: false };
-  } else {
-    cache = await db.doc(cacheRef).get();
-  }
-
-  if (cache.exists) {
-    const cacheData = cache.data();
-    return {
-      instagramHighLights: cacheData.instagramHighLights,
-      shortVideos: cacheData.shortVideos,
-      youtubeVideos: cacheData.youtubeVideos,
-      _360photos: cacheData._360photos,
-      instagramPhotos: cacheData.instagramPhotos,
-      mapsPhotos: cacheData.mapsPhotos,
-    };
-  }
-
   // Fetch from Firestore
   const result = {
     instagramHighLights: [],
@@ -92,7 +68,7 @@ export async function fetchMediasFromFirestore(
   };
 
   // Fetch highlights, videos, etc. for page 1
-  if (page === 1 && !cache.exists) {
+  if (page === 1) {
     const [highlights, shorts, youtube, photos360] = await Promise.all([
       fetchHighlights(db, country, city, sort),
       fetchShortVideos(db, country, city, sort),
@@ -107,23 +83,13 @@ export async function fetchMediasFromFirestore(
   }
 
   // Fetch posts and maps
-  if (!cache.exists) {
-    const [posts, maps] = await Promise.all([
-      fetchPosts(db, country, city, sort, totalPhotos),
-      fetchMaps(db, country, city, sort, totalMapsPhotos),
-    ]);
+  const [posts, maps] = await Promise.all([
+    fetchPosts(db, country, city, sort, totalPhotos),
+    fetchMaps(db, country, city, sort, totalMapsPhotos),
+  ]);
 
-    result.instagramPhotos = posts;
-    result.mapsPhotos = maps;
-  }
-
-  // Cache the results
-  if (!cache.exists) {
-    await db.doc(cacheRef).set({
-      ...result,
-      last_update: new Date().toISOString().split('T')[0],
-    });
-  }
+  result.instagramPhotos = posts;
+  result.mapsPhotos = maps;
 
   return result;
 }

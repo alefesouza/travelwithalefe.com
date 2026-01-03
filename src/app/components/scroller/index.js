@@ -88,6 +88,7 @@ export default async function Scroller({
               : '')
           }
           data-scroller-scroll
+          suppressHydrationWarning
         >
           {items.map((p) => {
             const originalId = p.id;

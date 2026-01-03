@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { cachedMedias } from '@/app/utils/cache-medias';
 import getTypePath from '@/app/utils/get-type-path';
+import { getFirestore } from 'firebase-admin/firestore';
 
 // Disable caching for this route
 export const dynamic = 'force-dynamic';
@@ -8,6 +8,12 @@ export const revalidate = 0;
 export const dynamicParams = false;
 
 export async function GET() {
+  const db = getFirestore();
+  const randomMedias = await db.collection('pages').doc('random').get();
+  const cachedMedias = randomMedias.exists
+    ? JSON.parse(randomMedias.data().value)
+    : [];
+
   // Get a random media from the cache
   const randomIndex = Math.floor(Math.random() * cachedMedias.length);
   const randomMedia = cachedMedias[randomIndex];

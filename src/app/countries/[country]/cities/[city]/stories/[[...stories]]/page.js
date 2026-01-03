@@ -175,32 +175,7 @@ export default async function Highlight({
     });
   }
 
-  let cache = null;
-  let cacheRef = null;
-
-  if (!USE_CACHE) {
-    cacheRef = `/caches/stories/stories-cache/${theCity.slug}/sort/${
-      sort === 'asc' ? 'asc' : 'desc'
-    }`;
-
-    const db = getFirestore();
-
-    if (editMode) {
-      cache = { exists: false };
-    } else {
-      cache = await db.doc(cacheRef).get();
-    }
-  }
-
-  let photos = await fetchStories(
-    USE_CACHE,
-    country,
-    city,
-    isWebStories,
-    sort,
-    cache,
-    cacheRef
-  );
+  let photos = await fetchStories(USE_CACHE, country, city, isWebStories, sort);
 
   if (!photos.length) {
     return notFound();

@@ -155,17 +155,9 @@ function fetchHashtagMediaFromCache(hashtag, sort) {
  * @param {FirebaseFirestore.Firestore} db
  * @param {string} hashtag
  * @param {string} sort
- * @param {boolean} shouldCache
- * @param {string} cacheRef
  * @returns {Promise<any[]>}
  */
-async function fetchHashtagMediaFromFirestore(
-  db,
-  hashtag,
-  sort,
-  shouldCache,
-  cacheRef
-) {
+async function fetchHashtagMediaFromFirestore(db, hashtag, sort) {
   const photosSnapshot = await db
     .collectionGroup('medias')
     .where('hashtags', 'array-contains', hashtag)
@@ -179,13 +171,6 @@ async function fetchHashtagMediaFromFirestore(
     photos.push(data);
   });
 
-  if (shouldCache) {
-    db.doc(cacheRef).set({
-      photos,
-      last_update: new Date().toISOString().split('T')[0],
-    });
-  }
-
   return photos;
 }
 
@@ -194,44 +179,14 @@ async function fetchHashtagMediaFromFirestore(
  * @param {boolean} useCache
  * @param {string} hashtag
  * @param {string} sort
- * @param {boolean} isWebStories
- * @param {boolean} editMode
  * @returns {Promise<any[]>}
  */
-export async function fetchHashtagMedia(
-  useCache,
-  hashtag,
-  sort,
-  isWebStories,
-  editMode
-) {
+export async function fetchHashtagMedia(useCache, hashtag, sort) {
   if (useCache) {
     return fetchHashtagMediaFromCache(hashtag, sort);
   }
 
   const db = getFirestore();
-  const cacheRef = `/caches/hashtags/hashtags-cache/${hashtag}/sort/${
-    sort === 'asc' ? 'asc' : 'desc'
-  }`;
 
-  let cache = null;
-
-  if (editMode) {
-    cache = { exists: false };
-  } else {
-    cache = await db.doc(cacheRef).get();
-  }
-
-  if (!cache.exists || isWebStories) {
-    const shouldCache = !cache.exists;
-    return fetchHashtagMediaFromFirestore(
-      db,
-      hashtag,
-      sort,
-      shouldCache,
-      cacheRef
-    );
-  }
-
-  return cache.data().photos;
+  return fetchHashtagMediaFromFirestore(db, hashtag, sort);
 }

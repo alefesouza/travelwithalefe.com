@@ -72,7 +72,7 @@ export async function GET(req) {
       USE_CACHE,
       finalHashtag.name,
       type,
-      finalHashtag.rss_limit,
+      10,
       editMode
     );
 

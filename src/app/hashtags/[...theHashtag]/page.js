@@ -216,13 +216,7 @@ export default async function Country({
 
   hashtag = finalHashtag.name;
 
-  let photos = await fetchHashtagMedia(
-    USE_CACHE,
-    hashtag,
-    sort,
-    isWebStories,
-    editMode
-  );
+  let photos = await fetchHashtagMedia(USE_CACHE, hashtag, sort);
 
   if (!photos.length) {
     const hashtagAlternate = await findAlternateHashtag(USE_CACHE, hashtag);

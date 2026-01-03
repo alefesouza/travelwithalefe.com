@@ -45,8 +45,6 @@ function fetchStoriesFromCache(country, city, isWebStories, sort) {
  * @param {string} city
  * @param {boolean} isWebStories
  * @param {string} sort
- * @param {boolean} shouldCache
- * @param {string} cacheRef
  * @returns {Promise<import('@/typings/media').Media[]>}
  */
 async function fetchStoriesFromFirestore(
@@ -54,9 +52,7 @@ async function fetchStoriesFromFirestore(
   country,
   city,
   isWebStories,
-  sort,
-  shouldCache,
-  cacheRef
+  sort
 ) {
   let photosSnapshot = await db
     .collection('countries')
@@ -77,13 +73,6 @@ async function fetchStoriesFromFirestore(
     data.path = photo.ref.path;
     photos.push(addStoryLink(data));
   });
-
-  if (shouldCache) {
-    db.doc(cacheRef).set({
-      photos,
-      last_update: new Date().toISOString().split('T')[0],
-    });
-  }
 
   return photos;
 }
@@ -137,8 +126,6 @@ export function expandPostsForWebStories(posts) {
  * @param {string} city
  * @param {boolean} isWebStories
  * @param {string} sort
- * @param {any} cache
- * @param {string} cacheRef
  * @returns {Promise<import('@/typings/media').Media[]>}
  */
 export async function fetchStories(
@@ -146,9 +133,7 @@ export async function fetchStories(
   country,
   city,
   isWebStories,
-  sort,
-  cache,
-  cacheRef
+  sort
 ) {
   if (useCache) {
     return fetchStoriesFromCache(country, city, isWebStories, sort);
@@ -156,18 +141,5 @@ export async function fetchStories(
 
   const db = getFirestore();
 
-  if (!cache.exists || isWebStories) {
-    const shouldCache = !isWebStories && !cache.exists;
-    return fetchStoriesFromFirestore(
-      db,
-      country,
-      city,
-      isWebStories,
-      sort,
-      shouldCache,
-      cacheRef
-    );
-  }
-
-  return cache.data().photos;
+  return fetchStoriesFromFirestore(db, country, city, isWebStories, sort);
 }

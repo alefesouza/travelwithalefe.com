@@ -70,10 +70,9 @@ async function fetchAllHashtagsFromFirestore(db, isBR) {
  * Fetch main and all hashtags
  * @param {boolean} useCache - Whether to use cache
  * @param {boolean} isBR - Whether to use Brazilian Portuguese names
- * @param {Function} fetchWithCache - Cache helper function
  * @returns {Promise<{hashtags: Hashtag[], allHashtags: string[]}>}
  */
-export async function fetchHashtags(useCache, isBR, fetchWithCache) {
+export async function fetchHashtags(useCache, isBR) {
   if (useCache) {
     return {
       hashtags: fetchMainHashtagsFromCache(),
@@ -82,16 +81,9 @@ export async function fetchHashtags(useCache, isBR, fetchWithCache) {
   }
 
   const db = getFirestore();
-  const cacheRef = '/caches/static_pages/static_pages/hashtags_page';
-
-  const cacheData = await fetchWithCache(cacheRef, async (db) => ({
-    hashtags: await fetchMainHashtagsFromFirestore(db),
-  }));
-
-  const allHashtags = await fetchAllHashtagsFromFirestore(db, isBR);
 
   return {
-    hashtags: cacheData.hashtags,
-    allHashtags,
+    hashtags: await fetchMainHashtagsFromFirestore(db),
+    allHashtags: await fetchAllHashtagsFromFirestore(db, isBR),
   };
 }

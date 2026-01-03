@@ -61,17 +61,13 @@ function fetchLocationMediaFromCache(country, possibleCities, location, sort) {
  * @param {string[]} possibleCities
  * @param {string} location
  * @param {string} sort
- * @param {boolean} shouldCache
- * @param {string} cacheRef
  * @returns {Promise<import('@/typings/media').Media[]>}
  */
 async function fetchLocationMediaFromFirestore(
   db,
   possibleCities,
   location,
-  sort,
-  shouldCache,
-  cacheRef
+  sort
 ) {
   const photosSnapshot = await db
     .collectionGroup('medias')
@@ -86,13 +82,6 @@ async function fetchLocationMediaFromFirestore(
     data.path = photo.ref.path;
     photos.push(data);
   });
-
-  if (shouldCache) {
-    db.doc(cacheRef).set({
-      photos,
-      last_update: new Date().toISOString().split('T')[0],
-    });
-  }
 
   return photos;
 }
@@ -124,29 +113,6 @@ export async function fetchLocationMedia(
   }
 
   const db = getFirestore();
-  const cacheRef = `/caches/locations/locations-cache/${city}-${location}/sort/${
-    sort === 'asc' ? 'asc' : 'desc'
-  }`;
 
-  let cache = null;
-
-  if (editMode) {
-    cache = { exists: false };
-  } else {
-    cache = await db.doc(cacheRef).get();
-  }
-
-  if (!cache.exists || isWebStories) {
-    const shouldCache = !cache.exists && !isWebStories;
-    return fetchLocationMediaFromFirestore(
-      db,
-      possibleCities,
-      location,
-      sort,
-      shouldCache,
-      cacheRef
-    );
-  }
-
-  return cache.data().photos;
+  return fetchLocationMediaFromFirestore(db, possibleCities, location, sort);
 }

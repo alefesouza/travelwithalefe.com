@@ -8,7 +8,6 @@ import useI18n from '@/app/hooks/use-i18n';
 import { SITE_NAME, USE_CACHE } from '../utils/constants';
 import defaultMetadata from '../utils/default-metadata';
 import { isBrazilianHost } from '../utils/locale-helpers';
-import { fetchWithCache } from '../utils/cache-helpers';
 import { fetchHashtags } from '../utils/hashtags-helpers';
 import { shuffleArray } from '../utils/media-sorting';
 
@@ -29,11 +28,7 @@ export default async function MapPage() {
   const host = await useHost();
   const isBR = isBrazilianHost(host());
 
-  const { hashtags, allHashtags } = await fetchHashtags(
-    USE_CACHE,
-    isBR,
-    fetchWithCache
-  );
+  const { hashtags, allHashtags } = await fetchHashtags(USE_CACHE, isBR);
 
   logAccess(host('/hashtags'));
 

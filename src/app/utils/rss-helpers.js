@@ -25,11 +25,9 @@ function fetchHomeRSSFromCache(type) {
  * Fetch media for home RSS feed from Firestore
  * @param {FirebaseFirestore.Firestore} db - Firestore instance
  * @param {string} type - Optional media type filter
- * @param {boolean} shouldCache - Whether to cache results
- * @param {string} cacheRef - Cache reference path
  * @returns {Promise<any[]>}
  */
-async function fetchHomeRSSFromFirestore(db, type, shouldCache, cacheRef) {
+async function fetchHomeRSSFromFirestore(db, type) {
   let photosSnapshot = db
     .collectionGroup('medias')
     .limit(ITEMS_PER_PAGE)
@@ -48,13 +46,6 @@ async function fetchHomeRSSFromFirestore(db, type, shouldCache, cacheRef) {
     photos.push(data);
   });
 
-  if (shouldCache) {
-    db.doc(cacheRef).set({
-      photos,
-      last_update: new Date().toISOString().split('T')[0],
-    });
-  }
-
   return photos;
 }
 
@@ -62,30 +53,16 @@ async function fetchHomeRSSFromFirestore(db, type, shouldCache, cacheRef) {
  * Fetch media for home RSS feed
  * @param {boolean} useCache - Whether to use cache
  * @param {string} type - Optional media type filter
- * @param {boolean} editMode - Whether in edit mode
  * @returns {Promise<any[]>}
  */
-export async function fetchHomeRSSFeed(useCache, type, editMode) {
+export async function fetchHomeRSSFeed(useCache, type) {
   if (useCache) {
     return fetchHomeRSSFromCache(type);
   }
 
   const db = getFirestore();
-  const cacheRef = `/caches/feeds/pages/home${type ? '-' + type : ''}`;
 
-  let cache = null;
-
-  if (editMode) {
-    cache = { exists: false };
-  } else {
-    cache = await db.doc(cacheRef).get();
-  }
-
-  if (!cache.exists) {
-    return fetchHomeRSSFromFirestore(db, type, true, cacheRef);
-  }
-
-  return cache.data().photos;
+  return fetchHomeRSSFromFirestore(db, type);
 }
 
 /**
@@ -117,18 +94,9 @@ function fetchHashtagRSSFromCache(hashtagName, type, rssLimit) {
  * @param {string} hashtagName - Hashtag name
  * @param {string} type - Optional media type filter
  * @param {number} rssLimit - RSS item limit
- * @param {boolean} shouldCache - Whether to cache results
- * @param {string} cacheRef - Cache reference path
  * @returns {Promise<any[]>}
  */
-async function fetchHashtagRSSFromFirestore(
-  db,
-  hashtagName,
-  type,
-  rssLimit,
-  shouldCache,
-  cacheRef
-) {
+async function fetchHashtagRSSFromFirestore(db, hashtagName, type, rssLimit) {
   let photosSnapshot = db
     .collectionGroup('medias')
     .where('hashtags', 'array-contains', hashtagName);
@@ -149,14 +117,6 @@ async function fetchHashtagRSSFromFirestore(
     photos.push(data);
   });
 
-  if (shouldCache) {
-    db.doc(cacheRef).set({
-      photos,
-      last_update: new Date().toISOString().split('T')[0],
-      user_agent: headers().get('user-agent'),
-    });
-  }
-
   return photos;
 }
 
@@ -166,45 +126,21 @@ async function fetchHashtagRSSFromFirestore(
  * @param {string} hashtagName - Hashtag name
  * @param {string} type - Optional media type filter
  * @param {number} rssLimit - RSS item limit
- * @param {boolean} editMode - Whether in edit mode
  * @returns {Promise<any[]>}
  */
 export async function fetchHashtagRSSFeed(
   useCache,
   hashtagName,
   type,
-  rssLimit,
-  editMode
+  rssLimit
 ) {
   if (useCache) {
-    return fetchHashtagRSSFromCache(hashtagName, type, rssLimit || 300);
+    return fetchHashtagRSSFromCache(hashtagName, type, rssLimit || 10);
   }
 
   const db = getFirestore();
-  const cacheRef = `/caches/feeds/hashtags-cache/${hashtagName}${
-    type ? '-' + type : ''
-  }/sort/desc`;
 
-  let cache = null;
-
-  if (editMode) {
-    cache = { exists: false };
-  } else {
-    cache = await db.doc(cacheRef).get();
-  }
-
-  if (!cache.exists) {
-    return fetchHashtagRSSFromFirestore(
-      db,
-      hashtagName,
-      type,
-      rssLimit,
-      true,
-      cacheRef
-    );
-  }
-
-  return cache.data().photos;
+  return fetchHashtagRSSFromFirestore(db, hashtagName, type, rssLimit);
 }
 
 /**
