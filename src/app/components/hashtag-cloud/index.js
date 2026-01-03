@@ -53,7 +53,6 @@ export default function HashtagCloud({
     fontSizes: [14, 40],
     scale: 'linear',
     spiral: 'archimedean',
-    fontWeight: isAndroid ? 'bold' : 'normal',
     rotations: 0,
     rotationAngles: [-180, 180],
     transitionDuration: 0,

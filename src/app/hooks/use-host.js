@@ -1,9 +1,8 @@
-import { headers } from 'next/headers';
-
 export default async function useHost() {
-  const headersList = await headers();
-
-  const firebaseURL = headersList.get('x-forwarded-host');
+  const firebaseURL =
+    process.env.NODE_ENV === 'production'
+      ? 'travelwithalefe.com'
+      : 'localhost:3000';
   const protocol =
     process.env.NODE_ENV === 'production' ? 'https://' : 'http://';
 

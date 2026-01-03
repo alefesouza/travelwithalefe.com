@@ -1,5 +1,4 @@
 import { getFirestore } from 'firebase-admin/firestore';
-import { headers } from 'next/headers';
 import { cachedMedias } from '@/app/utils/cache-medias';
 import { sortByDateDesc, sortByDateAsc } from '@/app/utils/media-sorting';
 
@@ -83,7 +82,6 @@ async function fetchStoriesFromFirestore(
     db.doc(cacheRef).set({
       photos,
       last_update: new Date().toISOString().split('T')[0],
-      user_agent: headers().get('user-agent'),
     });
   }
 

@@ -1,22 +1,16 @@
 import { FieldValue } from 'firebase-admin/firestore';
-import { headers } from 'next/headers';
+// import { headers } from 'next/headers';
 import useHost from '@/app/hooks/use-host';
-import getCookie from './get-cookies';
 
 export default async function logAccess(path) {
+  // if (ignoreAnalytics) {
+  return;
+  // }
+
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = await useHost();
   const headersList = await headers();
   const userAgent = headersList.get('user-agent') || '';
-  const ignoreAnalytics =
-    (await getCookie('ignore_analytics')) ||
-    host().includes('localhost') ||
-    (headersList.get('x-pathname').includes('/webstories') &&
-      headersList.get('x-searchparams').includes('ignore_analytics=true'));
-
-  // if (ignoreAnalytics) {
-  return;
-  // }
 
   const db = getFirestore();
   const random = Math.floor(Math.random() * 1000);

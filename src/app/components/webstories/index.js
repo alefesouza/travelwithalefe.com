@@ -10,7 +10,6 @@ import {
 } from '@/app/utils/constants';
 import SchemaData from '../schema-data';
 import getMetadata from '@/app/utils/get-metadata';
-import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 import getTypePath from '@/app/utils/get-type-path';
@@ -31,10 +30,7 @@ export default async function WebStories({
 }) {
   const i18n = await useI18n();
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
-  const headersList = await headers();
-  const isWindows =
-    new UAParser(headersList.get('user-agent')).getOS().name === 'Windows';
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   let highlightItem = items.find((i) => i.is_highlight);
 
@@ -151,18 +147,7 @@ export default async function WebStories({
             </h1>
 
             <div className="flag-container">
-              {countryData ? (
-                isWindows ? (
-                  <amp-img
-                    src={host('/flags/' + countryData.slug + '.png')}
-                    alt={i18n(countryData.name)}
-                    width={55}
-                    height={55}
-                  />
-                ) : (
-                  ' ' + countryData.flag
-                )
-              ) : null}
+              {countryData ? ' ' + countryData.flag : null}
             </div>
 
             {page > 1 && (

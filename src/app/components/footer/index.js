@@ -1,5 +1,4 @@
 import useHost from '@/app/hooks/use-host';
-import { headers } from 'next/headers';
 import useI18n from '@/app/hooks/use-i18n';
 import { UAParser } from 'ua-parser-js';
 import styles from './index.module.css';
@@ -8,11 +7,7 @@ import Link from 'next/link';
 export default async function Footer() {
   const host = await useHost();
   const i18n = await useI18n();
-  const isBR = host().includes('viajarcomale.com.br');
-  const headersList = await headers();
-  const isWindows =
-    new UAParser((await headers()).get('user-agent')).getOS().name ===
-    'Windows';
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   return (
     <footer>
@@ -70,10 +65,9 @@ export default async function Footer() {
           <div>
             <a
               href={
-                (isBR
+                isBR
                   ? 'https://travelwithalefe.com'
-                  : 'https://viajarcomale.com.br') +
-                headersList.get('x-pathname')
+                  : 'https://viajarcomale.com.br'
               }
               id="language-switcher"
               suppressHydrationWarning
@@ -100,18 +94,10 @@ export default async function Footer() {
         <div
           className="developed-by"
           dangerouslySetInnerHTML={{
-            __html:
-              i18n('Developed by AS.dev').replace(
-                'AS.dev',
-                '<a href="https://as.dev" target="_blank">AS.dev</a>'
-              ) +
-              (isWindows
-                ? '<br><br>' +
-                  i18n('Flag emojis by Twemoji').replace(
-                    'Twemoji',
-                    '<a href="https://twemoji.twitter.com/" target="_blank">Twemoji</a>'
-                  )
-                : ''),
+            __html: i18n('Developed by AS.dev').replace(
+              'AS.dev',
+              '<a href="https://as.dev" target="_blank">AS.dev</a>'
+            ),
           }}
         />
 

@@ -1,5 +1,4 @@
 import { getFirestore } from 'firebase-admin/firestore';
-import { headers } from 'next/headers';
 import { cachedMedias } from './cache-medias';
 import { ITEMS_PER_PAGE } from './constants';
 
@@ -53,7 +52,6 @@ async function fetchHomeRSSFromFirestore(db, type, shouldCache, cacheRef) {
     db.doc(cacheRef).set({
       photos,
       last_update: new Date().toISOString().split('T')[0],
-      user_agent: headers().get('user-agent'),
     });
   }
 

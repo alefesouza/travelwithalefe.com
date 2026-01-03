@@ -4,15 +4,10 @@ import { SITE_NAME } from '@/app/utils/constants';
 import countries from '@/app/utils/countries';
 import { getCountryLink } from '@/app/utils/country-link-helper';
 import Link from 'next/link';
-import { headers } from 'next/headers';
-import { UAParser } from 'ua-parser-js';
 
 export default async function Top() {
   const host = await useHost();
   const i18n = await useI18n();
-  const isWindows =
-    new UAParser((await headers()).get('user-agent')).getOS().name ===
-    'Windows';
 
   return (
     <div className="profile">
@@ -37,19 +32,7 @@ export default async function Top() {
           .map((c, i) => (
             <span key={i}>
               <Link href={getCountryLink(c)} key={c.name} prefetch={false}>
-                {isWindows ? (
-                  <>
-                    <img
-                      src={host('/flags/' + c.slug + '.png')}
-                      alt={i18n(c.name)}
-                      width={18}
-                      height={18}
-                    />
-                    &nbsp;
-                  </>
-                ) : (
-                  c.flag
-                )}
+                <span className="country-emoji-flag">{c.flag}</span>
               </Link>
               {i % 14 === 0 && i > 0 && <br />}
             </span>

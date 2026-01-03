@@ -16,7 +16,6 @@ import WebStories from '@/app/components/webstories';
 import logAccess from '@/app/utils/log-access';
 import StructuredBreadcrumbs from '@/app/components/structured-breadcrumbs';
 import defaultMetadata from '@/app/utils/default-metadata';
-import { headers } from 'next/headers';
 import MediaPage, {
   generateMetadata as generateMediaMetadata,
 } from '../../posts/[...media]/page';
@@ -159,9 +158,6 @@ export default async function Highlight({
   const i18n = await useI18n();
   const host = await useHost();
   const isBR = isBrazilianHost(host());
-  const isWindows =
-    new UAParser((await headers()).get('user-agent')).getOS().name ===
-    'Windows';
   const editMode = await useEditMode(searchParams);
 
   const isWebStories = stories && stories[stories.length - 1] === 'webstories';
@@ -357,10 +353,7 @@ export default async function Highlight({
       </div>
 
       <div className="container-fluid">
-        <h2
-          style={{ marginBottom: 0 }}
-          className={isWindows ? 'windows-header' : null}
-        >
+        <h2 style={{ marginBottom: 0 }}>
           {i18n('Stories')} -{' '}
           <Link
             href={'/countries/' + country + '/cities/' + city}
@@ -379,16 +372,7 @@ export default async function Highlight({
           >
             {i18n(countryData.name)}
           </Link>{' '}
-          {isWindows ? (
-            <img
-              src={host('/flags/' + countryData.slug + '.png')}
-              alt={i18n(countryData.name)}
-              width={26}
-              height={26}
-            />
-          ) : (
-            countryData.flag
-          )}
+          <span className="country-emoji-flag">{countryData.flag}</span>
         </h2>
         <div>
           {expandDate(theCity.start, isBR)} - {expandDate(theCity.end, isBR)}

@@ -4,10 +4,8 @@ customInitApp();
 import useHost from './hooks/use-host';
 import useI18n from './hooks/use-i18n';
 import { SITE_NAME } from './utils/constants';
-import { headers } from 'next/headers';
 import NavbarLinks from './components/navbar-links';
 import defaultMetadata from './utils/default-metadata';
-import getCookie from './utils/get-cookies';
 import Sidebar from './components/sidebar';
 import Link from 'next/link';
 import Autocomplete from './components/autocomplete';
@@ -20,37 +18,11 @@ export async function generateMetadata() {
 export default async function RootLayout({ children }) {
   const host = await useHost();
   const i18n = await useI18n();
-  const isBR = host().includes('viajarcomale.com.br');
-  const headersList = await headers();
-  const pathname = headersList.get('x-pathname');
-  const isAMP = pathname.includes('/webstories');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
-  const paths = pathname.split('/');
-  const isMediaSingle =
-    paths[1] === 'countries' &&
-    paths[3] === 'cities' &&
-    (paths[5] === 'posts' ||
-      paths[5] === 'stories' ||
-      paths[5] === 'videos' ||
-      paths[5] === 'short-videos' ||
-      paths[5] === '360-photos' ||
-      paths[5] === 'maps') &&
-    paths[6] &&
-    (paths[5] === 'stories' ||
-      paths[5] === 'videos' ||
-      paths[5] === 'short-videos' ||
-      paths[5] === '360-photos' ||
-      paths[5] === 'maps' ||
-      paths[7]);
+  const ignoreAnalytics = process.env.NODE_ENV === 'development';
 
-  const isSubPage = pathname !== '/';
-
-  const ignoreAnalytics =
-    (await getCookie('ignore_analytics')) || host().includes('localhost');
-
-  const editMode = await useEditMode({
-    edit_mode: headersList.get('x-searchparams').includes('edit_mode=true'),
-  });
+  const editMode = await useEditMode();
 
   const sharedTags = (
     <>
@@ -131,107 +103,75 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang={i18n('en')}>
-      {(ignoreAnalytics ||
-        (pathname.includes('/webstories') &&
-          headersList
-            .get('x-searchparams')
-            .includes('ignore_analytics=true'))) &&
-        !host().includes('localhost') && (
-          <div
-            style={{
-              position: 'absolute',
-              top: 16,
-              right: 16,
-              width: 12,
-              height: 12,
-              background: '#ff0000',
-              borderRadius: 12,
-              zIndex: 1,
-              pointerEvents: 'none',
-            }}
-          />
-        )}
-      {!isAMP && (
-        <head prefix={isMediaSingle ? 'video: https://ogp.me/ns/video#' : null}>
-          <meta name="viewport" content="width=device-width, initial-scale=1" />
-          {sharedTags}
-          {isMediaSingle &&
-            (paths[5] === 'stories' || paths[5] === 'posts') && (
-              <link
-                rel="stylesheet"
-                id="viewer-css"
-                href="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.css"
-              />
-            )}
+      <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        {sharedTags}
+        <link
+          rel="stylesheet"
+          id="viewer-css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.css"
+        />
+        <link
+          rel="stylesheet"
+          id="pannellum-css"
+          href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
+        />
+        <script
+          id="ld-website"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'http://schema.org',
+              '@type': 'WebSite',
+              url: host(''),
+              author: 'Alefe Souza',
+              name: i18n(SITE_NAME),
+              alternateName: [
+                i18n(SITE_NAME),
+                '@ViajarComAlê',
+                'viajarcomale',
+                'VCA',
+                'Viajar com Alefe',
+              ],
+              description: i18n(
+                'Travel photos and links to Travel with Alefe social networks.'
+              ),
+              potentialAction: {
+                '@type': 'SearchAction',
+                target: {
+                  '@type': 'EntryPoint',
+                  urlTemplate: host('') + 'hashtags/{search_term_string}',
+                },
+                'query-input': 'required name=search_term_string',
+              },
+            }),
+          }}
+        ></script>
+        <script
+          id="ld-organization"
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'http://schema.org',
+              '@type': 'Organization',
+              url: host(''),
+              logo: host('/icons/512x512.png'),
+              email: 'mailto:contato@viajarcomale.com',
+              sameAs: [
+                'https://instagram.com/viajarcomale',
+                'https://tiktok.com/@viajarcomale',
+                'https://youtube.com/@viajarcomale',
+                'https://twitter.com/viajarcomale',
+              ],
+            }),
+          }}
+        ></script>
 
-          {isMediaSingle && paths[5] === '360-photos' && (
-            <link
-              rel="stylesheet"
-              id="pannellum-css"
-              href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"
-            />
-          )}
-          {pathname === '/' && (
-            <>
-              <script
-                id="ld-website"
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                  __html: JSON.stringify({
-                    '@context': 'http://schema.org',
-                    '@type': 'WebSite',
-                    url: host(''),
-                    author: 'Alefe Souza',
-                    name: i18n(SITE_NAME),
-                    alternateName: [
-                      i18n(SITE_NAME),
-                      '@ViajarComAlê',
-                      'viajarcomale',
-                      'VCA',
-                      'Viajar com Alefe',
-                    ],
-                    description: i18n(
-                      'Travel photos and links to Travel with Alefe social networks.'
-                    ),
-                    potentialAction: {
-                      '@type': 'SearchAction',
-                      target: {
-                        '@type': 'EntryPoint',
-                        urlTemplate: host('') + 'hashtags/{search_term_string}',
-                      },
-                      'query-input': 'required name=search_term_string',
-                    },
-                  }),
-                }}
-              ></script>
-              <script
-                id="ld-organization"
-                type="application/ld+json"
-                dangerouslySetInnerHTML={{
-                  __html: JSON.stringify({
-                    '@context': 'http://schema.org',
-                    '@type': 'Organization',
-                    url: host(''),
-                    logo: host('/icons/512x512.png'),
-                    email: 'mailto:contato@viajarcomale.com',
-                    sameAs: [
-                      'https://instagram.com/viajarcomale',
-                      'https://tiktok.com/@viajarcomale',
-                      'https://youtube.com/@viajarcomale',
-                      'https://twitter.com/viajarcomale',
-                    ],
-                  }),
-                }}
-              ></script>
-            </>
-          )}
-          {!ignoreAnalytics && (
-            <>
-              {/* eslint-disable-next-line @next/next/next-script-for-ga */}
-              <script
-                id="gtm"
-                dangerouslySetInnerHTML={{
-                  __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+        {/* eslint-disable-next-line @next/next/next-script-for-ga */}
+        <script
+          id="gtm"
+          dangerouslySetInnerHTML={{
+            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
         new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
         j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
         'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
@@ -240,157 +180,113 @@ export default async function RootLayout({ children }) {
             ? process.env.NEXT_GTM_TRACKING_BR
             : process.env.NEXT_GTM_TRACKING
         }');`,
-                }}
-              />
-            </>
-          )}
-        </head>
-      )}
+          }}
+        />
+      </head>
 
-      {isAMP && (
-        <>
-          <head>
-            {sharedTags}
-            <script
-              async
-              src="https://cdn.ampproject.org/v0.js"
-              className="amp-asset"
-            ></script>
-            <script
-              async
-              custom-element="amp-story"
-              src="https://cdn.ampproject.org/v0/amp-story-1.0.js"
-              className="amp-asset"
-            ></script>
-            <script
-              async
-              custom-element="amp-story-auto-analytics"
-              src="https://cdn.ampproject.org/v0/amp-story-auto-analytics-0.1.js"
-              className="amp-asset"
-            ></script>
-            <script
-              async
-              custom-element="amp-video"
-              src="https://cdn.ampproject.org/v0/amp-video-0.1.js"
-              className="amp-asset"
-            ></script>
-            <script
-              async
-              custom-element="amp-story"
-              src="https://cdn.ampproject.org/v0/amp-story-1.0.js"
-              className="amp-asset"
-            ></script>
-          </head>
-          <body>{children}</body>
-        </>
-      )}
+      <body
+        className={[
+          // isSubPage ? 'sub-page' : null,
+          // isMediaSingle ? 'single-media-page' : null,
+          // (await getCookie('window_controls_overlay'))
+          //   ? 'window-controls-overlay'
+          //   : null,
+        ]
+          .filter((c) => c)
+          .join(' ')}
+        suppressHydrationWarning
+      >
+        {!ignoreAnalytics && (
+          <noscript>
+            <iframe
+              src={
+                'https://www.googletagmanager.com/ns.html?id=' +
+                (isBR
+                  ? process.env.NEXT_GTM_TRACKING_BR
+                  : process.env.NEXT_GTM_TRACKING)
+              }
+              height="0"
+              width="0"
+              style={{ display: 'none', visibility: 'hidden' }}
+            ></iframe>
+          </noscript>
+        )}
 
-      {!isAMP && (
-        <body
-          className={[
-            isSubPage ? 'sub-page' : null,
-            isMediaSingle ? 'single-media-page' : null,
-            (await getCookie('window_controls_overlay'))
-              ? 'window-controls-overlay'
-              : null,
-          ]
-            .filter((c) => c)
-            .join(' ')}
-        >
-          {!ignoreAnalytics && (
-            <noscript>
-              <iframe
-                src={
-                  'https://www.googletagmanager.com/ns.html?id=' +
-                  (isBR
-                    ? process.env.NEXT_GTM_TRACKING_BR
-                    : process.env.NEXT_GTM_TRACKING)
-                }
-                height="0"
-                width="0"
-                style={{ display: 'none', visibility: 'hidden' }}
-              ></iframe>
-            </noscript>
-          )}
+        <div className="background"></div>
 
-          <div className="background"></div>
+        <div id="loader-spinner" suppressHydrationWarning>
+          <span className="loader"></span>
+        </div>
 
-          <div id="loader-spinner" suppressHydrationWarning>
-            <span className="loader"></span>
-          </div>
-
-          <nav className="navbar mobile-navbar" suppressHydrationWarning>
-            <div
-              className="container"
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                paddingLeft: 0,
-                paddingRight: 0,
-              }}
-            >
-              <Link className="navbar-brand" href="/" prefetch={false}>
-                <img
-                  src="/icons/96x96.png"
-                  width={48}
-                  height={48}
-                  alt={i18n('Travel with Alefe Icon')}
-                />
-                <span className="site-name" suppressHydrationWarning>
-                  {i18n(SITE_NAME)}
-                </span>
-              </Link>
-
-              <NavbarLinks />
-            </div>
-          </nav>
-
-          <header className="container">
-            <div id="title-bar">
+        <nav className="navbar mobile-navbar" suppressHydrationWarning>
+          <div
+            className="container"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              paddingLeft: 0,
+              paddingRight: 0,
+            }}
+          >
+            <Link className="navbar-brand" href="/" prefetch={false}>
               <img
-                src={host('/icons/72x72.png')}
+                src="/icons/96x96.png"
+                width={48}
+                height={48}
                 alt={i18n('Travel with Alefe Icon')}
-                width={36}
-                height={36}
               />
+              <span className="site-name" suppressHydrationWarning>
+                {i18n(SITE_NAME)}
+              </span>
+            </Link>
 
-              <span>{i18n(SITE_NAME)}</span>
+            <NavbarLinks />
+          </div>
+        </nav>
 
-              <NavbarLinks />
-            </div>
+        <header className="container">
+          <div id="title-bar">
+            <img
+              src={host('/icons/72x72.png')}
+              alt={i18n('Travel with Alefe Icon')}
+              width={36}
+              height={36}
+            />
 
-            <div className="mobile-autocomplete">
-              <Autocomplete />
-            </div>
-          </header>
+            <span>{i18n(SITE_NAME)}</span>
 
-          <div className="main-container">
-            <aside
-              className={'sidebar' + (pathname === '/' ? ' home-page' : '')}
-              suppressHydrationWarning
-            >
-              <Sidebar isSubPage={isSubPage} />
-            </aside>
-            <main className={'main' + (pathname === '/' ? ' home-page' : '')}>
-              {children}
-            </main>
+            <NavbarLinks />
           </div>
 
-          {!ignoreAnalytics && (
-            <>
-              <script
-                async
-                src={`https://www.googletagmanager.com/gtag/js?id=${
-                  isBR
-                    ? process.env.NEXT_GA_TRACKING_BR
-                    : process.env.NEXT_GA_TRACKING
-                }`}
-              />
-              <script
-                async
-                id="analytics"
-                dangerouslySetInnerHTML={{
-                  __html: `
+          <div className="mobile-autocomplete">
+            <Autocomplete />
+          </div>
+        </header>
+
+        <div className="main-container">
+          <aside className={'sidebar'} suppressHydrationWarning>
+            <Sidebar />
+          </aside>
+          <main className={'main'} suppressHydrationWarning>
+            {children}
+          </main>
+        </div>
+
+        {!ignoreAnalytics && (
+          <>
+            <script
+              async
+              src={`https://www.googletagmanager.com/gtag/js?id=${
+                isBR
+                  ? process.env.NEXT_GA_TRACKING_BR
+                  : process.env.NEXT_GA_TRACKING
+              }`}
+            />
+            <script
+              async
+              id="analytics"
+              dangerouslySetInnerHTML={{
+                __html: `
                     window.dataLayer = window.dataLayer || [];
                     function gtag() { dataLayer.push(arguments); }
                     gtag('js', new Date());
@@ -401,27 +297,26 @@ export default async function RootLayout({ children }) {
                         : process.env.NEXT_GA_TRACKING
                     }');
                   `,
-                }}
-              />
-            </>
-          )}
+              }}
+            />
+          </>
+        )}
 
-          <script async src={host('/app.js')}></script>
-          {editMode.editMode && (
-            <>
-              <script
-                async
-                src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"
-              ></script>
+        <script async src={host('/app.js')}></script>
+        {editMode.editMode && (
+          <>
+            <script
+              async
+              src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"
+            ></script>
 
-              <script
-                async
-                src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"
-              ></script>
-            </>
-          )}
-        </body>
-      )}
+            <script
+              async
+              src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"
+            ></script>
+          </>
+        )}
+      </body>
     </html>
   );
 }

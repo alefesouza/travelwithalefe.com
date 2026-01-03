@@ -1,6 +1,5 @@
 import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
-import { headers } from 'next/headers';
 import { FILE_DOMAIN, FILE_DOMAIN_SQUARE, SITE_NAME } from './constants';
 import getMetadata from './get-metadata';
 
@@ -14,17 +13,14 @@ export default async function defaultMetadata(
   const i18n = await useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
-  const headersList = await headers();
-  const isWebStories = headersList.get('x-pathname').includes('/webstories');
-  let pathname =
-    (isWebStories ? '/webstories' : '') +
-    headersList.get('x-pathname').replace('/webstories', '');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   const defaultTitle = i18n(SITE_NAME);
   const defaultDescription = i18n(
     'Travel photos and links to Travel with Alefe social networks.'
   );
+
+  const pathname = '';
 
   const canonical = new URL(
     pathname,

@@ -15,7 +15,6 @@ import randomIntFromInterval from '@/app/utils/random-int';
 import ShareButton from '@/app/components/share-button';
 import logAccess from '@/app/utils/log-access';
 import defaultMetadata from '@/app/utils/default-metadata';
-import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 import LocationsMap from '@/app/components/locations-map';
@@ -54,7 +53,7 @@ export async function generateMetadata({
   const i18n = await useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   const countryData = getCountry(slug, searchParams);
 
@@ -183,10 +182,7 @@ export default async function Country({
 
   const i18n = await useI18n();
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
-  const isWindows =
-    new UAParser((await headers()).get('user-agent')).getOS().name ===
-    'Windows';
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   const editMode = await useEditMode(searchParams);
 
   if (slug.length > 6) {
@@ -432,26 +428,14 @@ export default async function Country({
       </div>
 
       <div className="container-fluid">
-        <h2
-          className={isWindows ? 'windows-header' : null}
-          style={{ marginBottom: 0 }}
-        >
+        <h2 style={{ marginBottom: 0 }}>
           {city
             ? (isBR && cityData[city].name_pt
                 ? cityData[city].name_pt
                 : cityData[city].name) + ' - '
             : ''}
           {i18n(countryData.name)}{' '}
-          {isWindows ? (
-            <img
-              src={host('/flags/' + countryData.slug + '.png')}
-              alt={i18n(countryData.name)}
-              width={26}
-              height={26}
-            />
-          ) : (
-            countryData.flag
-          )}
+          <span className="country-emoji-flag">{countryData.flag}</span>
         </h2>
 
         <div>

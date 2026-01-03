@@ -6,8 +6,6 @@ import Link from 'next/link';
 import styles from '@/app/page.module.css';
 import countries from '@/app/utils/countries';
 import { getCountryLink } from '@/app/utils/country-link-helper';
-import { UAParser } from 'ua-parser-js';
-import { headers } from 'next/headers';
 import Top from '@/app/components/top';
 import Footer from '@/app/components/footer';
 import Autocomplete from '@/app/components/autocomplete';
@@ -16,13 +14,10 @@ import { SITE_NAME } from '@/app/utils/constants';
 import socialLinks from '@/app/utils/social-links';
 import RandomPostButton from '@/app/components/random-post-button';
 
-export default async function Sidebar({ isSubPage }) {
+export default async function Sidebar() {
   const host = await useHost();
   const i18n = await useI18n();
-  const isBR = host().includes('viajarcomale.com.br');
-  const isWindows =
-    new UAParser((await headers()).get('user-agent')).getOS().name ===
-    'Windows';
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   return (
     <>
@@ -79,17 +74,8 @@ export default async function Sidebar({ isSubPage }) {
                 className={styles.country}
                 prefetch={false}
               >
-                <div className={styles.country_flag}>
-                  {isWindows ? (
-                    <img
-                      src={host('/flags/' + c.slug + '.png')}
-                      alt={i18n(c.name)}
-                      width={30}
-                      height={30}
-                    />
-                  ) : (
-                    c.flag
-                  )}
+                <div className={'country-emoji-flag ' + styles.country_flag}>
+                  {c.flag}
                 </div>
                 <span>{i18n(c.name)}</span>
               </Link>

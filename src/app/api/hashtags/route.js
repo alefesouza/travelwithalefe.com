@@ -9,7 +9,7 @@ customInitApp();
 
 export async function GET() {
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   let theHashtags = [];
 

@@ -1,4 +1,3 @@
-import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import Link from 'next/link';
 import ShareButton from '../components/share-button';
@@ -29,9 +28,6 @@ export default async function MapPage() {
   const i18n = await useI18n();
   const host = await useHost();
   const isBR = isBrazilianHost(host());
-  const isAndroid =
-    new UAParser((await headers()).get('user-agent')).getOS().name ===
-    'Android';
 
   const { hashtags, allHashtags } = await fetchHashtags(
     USE_CACHE,
@@ -73,7 +69,6 @@ export default async function MapPage() {
                 value: h.total,
               }))}
             isBR={isBR}
-            isAndroid={isAndroid}
           />
         </div>
 
@@ -86,7 +81,6 @@ export default async function MapPage() {
             isBR={isBR}
             shuffleText={i18n('Shuffle')}
             isRandom
-            isAndroid={isAndroid}
           />
         </div>
       </div>

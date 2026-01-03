@@ -1,5 +1,4 @@
 import { getFirestore } from 'firebase-admin/firestore';
-import { headers } from 'next/headers';
 import { cachedMedias } from '../utils/cache-medias';
 import { theCachedHashtags } from '../utils/cache-hashtags';
 import { sortByDateDesc, sortByDateAsc } from '../utils/media-sorting';
@@ -57,7 +56,7 @@ export async function findAlternateHashtag(useCache, hashtag) {
     .collection('hashtags')
     .where('alternate_tags', 'array-contains', hashtag)
     .get();
-  
+
   let hashtagAlternate = null;
   hashtagAlternateDoc.forEach((doc) => {
     hashtagAlternate = doc.data();
@@ -74,13 +73,17 @@ export async function findAlternateHashtag(useCache, hashtag) {
  * @param {boolean} isWebStories
  * @returns {Promise<any>}
  */
-export async function fetchHashtagCover(useCache, hashtagName, sort, isWebStories) {
+export async function fetchHashtagCover(
+  useCache,
+  hashtagName,
+  sort,
+  isWebStories
+) {
   let cover = null;
 
   if (useCache) {
     let coverSnapshot = cachedMedias.filter(
-      (m) =>
-        m.highlight_hashtags && m.highlight_hashtags.includes(hashtagName)
+      (m) => m.highlight_hashtags && m.highlight_hashtags.includes(hashtagName)
     );
 
     if (!coverSnapshot.length) {
@@ -156,7 +159,13 @@ function fetchHashtagMediaFromCache(hashtag, sort) {
  * @param {string} cacheRef
  * @returns {Promise<any[]>}
  */
-async function fetchHashtagMediaFromFirestore(db, hashtag, sort, shouldCache, cacheRef) {
+async function fetchHashtagMediaFromFirestore(
+  db,
+  hashtag,
+  sort,
+  shouldCache,
+  cacheRef
+) {
   const photosSnapshot = await db
     .collectionGroup('medias')
     .where('hashtags', 'array-contains', hashtag)
@@ -174,7 +183,6 @@ async function fetchHashtagMediaFromFirestore(db, hashtag, sort, shouldCache, ca
     db.doc(cacheRef).set({
       photos,
       last_update: new Date().toISOString().split('T')[0],
-      user_agent: headers().get('user-agent'),
     });
   }
 
@@ -218,7 +226,13 @@ export async function fetchHashtagMedia(
 
   if (!cache.exists || isWebStories) {
     const shouldCache = !isRandom && !cache.exists;
-    return fetchHashtagMediaFromFirestore(db, hashtag, sort, shouldCache, cacheRef);
+    return fetchHashtagMediaFromFirestore(
+      db,
+      hashtag,
+      sort,
+      shouldCache,
+      cacheRef
+    );
   }
 
   return cache.data().photos;

@@ -19,7 +19,7 @@ export async function GET() {
   // const host = (string = '') =>
   //   new URL(string, 'https://travelwithalefe.com/').toString();
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   const lastmod = '2025-08-31';
 
   const reference = host('sitemap.xml')

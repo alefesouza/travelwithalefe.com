@@ -1,9 +1,6 @@
 import useHost from '@/app/hooks/use-host';
-import { redirect, permanentRedirect } from 'next/navigation';
-import getCookie from '@/app/utils/get-cookies';
-import { getStorage } from 'firebase-admin/storage';
+import { redirect } from 'next/navigation';
 import { customInitApp } from '@/app/firebase';
-import { getFirestore } from 'firebase-admin/firestore';
 import logAccess from '@/app/utils/log-access';
 
 customInitApp();
@@ -17,80 +14,86 @@ export async function GET(req) {
 
   pathname = pathname.toLowerCase();
 
-  if (pathname.includes('/highlights/')) {
-    const [, , , country, , city] = pathname.split('/');
-    pathname =
-      '/webstories/countries/' + country + '/cities/' + city + '/stories';
+  const ignoreAnalytics = process.env.NODE_ENV === 'development';
 
-    permanentRedirect(pathname);
+  const request = await fetch(
+    host(pathname.replace('/webstories', '') + '/webstories') +
+      '?fixer=true' +
+      (sort !== 'desc' ? '&sort=' + sort : ''),
+    {
+      headers: {
+        'User-Agent': req.headers.get('user-agent'),
+      },
+    }
+  );
+
+  if (request.redirected) {
+    redirect(request.url);
   }
 
-  const ignoreAnalytics =
-    (await getCookie('ignore_analytics')) || host().includes('localhost');
+  const data = await request.text();
 
-  const reference =
-    'webstories/' +
-    host(pathname + '-' + sort + '.html')
-      .split('//')[1]
-      .replaceAll('/', '-')
-      .replace('www.', '')
-      .replace('viajarcomale', '')
-      .replace('travelwithalefe', '');
+  let $ = require('cheerio').load(data);
 
-  const storage = getStorage();
-  let cacheExists = [false];
+  $('meta[name="viewport"]').remove();
+  $('link[rel="stylesheet"]').remove();
+  $('link[rel="preload"]').remove();
+  $('script').remove();
 
-  if (sort !== 'random') {
-    cacheExists = await storage
-      .bucket('viajarcomale.appspot.com')
-      .file(reference)
-      .exists();
+  $('link[href^="/_next"]').remove();
+  $('script:not(.amp-asset)').remove();
+  $('script.amp-asset').attr('class', '');
+  $('next-route-announcer').remove();
+  $('nextjs-portal').remove();
+
+  $ = require('cheerio').load(`
+    <!DOCTYPE html>
+    <html amp>
+    <head>
+      ${$('head').html()}
+      <meta name="viewport" content="width=device-width,minimum-scale=1,initial-scale=1">
+      <script
+        async
+        src="https://cdn.ampproject.org/v0.js"
+      ></script>
+      <script
+        async
+        custom-element="amp-story"
+        src="https://cdn.ampproject.org/v0/amp-story-1.0.js"
+      ></script>
+      <script
+        async
+        custom-element="amp-story-auto-analytics"
+        src="https://cdn.ampproject.org/v0/amp-story-auto-analytics-0.1.js"
+      ></script>
+      <script
+        async
+        custom-element="amp-video"
+        src="https://cdn.ampproject.org/v0/amp-video-0.1.js"
+      ></script>
+    </head>
+    <body>
+    ${$('main.main').html()}
+    </body>
+    </html>
+  `);
+
+  if ($('amp-story-page').length <= 1) {
+    redirect(pathname.replace('/webstories', ''));
   }
 
-  let html = '';
-
-  if (!cacheExists[0] || sort === 'random') {
-    const request = await fetch(
-      host(pathname.replace('/webstories', '') + '/webstories') +
-        '?fixer=true' +
-        (sort !== 'desc' ? '&sort=' + sort : ''),
-      {
-        headers: {
-          'User-Agent': req.headers.get('user-agent'),
-        },
-      }
-    );
-
-    if (request.redirected) {
-      redirect(request.url);
-    }
-
-    const data = await request.text();
-
-    let $ = require('cheerio').load(data);
-
-    if ($('amp-story-page').length <= 1) {
-      redirect(pathname.replace('/webstories', ''));
-    }
-
-    $('link[href^="/_next"]').remove();
-    $('script:not(.amp-asset)').remove();
-    $('script.amp-asset').attr('class', '');
-    $('next-route-announcer').remove();
-    $('nextjs-portal').remove();
-    $('html').attr('amp', '');
-    $('[standalone]').attr('standalone', '');
-    $('[autoplay]').attr('autoplay', '');
-    $('[itemscope]').attr('itemscope', '');
-    $('head').append(
-      `<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>`
-    );
-    $('head').append(
-      `<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>`
-    );
-    $('head').append(
-      '<style amp-custom>' +
-        `
+  $('[standalone]').attr('standalone', '');
+  $('[autoplay]').attr('autoplay', '');
+  $('[itemscope]').attr('itemscope', '');
+  $('head').append(
+    `<style amp-boilerplate>body{-webkit-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-moz-animation:-amp-start 8s steps(1,end) 0s 1 normal both;-ms-animation:-amp-start 8s steps(1,end) 0s 1 normal both;animation:-amp-start 8s steps(1,end) 0s 1 normal both}@-webkit-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-moz-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-ms-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@-o-keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}@keyframes -amp-start{from{visibility:hidden}to{visibility:visible}}</style>`
+  );
+  $('head').append(
+    `<noscript><style amp-boilerplate>body{-webkit-animation:none;-moz-animation:none;-ms-animation:none;animation:none}</style></noscript>`
+  );
+  $('head').append(
+    '<style amp-custom>' +
+      `
       .header-container { 
         width: 100%;
         margin-left: 6px;
@@ -183,23 +186,12 @@ export async function GET(req) {
 
       .darker { filter: brightness(70%); }
       `
-          .replaceAll(' ', '')
-          .replaceAll('\n', '') +
-        '</style>'
-    );
+        .replaceAll(' ', '')
+        .replaceAll('\n', '') +
+      '</style>'
+  );
 
-    html = $.html();
-
-    if (sort !== 'random') {
-      storage.bucket('viajarcomale.appspot.com').file(reference).save(html);
-    }
-  } else {
-    const contents = await storage
-      .bucket('viajarcomale.appspot.com')
-      .file(reference)
-      .download();
-    html = contents;
-  }
+  let html = $.html();
 
   logAccess(host(pathname + ('?sort=' + sort)));
 

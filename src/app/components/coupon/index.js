@@ -20,7 +20,7 @@ import styles from '../../coupons/page.module.css';
 export default async function CouponCard({ item, editMode }) {
   const i18n = await useI18n();
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   return (
     <div className={'instagram_media_gallery_item ' + styles.coupon}>

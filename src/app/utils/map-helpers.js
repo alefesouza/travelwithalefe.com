@@ -1,5 +1,4 @@
 import { getFirestore } from 'firebase-admin/firestore';
-import { headers } from 'next/headers';
 import { theCachedLocations } from '../utils/cache-locations';
 import countries from '../utils/countries';
 
@@ -102,7 +101,6 @@ export async function fetchLocations(useCache, editMode) {
     await db.doc(cacheRef).set({
       locations,
       last_update: new Date().toISOString().split('T')[0],
-      user_agent: headers().get('user-agent'),
     });
 
     return locations;

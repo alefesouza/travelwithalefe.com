@@ -28,7 +28,7 @@ export default async function Scroller({
 }) {
   const i18n = await useI18n();
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   return (
     <div data-scroller data-only-stories={isStories ? 'true' : 'false'}>

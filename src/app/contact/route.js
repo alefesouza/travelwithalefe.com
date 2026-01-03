@@ -1,19 +1,9 @@
 import { redirect } from 'next/navigation';
-import { cookies } from 'next/headers';
 import useHost from '@/app/hooks/use-host';
 
-export async function GET(req) {
+export async function GET() {
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
-  const { searchParams } = new URL(req.url);
-
-  if (searchParams.get('ignore_analytics') === 'true') {
-    const oneYear = 3600 * 1000 * 24 * 365;
-    (await cookies()).set('__session', 'ignore_analytics=true&edit_mode=true', {
-      maxAge: oneYear,
-    });
-    redirect(host('/'));
-  }
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   redirect('https://alefesouza.com' + (isBR ? '.br' : '') + '/contact');
 }

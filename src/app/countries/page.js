@@ -6,7 +6,6 @@ import useHost from '../hooks/use-host';
 import { SITE_NAME } from '../utils/constants';
 import ShareButton from '../components/share-button';
 import defaultMetadata from '../utils/default-metadata';
-import { headers } from 'next/headers';
 import logAccess from '../utils/log-access';
 import { UAParser } from 'ua-parser-js';
 import RandomPostButton from '../components/random-post-button';
@@ -24,9 +23,6 @@ export async function generateMetadata() {
 export default async function Countries() {
   const i18n = await useI18n();
   const host = await useHost();
-  const isWindows =
-    new UAParser((await headers()).get('user-agent')).getOS().name ===
-    'Windows';
 
   logAccess(host('/countries'));
 
@@ -54,17 +50,8 @@ export default async function Countries() {
               className={styles.country}
               prefetch={false}
             >
-              <div className={styles.country_flag}>
-                {isWindows ? (
-                  <img
-                    src={host('/flags/' + c.slug + '.png')}
-                    alt={i18n(c.name)}
-                    width={30}
-                    height={30}
-                  />
-                ) : (
-                  c.flag
-                )}
+              <div className={'country-emoji-flag ' + styles.country_flag}>
+                {c.flag}
               </div>
               <span>{i18n(c.name)}</span>
             </Link>

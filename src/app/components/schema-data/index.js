@@ -14,7 +14,7 @@ export default async function SchemaData({
   jsonLdExtra = {},
 }) {
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   const i18n = await useI18n();
 
   const { title, description, hashtags, locationDescription, embedVideo } =

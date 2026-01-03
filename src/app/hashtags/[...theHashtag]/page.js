@@ -17,7 +17,6 @@ import logAccess from '@/app/utils/log-access';
 import getSort from '@/app/utils/get-sort';
 import StructuredBreadcrumbs from '@/app/components/structured-breadcrumbs';
 import defaultMetadata from '@/app/utils/default-metadata';
-import { headers } from 'next/headers';
 import getItemsPagination from '@/app/utils/get-items-pagination';
 import expandPosts from '@/app/utils/expand-posts';
 import SortPicker from '@/app/components/sort-picker';
@@ -47,7 +46,7 @@ export async function generateMetadata({
   const i18n = await useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   let { hashtag, page, expandGalleries, isWebStories } =
     getHashtagDataFromRoute(theHashtag, searchParams);
@@ -94,10 +93,7 @@ export async function generateMetadata({
 
     if (hashtagAlternate) {
       permanentRedirect(
-        (headers().get('x-pathname').includes('/webstories')
-          ? '/webstories'
-          : '') +
-          '/hashtags/' +
+        '/hashtags/' +
           (isBR && hashtagAlternate.name_pt
             ? hashtagAlternate.name_pt
             : hashtagAlternate.name)
@@ -114,17 +110,11 @@ export async function generateMetadata({
   }
 
   if (finalHashtag.is_city && finalHashtag?.metadata?.city_slug) {
-    const hasWebStories = (await headers())
-      .get('x-pathname')
-      .includes('/webstories');
-
     permanentRedirect(
-      (hasWebStories ? '/webstories' : '') +
-        '/countries/' +
+      '/countries/' +
         finalHashtag.metadata.country_slug +
         '/cities/' +
-        finalHashtag.metadata.city_slug +
-        (hasWebStories ? '/stories' : '')
+        finalHashtag.metadata.city_slug
     );
   }
 
@@ -201,7 +191,7 @@ export default async function Country({
 
   const i18n = await useI18n();
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   const editMode = await useEditMode(searchParams);
 
   let { hashtag, page, expandGalleries, isWebStories, sort } =

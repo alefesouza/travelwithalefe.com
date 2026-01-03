@@ -11,8 +11,6 @@ import Pagination from '@/app/components/pagination';
 import getMetadata from '@/app/utils/get-metadata';
 import defaultMetadata from '@/app/utils/default-metadata';
 import logAccess from '@/app/utils/log-access';
-import { headers } from 'next/headers';
-import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 import getTypePath from '@/app/utils/get-type-path';
 import getTypeLabel from '@/app/utils/get-type-label';
@@ -65,27 +63,8 @@ export async function generateMetadata({ params: paramsPromise }) {
 
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   const i18n = await useI18n();
-  const headerList = await headers();
-
-  const cityPath = '/countries/' + country + '/cities/' + city;
-
-  if (
-    headerList.get('x-pathname').includes('/posts/') &&
-    media[0].includes(city + '-')
-  ) {
-    const split = media[0].split('-');
-    let type = split[1];
-
-    if (type === 'short') {
-      type = 'short-video';
-    }
-
-    const typePath = getTypePath(type);
-
-    redirect(cityPath + '/' + typePath + '/' + split[split.length - 1]);
-  }
 
   const countryData = getCountry([country, 'cities', city], {});
 
@@ -138,10 +117,7 @@ export default async function MediaPage({
 
   const i18n = await useI18n();
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
-  const isWindows =
-    new UAParser((await headers()).get('user-agent')).getOS().name ===
-    'Windows';
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   const editMode = await useEditMode(searchParams);
 
   validateCountryCity(country, city);
@@ -284,7 +260,6 @@ export default async function MediaPage({
       }}
     >
       <h2
-        className={isWindows ? 'windows-header' : null}
         style={{
           justifyContent:
             media[1] || theMedia.type === 'story' ? 'center' : null,
@@ -308,16 +283,7 @@ export default async function MediaPage({
         >
           {i18n(countryData.name)}
         </Link>{' '}
-        {isWindows ? (
-          <img
-            src={host('/flags/' + countryData.slug + '.png')}
-            alt={i18n(countryData.name)}
-            width={26}
-            height={26}
-          />
-        ) : (
-          countryData.flag
-        )}
+        <span className="country-emoji-flag">{countryData.flag}</span>
       </h2>
       <div>
         {expandDate(theCity.start, isBR)} - {expandDate(theCity.end, isBR)}

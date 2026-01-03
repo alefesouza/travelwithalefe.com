@@ -18,7 +18,6 @@ import logAccess from '@/app/utils/log-access';
 import getSort from '@/app/utils/get-sort';
 import StructuredBreadcrumbs from '@/app/components/structured-breadcrumbs';
 import defaultMetadata from '@/app/utils/default-metadata';
-import { headers } from 'next/headers';
 import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 import expandPosts from '@/app/utils/expand-posts';
@@ -58,7 +57,7 @@ export async function generateMetadata({
   const i18n = await useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   let { page, location, isWebStories } = getLocationDataFromRoute(
     theLocation,
@@ -229,10 +228,7 @@ export default async function Country({
 
   const i18n = await useI18n();
   const host = await useHost();
-  const isBR = host().includes('viajarcomale.com.br');
-  const isWindows =
-    new UAParser((await headers()).get('user-agent')).getOS().name ===
-    'Windows';
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   const editMode = await useEditMode(searchParams);
 
   let { page, expandGalleries, sort, location, isWebStories } =
@@ -498,10 +494,7 @@ export default async function Country({
       </div>
 
       <div className="container-fluid">
-        <h2
-          className={isWindows ? 'windows-header' : null}
-          style={{ marginBottom: 0 }}
-        >
+        <h2 style={{ marginBottom: 0 }}>
           {isBR && theMedia.name_pt ? theMedia.name_pt : theMedia.name}
           {theMedia.alternative_names &&
             ' (' + theMedia.alternative_names.join(', ') + ')'}{' '}
@@ -519,16 +512,7 @@ export default async function Country({
           >
             {i18n(countryData.name)}
           </Link>{' '}
-          {isWindows ? (
-            <img
-              src={host('/flags/' + countryData.slug + '.png')}
-              alt={i18n(countryData.name)}
-              width={26}
-              height={26}
-            />
-          ) : (
-            countryData.flag
-          )}
+          <span className="country-emoji-flag">{countryData.flag}</span>
         </h2>
 
         <div>

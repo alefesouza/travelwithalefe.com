@@ -1,5 +1,5 @@
 import { getFirestore } from 'firebase-admin/firestore';
-import { headers } from 'next/headers';
+// import { headers } from 'next/headers';
 
 /**
  * Fetch data from cache or generate new cache
@@ -17,7 +17,7 @@ export async function fetchWithCache(cacheRef, fetchCallback) {
     await db.doc(cacheRef).set({
       ...data,
       last_update: new Date().toISOString().split('T')[0],
-      user_agent: headers().get('user-agent'),
+      // user_agent: headers().get('user-agent'),
     });
 
     return data;

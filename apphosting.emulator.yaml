@@ -14,3 +14,5 @@ env:
     value: GTM-KG98M7XG
   - variable: NEXT_MAPS_API_KEY
     value: AIzaSyDHlaC0rNWLdOVdagruwlLTCGu6BajppZQ
+  - variable: NEXT_PUBLIC_LOCALE
+    value: en-US
