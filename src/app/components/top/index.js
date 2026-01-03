@@ -32,7 +32,14 @@ export default async function Top() {
           .map((c, i) => (
             <span key={i}>
               <Link href={getCountryLink(c)} key={c.name} prefetch={false}>
-                <span className="country-emoji-flag">{c.flag}</span>
+                <span
+                  className="country-emoji-flag"
+                  data-country-slug={c.slug}
+                  data-country-name={i18n(c.name)}
+                  suppressHydrationWarning
+                >
+                  {c.flag}
+                </span>
               </Link>
               {i % 14 === 0 && i > 0 && <br />}
             </span>

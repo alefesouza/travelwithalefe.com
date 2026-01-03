@@ -600,6 +600,20 @@ const pageDetection = {
       document.querySelector('header').appendChild(portugueseLanguageSwitcher);
     }
 
+    if (navigator.userAgentData.platform === 'Windows') {
+      document.querySelectorAll('.country-emoji-flag').forEach((item) => {
+        item.innerHTML = `
+          <img
+            src="/flags/${item.dataset.countrySlug}.png"
+            alt="${item.dataset.countryName}"
+            height="${window
+              .getComputedStyle(item, null)
+              .getPropertyValue('font-size')}"
+          />
+        `;
+      });
+    }
+
     const panoramaEl = document.querySelector('#panorama');
 
     if (panoramaEl) {

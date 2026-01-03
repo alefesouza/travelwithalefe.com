@@ -495,7 +495,14 @@ export default async function Country({
           >
             {i18n(countryData.name)}
           </Link>{' '}
-          <span className="country-emoji-flag">{countryData.flag}</span>
+          <span
+            className="country-emoji-flag"
+            data-country-slug={countryData.slug}
+            data-country-name={i18n(countryData.name)}
+            suppressHydrationWarning
+          >
+            {countryData.flag}
+          </span>
         </h2>
 
         <div>

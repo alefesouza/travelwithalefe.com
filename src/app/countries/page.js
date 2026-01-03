@@ -50,7 +50,12 @@ export default async function Countries() {
               className={styles.country}
               prefetch={false}
             >
-              <div className={'country-emoji-flag ' + styles.country_flag}>
+              <div
+                className={'country-emoji-flag ' + styles.country_flag}
+                data-country-slug={c.slug}
+                data-country-name={i18n(c.name)}
+                suppressHydrationWarning
+              >
                 {c.flag}
               </div>
               <span>{i18n(c.name)}</span>
