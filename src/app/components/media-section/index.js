@@ -11,7 +11,6 @@ export default function MediaSection({
   isBR,
   expandGalleries,
   editMode,
-  isRandom,
   page,
   paginationBase,
   pageNumber,
@@ -43,7 +42,7 @@ export default function MediaSection({
           <h3>{title}</h3>
         </div>
 
-        {!isRandom && pageNumber > 1 && (
+        {pageNumber > 1 && (
           <Pagination
             base={paginationBase}
             currentPage={Number(page) || 1}
@@ -77,20 +76,7 @@ export default function MediaSection({
           ))}
         </div>
 
-        {!useCache && isRandom && (
-          <div style={{ textAlign: 'center', marginTop: 30 }}>
-            <Link
-              href={`?sort=random${useCache ? '' : '&shuffle=' + newShuffle}`}
-              scroll={false}
-              prefetch={false}
-              className="shuffle"
-            >
-              <button className="btn btn-primary">{i18n('Shuffle')}</button>
-            </Link>
-          </div>
-        )}
-
-        {!isRandom && pageNumber > 1 && (
+        {pageNumber > 1 && (
           <div style={{ marginTop: 30 }}>
             <Pagination
               base={paginationBase}

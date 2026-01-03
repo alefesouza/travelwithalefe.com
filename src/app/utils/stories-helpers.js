@@ -137,7 +137,6 @@ export function expandPostsForWebStories(posts) {
  * @param {string} city
  * @param {boolean} isWebStories
  * @param {string} sort
- * @param {boolean} isRandom
  * @param {any} cache
  * @param {string} cacheRef
  * @returns {Promise<import('@/typings/media').Media[]>}
@@ -148,7 +147,6 @@ export async function fetchStories(
   city,
   isWebStories,
   sort,
-  isRandom,
   cache,
   cacheRef
 ) {
@@ -159,7 +157,7 @@ export async function fetchStories(
   const db = getFirestore();
 
   if (!cache.exists || isWebStories) {
-    const shouldCache = !isRandom && !isWebStories && !cache.exists;
+    const shouldCache = !isWebStories && !cache.exists;
     return fetchStoriesFromFirestore(
       db,
       country,

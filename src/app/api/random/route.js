@@ -5,6 +5,7 @@ import getTypePath from '@/app/utils/get-type-path';
 // Disable caching for this route
 export const dynamic = 'force-dynamic';
 export const revalidate = 0;
+export const dynamicParams = false;
 
 export async function GET() {
   // Get a random media from the cache
@@ -27,14 +28,18 @@ export async function GET() {
     randomMedia.city
   }/${getTypePath(randomMedia.type)}/${mediaId}`;
 
+  const headers = new Headers();
+  headers.append(
+    'Cache-Control',
+    'no-store, no-cache, must-revalidate, max-age=0'
+  );
+  headers.append('Pragma', 'no-cache');
+  headers.append('Expires', '0');
+
   return NextResponse.json(
     { url },
     {
-      headers: {
-        'Cache-Control': 'no-store, no-cache, must-revalidate, max-age=0',
-        Pragma: 'no-cache',
-        Expires: '0',
-      },
+      headers,
     }
   );
 }

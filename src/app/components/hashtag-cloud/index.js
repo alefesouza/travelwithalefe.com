@@ -7,12 +7,7 @@ import 'tippy.js/animations/scale.css';
 import { useState } from 'react';
 import { shuffleArray } from '@/app/utils/media-sorting';
 
-export default function HashtagCloud({
-  theHashtags,
-  isRandom,
-  shuffleText,
-  isAndroid,
-}) {
+export default function HashtagCloud({ theHashtags, isRandom, shuffleText }) {
   const [isLoading, setIsLoading] = useState(false);
   const [hashtags, setHashtags] = useState(theHashtags);
 

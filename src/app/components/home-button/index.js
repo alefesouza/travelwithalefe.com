@@ -8,6 +8,7 @@ export default function HomeButton({ text, url, image, subpage, ...props }) {
       className="list-group-item list-group-item-action"
       prefetch={false}
       rel={subpage ? null : 'me'}
+      suppressHydrationWarning
       {...props}
     >
       {image && <img src={image} alt={text} width={48} height={48} />}

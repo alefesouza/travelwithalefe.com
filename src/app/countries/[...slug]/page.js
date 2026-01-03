@@ -24,7 +24,7 @@ import { cachedCities, cachedCountries } from '@/app/utils/cache-data';
 import { cachedMedias } from '@/app/utils/cache-medias';
 import { theCachedLocations } from '@/app/utils/cache-locations';
 import { getDataFromRoute, getCountry } from '@/app/utils/route-helpers';
-import { sortMediaArrays, shuffleArray } from '@/app/utils/media-sorting';
+import { sortMediaArrays } from '@/app/utils/media-sorting';
 import {
   fetchMediasFromCache,
   fetchMediasFromFirestore,
@@ -216,8 +216,6 @@ export default async function Country({
     return notFound();
   }
 
-  const isRandom = searchParams.sort === 'random';
-
   const totalPhotos = city
     ? cityData[city]?.totals?.posts
     : countryData?.totals?.posts;
@@ -244,7 +242,6 @@ export default async function Country({
       sort,
       totalPhotos,
       totalMapsPhotos,
-      isRandom,
       cacheRef,
       editMode
     );
@@ -296,29 +293,6 @@ export default async function Country({
     ].length === 0
   ) {
     return notFound();
-  }
-
-  // Handle random sorting
-  const index = city ? 'city_index' : 'country_index';
-
-  if (isRandom) {
-    if (USE_CACHE) {
-      instagramHighLights = shuffleArray(instagramHighLights);
-      shortVideos = shuffleArray(shortVideos);
-      youtubeVideos = shuffleArray(youtubeVideos);
-      _360photos = shuffleArray(_360photos);
-      instagramPhotos = shuffleArray(instagramPhotos);
-      mapsPhotos = shuffleArray(mapsPhotos);
-      sort = 'random';
-    } else {
-      instagramHighLights = shuffleArray(instagramHighLights);
-      shortVideos = shuffleArray(shortVideos);
-      youtubeVideos = shuffleArray(youtubeVideos);
-      _360photos = shuffleArray(_360photos);
-      // For photos and maps, we need the randomArray from fetcher
-      // This is a limitation of the current refactor
-      sort = 'random';
-    }
   }
 
   // Expand galleries if needed
@@ -502,7 +476,6 @@ export default async function Country({
           sort={sort}
           paginationBase={paginationBase}
           type="stories"
-          isRandom={isRandom}
           newShuffle={newShuffle}
           useCache={USE_CACHE}
         />
@@ -526,7 +499,6 @@ export default async function Country({
             sort={sort}
             paginationBase={paginationBase}
             type="short"
-            isRandom={isRandom}
             newShuffle={newShuffle}
             useCache={USE_CACHE}
           />
@@ -547,7 +519,6 @@ export default async function Country({
             sort={sort}
             paginationBase={paginationBase}
             type="youtube"
-            isRandom={isRandom}
             newShuffle={newShuffle}
             useCache={USE_CACHE}
           />
@@ -568,7 +539,6 @@ export default async function Country({
             sort={sort}
             paginationBase={paginationBase}
             type="360photos"
-            isRandom={isRandom}
             newShuffle={newShuffle}
             useCache={USE_CACHE}
           />
@@ -589,7 +559,6 @@ export default async function Country({
             sort={sort}
             paginationBase={paginationBase}
             type="photos"
-            isRandom={isRandom}
             newShuffle={newShuffle}
             useCache={USE_CACHE}
           />
@@ -602,7 +571,6 @@ export default async function Country({
             isBR={isBR}
             expandGalleries={expandGalleries}
             editMode={editMode}
-            isRandom={isRandom}
             page={page}
             paginationBase={paginationBase}
             pageNumber={pageNumber}
@@ -622,7 +590,6 @@ export default async function Country({
             sort={sort}
             paginationBase={paginationBase}
             type="maps"
-            isRandom={isRandom}
             newShuffle={newShuffle}
             useCache={USE_CACHE}
           />
@@ -635,7 +602,6 @@ export default async function Country({
             isBR={isBR}
             expandGalleries={expandGalleries}
             editMode={editMode}
-            isRandom={isRandom}
             page={page}
             paginationBase={paginationBase}
             pageNumber={pageMapsNumber}

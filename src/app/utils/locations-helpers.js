@@ -104,7 +104,6 @@ async function fetchLocationMediaFromFirestore(
  * @param {string[]} possibleCities
  * @param {string} location
  * @param {string} sort
- * @param {boolean} isRandom
  * @param {boolean} isWebStories
  * @param {string} city
  * @param {boolean} editMode
@@ -116,7 +115,6 @@ export async function fetchLocationMedia(
   possibleCities,
   location,
   sort,
-  isRandom,
   isWebStories,
   city,
   editMode
@@ -139,7 +137,7 @@ export async function fetchLocationMedia(
   }
 
   if (!cache.exists || isWebStories) {
-    const shouldCache = !isRandom && !cache.exists && !isWebStories;
+    const shouldCache = !cache.exists && !isWebStories;
     return fetchLocationMediaFromFirestore(
       db,
       possibleCities,

@@ -194,7 +194,6 @@ async function fetchHashtagMediaFromFirestore(
  * @param {boolean} useCache
  * @param {string} hashtag
  * @param {string} sort
- * @param {boolean} isRandom
  * @param {boolean} isWebStories
  * @param {boolean} editMode
  * @returns {Promise<any[]>}
@@ -203,7 +202,6 @@ export async function fetchHashtagMedia(
   useCache,
   hashtag,
   sort,
-  isRandom,
   isWebStories,
   editMode
 ) {
@@ -225,7 +223,7 @@ export async function fetchHashtagMedia(
   }
 
   if (!cache.exists || isWebStories) {
-    const shouldCache = !isRandom && !cache.exists;
+    const shouldCache = !cache.exists;
     return fetchHashtagMediaFromFirestore(
       db,
       hashtag,

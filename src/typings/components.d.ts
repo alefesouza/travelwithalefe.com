@@ -7,10 +7,9 @@ import { Location } from './location';
 
 export interface SortPickerProps {
   i18n: (key: string) => string;
-  sort: 'asc' | 'desc' | 'random';
+  sort: 'asc' | 'desc';
   paginationBase: string;
   type: string;
-  isRandom: boolean;
   newShuffle: number | null;
   useCache: boolean;
 }
@@ -26,7 +25,7 @@ export interface CityTabsProps {
   cities: City[];
   currentCity: string | null;
   expandGalleries: boolean;
-  sort: 'asc' | 'desc' | 'random';
+  sort: 'asc' | 'desc';
   i18n: (key: string) => string;
   isBR: boolean;
 }
@@ -44,7 +43,6 @@ export interface MediaSectionProps {
   isBR: boolean;
   expandGalleries: boolean;
   editMode: boolean;
-  isRandom: boolean;
   page: number;
   paginationBase: string;
   pageNumber: number;
@@ -52,7 +50,7 @@ export interface MediaSectionProps {
   i18n: (key: string) => string;
   country: string;
   city: string | null;
-  sort: 'asc' | 'desc' | 'random';
+  sort: 'asc' | 'desc';
   newShuffle: number | null;
   useCache: boolean;
   label?: string | null;

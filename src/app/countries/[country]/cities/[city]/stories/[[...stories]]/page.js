@@ -19,17 +19,10 @@ import defaultMetadata from '@/app/utils/default-metadata';
 import MediaPage, {
   generateMetadata as generateMediaMetadata,
 } from '../../posts/[...media]/page';
-import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 import useEditMode from '@/app/utils/use-edit-mode';
-import countries from '@/app/utils/countries';
 import { cachedMedias } from '@/app/utils/cache-medias';
 import { getCountry } from '@/app/utils/route-helpers';
-import {
-  sortByDateDesc,
-  sortByDateAsc,
-  shuffleArray,
-} from '@/app/utils/media-sorting';
 import { isBrazilianHost } from '@/app/utils/locale-helpers';
 import {
   fetchStories,
@@ -199,30 +192,18 @@ export default async function Highlight({
     }
   }
 
-  let isRandom = sort === 'random';
-
-  if (isRandom) {
-    sort = 'desc';
-  }
-
   let photos = await fetchStories(
     USE_CACHE,
     country,
     city,
     isWebStories,
     sort,
-    isRandom,
     cache,
     cacheRef
   );
 
   if (!photos.length) {
     return notFound();
-  }
-
-  if (isRandom) {
-    photos = shuffleArray(photos);
-    sort = 'random';
   }
 
   logAccess(
@@ -402,9 +383,9 @@ export default async function Highlight({
             sort={sort}
             paginationBase={basePath}
             type="stories"
-            isRandom={isRandom}
             newShuffle={newShuffle}
             useCache={USE_CACHE}
+            reverse
           />
         )}
 

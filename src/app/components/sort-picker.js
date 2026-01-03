@@ -8,23 +8,20 @@ export default function SortPicker({
   sort,
   paginationBase,
   type,
-  isRandom,
-  newShuffle,
-  useCache,
+  reverse = false,
 }) {
   const sortOptions = [
     { name: 'Latest', value: 'desc' },
     { name: 'Oldest', value: 'asc' },
-    { name: 'Random', value: 'random' },
   ];
 
   const getHref = (optionValue) => {
     const basePath = paginationBase.split('?')[0].replace('/page/{page}', '');
 
-    if (optionValue === 'random') {
-      return sort === 'random'
+    if (reverse) {
+      return optionValue !== 'asc'
         ? basePath + '?sort=' + optionValue
-        : basePath + '?sort=random';
+        : basePath;
     }
 
     return optionValue !== 'desc'
@@ -38,7 +35,12 @@ export default function SortPicker({
         <span>{i18n('Sorting')}:</span>
 
         {sortOptions.map((option) => (
-          <Link key={option.value} href={getHref(option.value)} scroll={false} prefetch={false}>
+          <Link
+            key={option.value}
+            href={getHref(option.value)}
+            scroll={false}
+            prefetch={false}
+          >
             <label>
               <input
                 type="radio"
@@ -52,19 +54,6 @@ export default function SortPicker({
           </Link>
         ))}
       </div>
-
-      {isRandom && (
-        <div style={{ textAlign: 'center', marginTop: 18 }}>
-          <Link
-            href={`?sort=random${useCache ? '' : '&shuffle=' + newShuffle}`}
-            scroll={false}
-            prefetch={false}
-            className="shuffle"
-          >
-            <button className="btn btn-primary">{i18n('Shuffle')}</button>
-          </Link>
-        </div>
-      )}
     </div>
   );
 }

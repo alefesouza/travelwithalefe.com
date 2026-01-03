@@ -32,7 +32,6 @@ import {
   fetchHashtagCover,
   fetchHashtagMedia,
 } from '@/app/utils/hashtag-page-helpers';
-import { shuffleArray } from '@/app/utils/media-sorting';
 import RandomPostButton from '@/app/components/random-post-button';
 
 export async function generateMetadata({
@@ -217,17 +216,10 @@ export default async function Country({
 
   hashtag = finalHashtag.name;
 
-  let isRandom = sort === 'random';
-
-  if (isRandom) {
-    sort = 'desc';
-  }
-
   let photos = await fetchHashtagMedia(
     USE_CACHE,
     hashtag,
     sort,
-    isRandom,
     isWebStories,
     editMode
   );
@@ -245,12 +237,6 @@ export default async function Country({
     } else {
       return notFound();
     }
-  }
-
-  if (isRandom) {
-    photos = shuffleArray(photos);
-
-    sort = 'random';
   }
 
   let newShuffle = randomIntFromInterval(1, 15);
@@ -382,7 +368,6 @@ export default async function Country({
           sort={sort}
           paginationBase={paginationBase}
           type="360photos"
-          isRandom={isRandom}
           newShuffle={newShuffle}
           useCache={USE_CACHE}
         />
@@ -395,7 +380,7 @@ export default async function Country({
           is360Photos
           editMode={editMode}
         >
-          {!isRandom && _360photosPageNumber > 1 && (
+          {_360photosPageNumber > 1 && (
             <Pagination
               base={paginationBase}
               currentPage={Number(page) || 1}
@@ -418,7 +403,6 @@ export default async function Country({
           sort={sort}
           paginationBase={paginationBase}
           type="youtube"
-          isRandom={isRandom}
           newShuffle={newShuffle}
           useCache={USE_CACHE}
         />
@@ -431,7 +415,7 @@ export default async function Country({
           isYouTubeVideos
           editMode={editMode}
         >
-          {!isRandom && videosPageNumber > 1 && (
+          {videosPageNumber > 1 && (
             <Pagination
               base={paginationBase}
               currentPage={Number(page) || 1}
@@ -531,7 +515,6 @@ export default async function Country({
             sort={sort}
             paginationBase={paginationBase}
             type="stories"
-            isRandom={isRandom}
             newShuffle={newShuffle}
             useCache={USE_CACHE}
           />
@@ -546,7 +529,7 @@ export default async function Country({
             sort={sort}
             editMode={editMode}
           >
-            {!isRandom && storiesPageNumber > 1 && (
+            {storiesPageNumber > 1 && (
               <Pagination
                 base={paginationBase}
                 currentPage={Number(page) || 1}
@@ -576,7 +559,6 @@ export default async function Country({
             sort={sort}
             paginationBase={paginationBase}
             type="short"
-            isRandom={isRandom}
             newShuffle={newShuffle}
             useCache={USE_CACHE}
           />
@@ -589,7 +571,7 @@ export default async function Country({
             isShortVideos
             editMode={editMode}
           >
-            {!isRandom && shortsPageNumber > 1 && (
+            {shortsPageNumber > 1 && (
               <Pagination
                 base={paginationBase}
                 currentPage={Number(page) || 1}
@@ -612,7 +594,6 @@ export default async function Country({
             sort={sort}
             paginationBase={paginationBase}
             type="photos"
-            isRandom={isRandom}
             newShuffle={newShuffle}
             useCache={USE_CACHE}
           />
@@ -625,7 +606,7 @@ export default async function Country({
                 <h3>{i18n('Posts')}</h3>
               </div>
 
-              {!isRandom && postsPageNumber > 1 && (
+              {postsPageNumber > 1 && (
                 <Pagination
                   base={paginationBase}
                   currentPage={Number(page) || 1}
@@ -676,7 +657,6 @@ export default async function Country({
             sort={sort}
             paginationBase={paginationBase}
             type="maps"
-            isRandom={isRandom}
             newShuffle={newShuffle}
             useCache={USE_CACHE}
           />
@@ -689,7 +669,7 @@ export default async function Country({
                 <h3>{i18n('Places Photos')}</h3>
               </div>
 
-              {!isRandom && mapsPageNumber > 1 && (
+              {mapsPageNumber > 1 && (
                 <Pagination
                   base={paginationBase}
                   currentPage={Number(page) || 1}

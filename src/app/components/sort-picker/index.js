@@ -12,7 +12,6 @@ export default async function SortPicker({ type, basePath, sort }) {
         {[
           { name: 'Latest', value: 'desc' },
           { name: 'Oldest', value: 'asc' },
-          { name: 'Random', value: 'random' },
         ].map((o) => (
           <Link
             key={o}

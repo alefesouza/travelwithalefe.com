@@ -1,6 +1,5 @@
 import { cachedMedias } from './cache-medias';
 import { ITEMS_PER_PAGE } from './constants';
-import { shuffleArray } from './media-sorting';
 
 /**
  * Fetch medias from cache
@@ -47,7 +46,6 @@ export function fetchMediasFromCache(country, city, page) {
  * @param {'asc' | 'desc'} sort
  * @param {number} totalPhotos
  * @param {number} totalMapsPhotos
- * @param {boolean} isRandom
  * @param {string} cacheRef
  * @param {boolean} editMode
  * @returns {Promise<{instagramHighLights: import('@/typings/media').Media[], shortVideos: import('@/typings/media').Media[], youtubeVideos: import('@/typings/media').Media[], _360photos: import('@/typings/media').Media[], instagramPhotos: import('@/typings/media').Media[], mapsPhotos: import('@/typings/media').Media[]}>}
@@ -60,7 +58,6 @@ export async function fetchMediasFromFirestore(
   sort,
   totalPhotos,
   totalMapsPhotos,
-  isRandom,
   cacheRef,
   editMode
 ) {
@@ -72,7 +69,7 @@ export async function fetchMediasFromFirestore(
     cache = await db.doc(cacheRef).get();
   }
 
-  if (cache.exists && !isRandom) {
+  if (cache.exists) {
     const cacheData = cache.data();
     return {
       instagramHighLights: cacheData.instagramHighLights,
@@ -94,16 +91,6 @@ export async function fetchMediasFromFirestore(
     mapsPhotos: [],
   };
 
-  let randomArray = [];
-  let randomMapsArray = [];
-
-  if (isRandom) {
-    const array = Array.from(Array(totalPhotos).keys());
-    randomArray = shuffleArray(array).slice(0, ITEMS_PER_PAGE);
-    const arrayMaps = Array.from(Array(totalMapsPhotos).keys());
-    randomMapsArray = shuffleArray(arrayMaps).slice(0, ITEMS_PER_PAGE);
-  }
-
   // Fetch highlights, videos, etc. for page 1
   if (page === 1 && !cache.exists) {
     const [highlights, shorts, youtube, photos360] = await Promise.all([
@@ -120,18 +107,10 @@ export async function fetchMediasFromFirestore(
   }
 
   // Fetch posts and maps
-  if (!cache.exists || isRandom) {
+  if (!cache.exists) {
     const [posts, maps] = await Promise.all([
-      fetchPosts(db, country, city, sort, isRandom, randomArray, totalPhotos),
-      fetchMaps(
-        db,
-        country,
-        city,
-        sort,
-        isRandom,
-        randomMapsArray,
-        totalMapsPhotos
-      ),
+      fetchPosts(db, country, city, sort, totalPhotos),
+      fetchMaps(db, country, city, sort, totalMapsPhotos),
     ]);
 
     result.instagramPhotos = posts;
@@ -139,7 +118,7 @@ export async function fetchMediasFromFirestore(
   }
 
   // Cache the results
-  if (!isRandom && !cache.exists) {
+  if (!cache.exists) {
     await db.doc(cacheRef).set({
       ...result,
       last_update: new Date().toISOString().split('T')[0],
@@ -251,15 +230,7 @@ async function fetch360Photos(db, country, city, sort) {
   return snapshotToArray(snapshot);
 }
 
-async function fetchPosts(
-  db,
-  country,
-  city,
-  sort,
-  isRandom,
-  randomArray,
-  totalPhotos
-) {
+async function fetchPosts(db, country, city, sort, totalPhotos) {
   if (totalPhotos === 0) return [];
 
   let query;
@@ -280,25 +251,13 @@ async function fetchPosts(
       .where('type', '==', 'post');
   }
 
-  if (isRandom && totalPhotos > 0) {
-    query = query.where(indexField, 'in', randomArray);
-  } else {
-    query = query.orderBy(indexField, sort).limit(ITEMS_PER_PAGE);
-  }
+  query = query.orderBy(indexField, sort).limit(ITEMS_PER_PAGE);
 
   const snapshot = await query.get();
   return snapshotToArray(snapshot);
 }
 
-async function fetchMaps(
-  db,
-  country,
-  city,
-  sort,
-  isRandom,
-  randomArray,
-  totalMapsPhotos
-) {
+async function fetchMaps(db, country, city, sort, totalMapsPhotos) {
   if (totalMapsPhotos === 0) return [];
 
   let query;
@@ -319,11 +278,7 @@ async function fetchMaps(
       .where('type', '==', 'maps');
   }
 
-  if (isRandom && totalMapsPhotos > 0) {
-    query = query.where(indexField, 'in', randomArray);
-  } else {
-    query = query.orderBy(indexField, sort).limit(ITEMS_PER_PAGE);
-  }
+  query = query.orderBy(indexField, sort).limit(ITEMS_PER_PAGE);
 
   const snapshot = await query.get();
   return snapshotToArray(snapshot);

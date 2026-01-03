@@ -26,19 +26,6 @@ export function expandMediaGalleries(medias) {
 }
 
 /**
- * Apply random sorting to medias
- * @param {import('@/typings/media').Media[]} medias
- * @param {number[]} randomArray
- * @param {string} index
- * @returns {import('@/typings/media').Media[]}
- */
-export function applyRandomSort(medias, randomArray, index) {
-  return medias.sort(
-    (a, b) => randomArray.indexOf(a[index]) - randomArray.indexOf(b[index])
-  );
-}
-
-/**
  * Paginate media array
  * @param {import('@/typings/media').Media[]} medias
  * @param {number} page
