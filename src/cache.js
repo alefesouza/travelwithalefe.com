@@ -1,4 +1,4 @@
-import { NetworkFirst, StaleWhileRevalidate } from 'serwist';
+import { NetworkFirst, StaleWhileRevalidate, NetworkOnly } from 'serwist';
 
 // Workbox RuntimeCaching config: https://developers.google.com/web/tools/workbox/reference-docs/latest/module-workbox-build#.RuntimeCachingEntry
 export default [
@@ -61,6 +61,10 @@ export default [
         maxAgeSeconds: 24 * 60 * 60, // 24 hours
       },
     }),
+  },
+  {
+    matcher: '/api/random',
+    handler: new NetworkOnly(),
   },
   {
     matcher: ({ url }) => {
