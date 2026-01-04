@@ -470,6 +470,8 @@ const pageDetection = {
       main.style.paddingBottom = pathname === '/videos' ? '0px' : '';
       document.querySelector('.mobile-navbar').style.display = 'none';
       document.querySelector('header').style.display = 'none';
+
+      window.videosClicked = true;
     } else {
       main.style.paddingTop = '';
       main.style.paddingBottom = '';

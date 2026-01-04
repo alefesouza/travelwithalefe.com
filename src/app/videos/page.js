@@ -5,7 +5,6 @@ import { SITE_NAME } from '../utils/constants';
 import defaultMetadata from '../utils/default-metadata';
 import logAccess from '../utils/log-access';
 import VideoFeed from '../components/video-feed';
-import { shuffleArray } from '../utils/media-sorting';
 import getRandomVideos from '../utils/get-random-videos';
 
 export function generateMetadata() {
@@ -32,6 +31,7 @@ export default async function Videos() {
     <VideoFeed
       openText={i18n('Open')}
       swipeUpText={i18n('Swipe up')}
+      tapToUnmuteText={i18n('Tap to unmute')}
       initialVideos={videos}
     />
   );

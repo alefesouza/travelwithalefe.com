@@ -20,6 +20,8 @@ export const VerticalFeed = ({
   scrollBehavior = 'smooth',
   renderItemOverlay,
   swipeUpComponent,
+  isIOS,
+  currentVideoId,
 }) => {
   const containerRef = useRef(null);
   const [loadingStates, setLoadingStates] = useState({});
@@ -48,12 +50,16 @@ export const VerticalFeed = ({
             const video = entry.target.querySelector('video');
 
             if (video) {
-              if (navigator.userActivation?.hasBeenActive) {
-                video.removeAttribute('muted');
-                video.muted = false;
-              } else {
+              if (
+                (isIOS && !window.videosClicked) ||
+                (typeof navigator !== 'undefined' &&
+                  !navigator.userActivation?.hasBeenActive)
+              ) {
                 video.setAttribute('muted', 'true');
                 video.muted = true;
+              } else {
+                video.removeAttribute('muted');
+                video.muted = false;
               }
 
               video.play().catch((error) => {
@@ -143,8 +149,8 @@ export const VerticalFeed = ({
           <video
             src={item.src}
             muted={item.muted ?? true}
-            playsInline={item.playsInline ?? true}
-            loop={item.loop ?? true}
+            playsInline
+            loop
             onLoadedData={() => handleMediaLoad(index)}
             onError={() => handleMediaError(index)}
             onClick={(event) => {
@@ -160,6 +166,7 @@ export const VerticalFeed = ({
               objectFit: 'cover',
               display: hasError ? 'none' : 'block',
             }}
+            data-current={item.id === currentVideoId}
             suppressHydrationWarning
           />
           {renderItemOverlay && renderItemOverlay(item, index)}

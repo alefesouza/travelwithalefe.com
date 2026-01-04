@@ -149,6 +149,7 @@ const langs = {
     'Video Feed': 'Feed de vídeos',
     "Travel with Alefe's video feed.": 'Feed de vídeos do Viajar com Alê.',
     'Swipe up': 'Arraste para cima',
+    'Tap to unmute': 'Toque para ativar o som',
 
     // Countries
     Brazil: 'Brasil',
