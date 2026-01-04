@@ -46,7 +46,16 @@ export const VerticalFeed = ({
 
           if (entry.isIntersecting) {
             const video = entry.target.querySelector('video');
+
             if (video) {
+              if (navigator.userActivation?.hasBeenActive) {
+                video.removeAttribute('muted');
+                video.muted = false;
+              } else {
+                video.setAttribute('muted', 'true');
+                video.muted = true;
+              }
+
               video.play().catch((error) => {
                 console.error('Error playing video:', error);
               });
@@ -135,11 +144,16 @@ export const VerticalFeed = ({
             src={item.src}
             muted={item.muted ?? true}
             playsInline={item.playsInline ?? true}
-            controls={item.controls ?? false}
-            autoPlay={item.autoPlay ?? true}
-            loop={item.loop ?? false}
+            loop={item.loop ?? true}
             onLoadedData={() => handleMediaLoad(index)}
             onError={() => handleMediaError(index)}
+            onClick={(event) => {
+              event.target.setAttribute('controls', 'true');
+              event.target.removeAttribute('muted');
+              event.target.muted = false;
+            }}
+            id={item.id}
+            poster={item.src.replace('.mp4', '-thumb.png')}
             style={{
               width: '100%',
               height: '100%',

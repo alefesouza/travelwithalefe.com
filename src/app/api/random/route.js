@@ -1,5 +1,4 @@
 import { NextResponse } from 'next/server';
-import getTypePath from '@/app/utils/get-type-path';
 import { getFirestore } from 'firebase-admin/firestore';
 import { customInitApp } from '../../firebase';
 import mediaToUrl from '@/app/utils/media-to-url';

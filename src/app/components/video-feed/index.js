@@ -6,27 +6,18 @@ import { VerticalFeed } from '../vertical-feed';
 import styles from './style.module.css';
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { FILE_DOMAIN } from '@/app/utils/constants';
+import Link from 'next/link';
 
 export default function VideoFeed({ openText, swipeUpText, initialVideos }) {
-  const [userInteracted, setUserInteracted] = useState(
-    typeof navigator !== 'undefined' && navigator.userActivation?.hasBeenActive
-  );
   const [showSwipeUp, setShowSwipeUp] = useState(true);
   const [videos, setVideos] = useState(
     initialVideos.map((video) => ({
       ...video,
-      src: video.file,
-      controls: true,
-      autoPlay: true,
-      muted: !(
-        typeof navigator !== 'undefined' &&
-        navigator.userActivation?.hasBeenActive
-      ),
-      loop: true,
+      src: FILE_DOMAIN + video.file,
     }))
   );
   const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -38,17 +29,6 @@ export default function VideoFeed({ openText, swipeUpText, initialVideos }) {
   const handleItemVisible = async (item, index) => {
     if (index === 1) {
       setShowSwipeUp(false);
-    }
-
-    if (!userInteracted && navigator.userActivation.hasBeenActive) {
-      setUserInteracted(true);
-      setVideos((prevVideos) =>
-        prevVideos.map((video) => ({
-          ...video,
-          autoPlay: true,
-          muted: false,
-        }))
-      );
     }
 
     if (index !== videos.length - 2) {
@@ -65,16 +45,10 @@ export default function VideoFeed({ openText, swipeUpText, initialVideos }) {
     const json = await response.json();
     const newVideos = json.videos;
 
-    const { hasBeenActive } = navigator.userActivation;
-
     setVideos((prevVideos) =>
       [...prevVideos, ...newVideos].map((video) => ({
         ...video,
-        src: video.file,
-        controls: true,
-        autoPlay: true,
-        muted: !hasBeenActive,
-        loop: true,
+        src: FILE_DOMAIN + video.file,
       }))
     );
 
@@ -103,7 +77,7 @@ export default function VideoFeed({ openText, swipeUpText, initialVideos }) {
             backdropFilter: 'blur(4px)',
           }}
         >
-          <button
+          <Link
             style={{
               background: 'none',
               border: 'none',
@@ -114,12 +88,10 @@ export default function VideoFeed({ openText, swipeUpText, initialVideos }) {
               alignItems: 'center',
               gap: '4px',
             }}
-            onClick={() => {
-              router.push(mediaToUrl(item));
-            }}
+            href={mediaToUrl(item)}
           >
             <span style={{ color: 'white', fontSize: '14px' }}>{openText}</span>
-          </button>
+          </Link>
         </div>
       </div>
     );
