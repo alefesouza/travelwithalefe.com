@@ -31,7 +31,13 @@ export default async function Videos() {
     <VideoFeed
       openText={i18n('Open')}
       swipeUpText={i18n('Swipe up')}
-      tapToUnmuteText={i18n('Tap to unmute')}
+      tapToUnmuteText={i18n('Toque para ativar o som')}
+      iOSVideoFeedWarningMessage={i18n(
+        'Due to iOS limitations, the following videos will be initially muted as you directly accessed this page. You can have an unmuted experience by accessing the home page and clicking "Videos" on the navbar. Do you want to try it now?'
+      )}
+      iOSVideoFeedWarningMessage2={i18n(
+        'Due to iOS limitations, the following videos will be initially muted, please tap the video if you want to unmute it.'
+      )}
       initialVideos={videos}
     />
   );

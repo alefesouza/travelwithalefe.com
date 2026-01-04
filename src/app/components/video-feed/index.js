@@ -4,7 +4,7 @@ import mediaToUrl from '@/app/utils/media-to-url';
 import { VerticalFeed } from '../vertical-feed';
 
 import styles from './style.module.css';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { FILE_DOMAIN } from '@/app/utils/constants';
 import Link from 'next/link';
 
@@ -12,6 +12,8 @@ export default function VideoFeed({
   openText,
   swipeUpText,
   tapToUnmuteText,
+  iOSVideoFeedWarningMessage,
+  iOSVideoFeedWarningMessage2,
   initialVideos,
 }) {
   const isIOS =
@@ -19,34 +21,27 @@ export default function VideoFeed({
     (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
       (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1));
 
+  const startMuted =
+    (typeof window !== 'undefined' && !window.navbarClicked) ||
+    (typeof navigator !== 'undefined' &&
+      !navigator.userActivation?.hasBeenActive);
+
   const [showSwipeUp, setShowSwipeUp] = useState(true);
-  const [showUnmuteButton, setShowUnmuteButton] = useState(
-    (isIOS && !window.videosClicked) ||
-      (typeof navigator !== 'undefined' &&
-        !navigator.userActivation?.hasBeenActive)
-  );
+  const [showUnmuteButton, setShowUnmuteButton] = useState(startMuted);
   const [videos, setVideos] = useState(
     initialVideos.map((video) => ({
       ...video,
       src: FILE_DOMAIN + video.file,
-      muted:
-        (isIOS && !window.videosClicked) ||
-        (typeof navigator !== 'undefined' &&
-          !navigator.userActivation?.hasBeenActive),
+      muted: startMuted,
       controls: false,
     }))
   );
   const [isLoading, setIsLoading] = useState(false);
-  const [currentVideoId, setCurrentVideoId] = useState(
-    initialVideos.length > 0 ? initialVideos[0].id : null
-  );
 
   const handleItemVisible = async (item, index) => {
     if (index !== 0) {
       setShowSwipeUp(false);
     }
-
-    setCurrentVideoId(item.id);
 
     if (index !== videos.length - 2) {
       return;
@@ -70,25 +65,6 @@ export default function VideoFeed({
     );
 
     setIsLoading(false);
-  };
-
-  const handleUnmute = () => {
-    setShowUnmuteButton(false);
-
-    const currentVideo = document.getElementById(currentVideoId);
-    if (currentVideo) {
-      currentVideo.muted = false;
-      currentVideo.setAttribute('controls', 'true');
-
-      setVideos((prevVideos) => {
-        return prevVideos.map((video) => {
-          if (video.id === currentVideoId) {
-            return { ...video, muted: false };
-          }
-          return video;
-        });
-      });
-    }
   };
 
   const renderVideoOverlay = (item, index) => {
@@ -135,7 +111,10 @@ export default function VideoFeed({
         </div>
 
         {index === 0 && showUnmuteButton && (
-          <div onClick={handleUnmute} className={styles.unmuteButtonContainer}>
+          <div
+            className={styles.unmuteButtonContainer}
+            suppressHydrationWarning
+          >
             <div className={styles.unmuteButton}>
               <span style={{ fontSize: '20px' }}>🔊</span>
               {tapToUnmuteText}
@@ -153,8 +132,9 @@ export default function VideoFeed({
       className={styles.video_feed}
       renderItemOverlay={renderVideoOverlay}
       isIOS={isIOS}
-      currentVideoId={currentVideoId}
       suppressHydrationWarning
+      iOSVideoFeedWarningMessage={iOSVideoFeedWarningMessage}
+      iOSVideoFeedWarningMessage2={iOSVideoFeedWarningMessage2}
       swipeUpComponent={
         showSwipeUp && (
           <div className={styles.swipeUpIndicator}>

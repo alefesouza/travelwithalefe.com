@@ -113,6 +113,8 @@ const navigation = {
     const navLinks = [...document.querySelectorAll('.navbar .nav-link')];
     navLinks.forEach((item) => item.parentElement.classList.remove('active'));
     this.parentElement.classList.add('active');
+
+    window.navbarClicked = true;
   },
 
   initNavbarLinkClick: () => {

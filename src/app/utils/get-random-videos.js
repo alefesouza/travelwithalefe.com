@@ -8,7 +8,7 @@ export default async function getRandomVideos(db) {
       (media) =>
         media.type === 'story' && media.file && media.file.includes('.mp4')
     )
-  ).slice(0, 5);
+  ).slice(0, 10);
 
   return randomMediasShuffled;
 }

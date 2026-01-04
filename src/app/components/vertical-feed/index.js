@@ -1,3 +1,5 @@
+'use client';
+
 import React, {
   useRef,
   useEffect,
@@ -5,6 +7,7 @@ import React, {
   useMemo,
   useState,
 } from 'react';
+import { useRouter } from 'next/navigation';
 
 export const VerticalFeed = ({
   items,
@@ -21,11 +24,13 @@ export const VerticalFeed = ({
   renderItemOverlay,
   swipeUpComponent,
   isIOS,
-  currentVideoId,
+  iOSVideoFeedWarningMessage,
+  iOSVideoFeedWarningMessage2,
 }) => {
   const containerRef = useRef(null);
   const [loadingStates, setLoadingStates] = useState({});
   const [errorStates, setErrorStates] = useState({});
+  const router = useRouter();
 
   const handleMediaLoad = useCallback((index) => {
     setLoadingStates((prev) => ({ ...prev, [index]: false }));
@@ -51,9 +56,9 @@ export const VerticalFeed = ({
 
             if (video) {
               if (
-                (isIOS && !window.videosClicked) ||
-                (typeof navigator !== 'undefined' &&
-                  !navigator.userActivation?.hasBeenActive)
+                !window.navbarClicked ||
+                (!isIOS && !navigator.userActivation?.hasBeenActive) ||
+                (isIOS && index >= 10)
               ) {
                 video.setAttribute('muted', 'true');
                 video.muted = true;
@@ -65,6 +70,26 @@ export const VerticalFeed = ({
               video.play().catch((error) => {
                 console.error('Error playing video:', error);
               });
+
+              if (isIOS && window.unmutedVideo && !window.navbarClicked) {
+                if (!window.askedForConfirmation) {
+                  const confirmResult = confirm(iOSVideoFeedWarningMessage);
+
+                  if (confirmResult) {
+                    router.push('/');
+                  }
+
+                  window.askedForConfirmation = true;
+                }
+              }
+
+              if (isIOS && window.navbarClicked && index === 10) {
+                if (!window.askedForConfirmation2) {
+                  alert(iOSVideoFeedWarningMessage2);
+
+                  window.askedForConfirmation2 = true;
+                }
+              }
             }
             onItemVisible?.(item, index);
           } else {
@@ -157,6 +182,8 @@ export const VerticalFeed = ({
               event.target.setAttribute('controls', 'true');
               event.target.removeAttribute('muted');
               event.target.muted = false;
+
+              window.unmutedVideo = true;
             }}
             id={item.id}
             poster={item.src.replace('.mp4', '-thumb.png')}
@@ -166,7 +193,6 @@ export const VerticalFeed = ({
               objectFit: 'cover',
               display: hasError ? 'none' : 'block',
             }}
-            data-current={item.id === currentVideoId}
             suppressHydrationWarning
           />
           {renderItemOverlay && renderItemOverlay(item, index)}
