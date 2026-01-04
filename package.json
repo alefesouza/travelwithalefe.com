@@ -23,6 +23,7 @@
     "react": "^19.2.3",
     "react-dom": "^19.2.3",
     "react-select": "^5.10.2",
+    "react-vertical-feed": "^0.1.20",
     "react-wordcloud": "^1.2.7",
     "tinyduration": "^3.3.0",
     "translate": "^3.0.1",

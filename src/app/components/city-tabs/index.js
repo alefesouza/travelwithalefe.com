@@ -25,6 +25,7 @@ export default function CityTabs({
           `/countries/${countrySlug}${expandGalleries ? '/expand' : ''}` +
           (sort !== 'desc' ? '?sort=' + sort : '')
         }
+        prefetch={false}
       >
         {i18n('All')}
       </Link>

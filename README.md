@@ -1,6 +1,6 @@
 # [travelwithalefe.com](https://travelwithalefe.com)
 
-This repository contains the code for my travel account Travel with Alefe website [https://travelwithalefe.com](https://travelwithalefe.com), which intends to be a hub to all my travel social media content, with content separated by country, city, location and hashtag, with page like a map with every place I went, hashtag cloud, my discount coupons, the template is inspired on link in bio platforms using Google Analytics and PWA concepts like:
+This repository contains the code for my travel account Travel with Alefe website [https://travelwithalefe.com](https://travelwithalefe.com), which intends to be a hub to all my travel social media content, with content separated by country, city, location and hashtag, with page like a map with every place I went, hashtag cloud, my discount coupons, random post button and a TikTok infinite scroll style random video feed of all my Instagram video stories, the template is inspired on link in bio platforms using Google Analytics and PWA concepts like:
 
 - Full `manifest.json`
 - Service Worker

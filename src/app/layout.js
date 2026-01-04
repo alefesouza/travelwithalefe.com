@@ -36,7 +36,7 @@ export default async function RootLayout({ children }) {
       <link rel="image_src" href={host('profile-photo-2x.jpg')} />
 
       <meta name="apple-mobile-web-app-title" content={i18n(SITE_NAME)} />
-      <meta name="apple-mobile-web-app-capable" content="yes" />
+      <meta name="mobile-web-app-capable" content="yes" />
       <meta name="apple-mobile-web-app-status-bar-style" content="default" />
       <link
         rel="apple-touch-icon"
@@ -244,7 +244,7 @@ export default async function RootLayout({ children }) {
           </div>
         </nav>
 
-        <header className="container">
+        <header className="container" suppressHydrationWarning>
           <div id="title-bar">
             <img
               src={host('/icons/72x72.png')}

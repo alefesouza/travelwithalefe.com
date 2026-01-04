@@ -275,6 +275,7 @@ export default async function Highlight({
             id="back-button"
             className={styles.history_back_button}
             scroll={false}
+            prefetch={false}
           >
             <img src="/images/back.svg" alt={i18n('Back')} width="32px"></img>
           </Link>

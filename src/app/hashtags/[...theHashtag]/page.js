@@ -440,6 +440,7 @@ export default async function Country({
             className={styles.history_back_button}
             scroll={false}
             style={{ display: 'flex' }}
+            prefetch={false}
           >
             <img src="/images/back.svg" alt={i18n('Back')} width={32}></img>
           </Link>

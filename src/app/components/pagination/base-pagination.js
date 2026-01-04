@@ -56,6 +56,7 @@ export default async function BasePagination({
           <Link
             href={base.replace('/page/{page}', '')}
             className={styles.page_number}
+            prefetch={false}
           >
             1
           </Link>

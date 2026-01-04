@@ -67,6 +67,14 @@ export default [
     handler: new NetworkOnly(),
   },
   {
+    matcher: '/api/random-videos',
+    handler: new NetworkOnly(),
+  },
+  {
+    matcher: '/videos',
+    handler: new NetworkOnly(),
+  },
+  {
     matcher: ({ url }) => {
       const isSameOrigin = self.origin === url.origin;
       if (!isSameOrigin) return false;

@@ -62,6 +62,10 @@ const navigation = {
       return;
     }
 
+    if (link.includes(window.location.origin + '/videos')) {
+      return;
+    }
+
     document.querySelector('#loader-spinner').style.display = 'block';
   },
 
@@ -79,7 +83,7 @@ const navigation = {
 
     const { pathname } = window.location;
     const navItemSelectors = {
-      '/': 1,
+      '/videos': 1,
       '/map': 2,
       '/hashtags': 3,
       '/coupons': 4,
@@ -461,6 +465,18 @@ const pageDetection = {
       siteName.style.display = 'block';
     }
 
+    if (pathname === '/videos') {
+      main.style.paddingTop = pathname === '/videos' ? '0px' : '';
+      main.style.paddingBottom = pathname === '/videos' ? '0px' : '';
+      document.querySelector('.mobile-navbar').style.display = 'none';
+      document.querySelector('header').style.display = 'none';
+    } else {
+      main.style.paddingTop = '';
+      main.style.paddingBottom = '';
+      document.querySelector('.mobile-navbar').style.display = '';
+      document.querySelector('header').style.display = '';
+    }
+
     if (pageDetection.isMediaSingle()) {
       body.classList.add('single-media-page');
     } else {
@@ -600,7 +616,7 @@ const pageDetection = {
       document.querySelector('header').appendChild(portugueseLanguageSwitcher);
     }
 
-    if (navigator.userAgentData.platform === 'Windows') {
+    if (navigator.userAgentData?.platform === 'Windows') {
       document.querySelectorAll('.country-emoji-flag').forEach((item) => {
         item.innerHTML = `
           <img

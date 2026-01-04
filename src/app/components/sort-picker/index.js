@@ -17,6 +17,7 @@ export default async function SortPicker({ type, basePath, sort }) {
             key={o}
             href={o.value !== 'desc' ? '?sort=' + o.value : basePath}
             scroll={false}
+            prefetch={false}
           >
             <label>
               <input

@@ -7,8 +7,8 @@ const NavbarLinks = async () => {
   return (
     <ul className="navbar-nav">
       <li className="nav-item" suppressHydrationWarning>
-        <Link className="nav-link" href="/" prefetch={false}>
-          {i18n('Home')}
+        <Link className="nav-link" href="/videos" prefetch={false}>
+          {i18n('Videos')}
         </Link>
       </li>
       <li className="nav-item" suppressHydrationWarning>

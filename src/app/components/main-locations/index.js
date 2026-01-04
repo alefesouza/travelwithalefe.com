@@ -21,6 +21,7 @@ export default function MainLocations({ locations, i18n, isBR, host }) {
                 location.slug
             )}
             target="_blank"
+            prefetch={false}
           >
             {isBR && location.name_pt ? location.name_pt : location.name}
           </Link>

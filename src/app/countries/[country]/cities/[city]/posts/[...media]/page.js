@@ -408,6 +408,7 @@ export default async function MediaPage({
               )
             }
             className="btn"
+            prefetch={false}
           >
             &lt; {i18n(getTypeLabel(theMedia.type, 'Previous'))}
           </Link>
@@ -424,6 +425,7 @@ export default async function MediaPage({
               )
             }
             className="btn"
+            prefetch={false}
           >
             {i18n(getTypeLabel(theMedia.type, 'Next'))} &gt;
           </Link>

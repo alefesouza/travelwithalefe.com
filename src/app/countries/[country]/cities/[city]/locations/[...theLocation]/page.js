@@ -486,6 +486,7 @@ export default async function Country({
           <Link
             href={`/countries/${country}/cities/${city}`}
             style={{ textDecoration: 'underline' }}
+            prefetch={false}
           >
             {isBR && theCity.name_pt ? theCity.name_pt : theCity.name}
           </Link>{' '}
@@ -493,6 +494,7 @@ export default async function Country({
           <Link
             href={`/countries/${country}`}
             style={{ textDecoration: 'underline' }}
+            prefetch={false}
           >
             {i18n(countryData.name)}
           </Link>{' '}
