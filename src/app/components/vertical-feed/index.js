@@ -29,7 +29,6 @@ export const VerticalFeed = ({
   const containerRef = useRef(null);
   const [loadingStates, setLoadingStates] = useState({});
   const [errorStates, setErrorStates] = useState({});
-  const router = useRouter();
 
   const handleMediaLoad = useCallback((index) => {
     setLoadingStates((prev) => ({ ...prev, [index]: false }));

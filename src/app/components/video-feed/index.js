@@ -13,6 +13,7 @@ export default function VideoFeed({
   swipeUpText,
   tapToUnmuteText,
   refreshText,
+  refreshingText,
   homeText,
   iOSVideoFeedWarningMessage,
   initialVideos,
@@ -37,6 +38,7 @@ export default function VideoFeed({
     }))
   );
   const [isLoading, setIsLoading] = useState(false);
+  const [refreshClicked, setRefreshClicked] = useState(false);
 
   const handleItemVisible = async (item, index) => {
     if (index !== 0) {
@@ -69,11 +71,14 @@ export default function VideoFeed({
     const newVideos = json.videos;
 
     setIsLoading(false);
+    setRefreshClicked(false);
 
     return newVideos;
   };
 
   const handleRefreshClick = async () => {
+    setRefreshClicked(true);
+
     const newVideos = await getMoreVideos();
 
     setVideos(
@@ -88,6 +93,7 @@ export default function VideoFeed({
     });
 
     window.navbarClicked = true;
+    window.unmutedVideo = true;
   };
 
   const renderVideoOverlay = (item, index) => {
@@ -117,6 +123,7 @@ export default function VideoFeed({
             className={styles.button}
             onClick={handleRefreshClick}
             title={refreshText}
+            disabled={isLoading}
           >
             <img
               src="/images/refresh.svg"
@@ -137,17 +144,27 @@ export default function VideoFeed({
 
         {index === 0 &&
           typeof window !== 'undefined' &&
+          !isLoading &&
           !window.unmutedVideo && (
             <div
-              className={styles.unmuteButtonContainer}
+              className={styles.centerMessageContainer}
               suppressHydrationWarning
             >
-              <div className={styles.unmuteButton}>
+              <div className={styles.centerMessage}>
                 <span style={{ fontSize: '20px' }}>🔊</span>
                 {tapToUnmuteText}
               </div>
             </div>
           )}
+
+        {refreshClicked && (
+          <div
+            className={styles.centerMessageContainer}
+            suppressHydrationWarning
+          >
+            <div className={styles.centerMessage}>{refreshingText}...</div>
+          </div>
+        )}
       </>
     );
   };
@@ -161,6 +178,7 @@ export default function VideoFeed({
       isIOS={isIOS}
       suppressHydrationWarning
       iOSVideoFeedWarningMessage={iOSVideoFeedWarningMessage}
+      isLoading={isLoading}
       swipeUpComponent={
         showSwipeUp && (
           <div className={styles.swipeUpIndicator}>

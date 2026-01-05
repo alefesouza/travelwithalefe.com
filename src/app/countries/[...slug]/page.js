@@ -15,7 +15,6 @@ import randomIntFromInterval from '@/app/utils/random-int';
 import ShareButton from '@/app/components/share-button';
 import logAccess from '@/app/utils/log-access';
 import defaultMetadata from '@/app/utils/default-metadata';
-import { UAParser } from 'ua-parser-js';
 import expandDate from '@/app/utils/expand-date';
 import LocationsMap from '@/app/components/locations-map';
 import { notFound } from 'next/navigation';

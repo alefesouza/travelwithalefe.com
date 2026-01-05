@@ -50,13 +50,6 @@ export default async function Footer() {
             height={144}
             alt={i18n('Travel with Alefe Icon')}
           />
-          <img
-            src={host('images/asexplore-144.png')}
-            srcSet={host('images/asexplore-288.png') + ' 2x'}
-            width={144}
-            height={144}
-            alt={i18n('ASExplore Icon')}
-          />
         </div>
       </div>
 

@@ -3,12 +3,7 @@ import useI18n from '@/app/hooks/use-i18n';
 import { FILE_DOMAIN, FILE_DOMAIN_SQUARE, SITE_NAME } from './constants';
 import getMetadata from './get-metadata';
 
-export default async function defaultMetadata(
-  title,
-  description,
-  media,
-  isSingle
-) {
+export default function defaultMetadata(title, description, media, isSingle) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -69,6 +64,8 @@ export default async function defaultMetadata(
     (media.type === 'youtube' ||
       media.type === 'short-video' ||
       media.file.includes('.mp4'));
+
+  console.log(title || defaultTitle);
 
   return {
     title: title || defaultTitle,

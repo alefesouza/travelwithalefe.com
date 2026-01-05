@@ -129,7 +129,6 @@ const langs = {
     'Instagram Icon': 'Ícone do Instagram',
     'TikTok Icon': 'Ícone do TikTok',
     'YouTube Icon': 'Ícone do YouTube',
-    'ASExplore Icon': 'Ícone do ASExplore',
     'Pinterest Icon': 'Ícone do Pinterest',
     'RSS Icon': 'Ícone de RSS',
     Back: 'Voltar',
@@ -151,6 +150,7 @@ const langs = {
     'Swipe up': 'Arraste para cima',
     'Tap to unmute': 'Toque para ativar o som',
     Refresh: 'Recarregar',
+    Refreshing: 'Recarregando',
     'Due to iOS limitations, the following videos will be initially muted, please tap the video if you want to unmute it.':
       'Devido a limitações do iOS, os vídeos a seguir estarão inicialmente sem som, por favor toque no vídeo se quiser ativar o som.',
 

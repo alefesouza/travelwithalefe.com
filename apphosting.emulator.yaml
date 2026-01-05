@@ -12,6 +12,10 @@ env:
     value: GTM-TKHNG4LM
   - variable: NEXT_GTM_TRACKING
     value: GTM-KG98M7XG
+  - variable: NEXT_GA_TRACKING_BR
+    value: G-DYLH5B5H8G
+  - variable: NEXT_GA_TRACKING
+    value: G-5P2W9QP6M4
   - variable: NEXT_MAPS_API_KEY
     value: AIzaSyDHlaC0rNWLdOVdagruwlLTCGu6BajppZQ
   - variable: NEXT_PUBLIC_LOCALE

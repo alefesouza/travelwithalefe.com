@@ -295,7 +295,7 @@ export default async function WebStories({
             >
               <div className="common-text username">
                 <span className="username-text">
-                  {isBR ? '@viajarcomale' : '@ASExplore'}
+                  {isBR ? '@viajarcomale' : '@travelwithalefe'}
                 </span>{' '}
                 {!(
                   item.city === 'sao-paulo' &&

@@ -33,6 +33,7 @@ export default async function Videos() {
       swipeUpText={i18n('Swipe up')}
       tapToUnmuteText={i18n('Tap to unmute')}
       refreshText={i18n('Refresh')}
+      refreshingText={i18n('Refreshing')}
       homeText={i18n('Home')}
       iOSVideoFeedWarningMessage={i18n(
         'Due to iOS limitations, the following videos will be initially muted, please tap the video if you want to unmute it.'
