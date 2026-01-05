@@ -115,6 +115,7 @@ const navigation = {
     this.parentElement.classList.add('active');
 
     window.navbarClicked = true;
+    window.unmutedVideo = true;
   },
 
   initNavbarLinkClick: () => {

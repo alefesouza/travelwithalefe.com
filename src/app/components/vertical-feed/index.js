@@ -25,7 +25,6 @@ export const VerticalFeed = ({
   swipeUpComponent,
   isIOS,
   iOSVideoFeedWarningMessage,
-  iOSVideoFeedWarningMessage2,
 }) => {
   const containerRef = useRef(null);
   const [loadingStates, setLoadingStates] = useState({});
@@ -56,38 +55,25 @@ export const VerticalFeed = ({
 
             if (video) {
               if (
-                !window.navbarClicked ||
-                (!isIOS && !navigator.userActivation?.hasBeenActive) ||
-                (isIOS && index >= 10)
+                (window.navbarClicked && (!isIOS || (isIOS && index < 10))) ||
+                (!isIOS && navigator.userActivation?.hasBeenActive)
               ) {
-                video.setAttribute('muted', 'true');
-                video.muted = true;
-              } else {
                 video.removeAttribute('muted');
                 video.muted = false;
+              } else {
+                video.setAttribute('muted', 'true');
+                video.muted = true;
               }
 
               video.play().catch((error) => {
                 console.error('Error playing video:', error);
               });
 
-              if (isIOS && window.unmutedVideo && !window.navbarClicked) {
+              if (isIOS && window.navbarClicked && index === 10) {
                 if (!window.askedForConfirmation) {
-                  const confirmResult = confirm(iOSVideoFeedWarningMessage);
-
-                  if (confirmResult) {
-                    router.push('/');
-                  }
+                  alert(iOSVideoFeedWarningMessage);
 
                   window.askedForConfirmation = true;
-                }
-              }
-
-              if (isIOS && window.navbarClicked && index === 10) {
-                if (!window.askedForConfirmation2) {
-                  alert(iOSVideoFeedWarningMessage2);
-
-                  window.askedForConfirmation2 = true;
                 }
               }
             }
@@ -179,6 +165,10 @@ export const VerticalFeed = ({
             onLoadedData={() => handleMediaLoad(index)}
             onError={() => handleMediaError(index)}
             onClick={(event) => {
+              if (!window.navbarClicked && !window.unmutedVideo) {
+                event.preventDefault();
+              }
+
               event.target.setAttribute('controls', 'true');
               event.target.removeAttribute('muted');
               event.target.muted = false;
@@ -226,6 +216,7 @@ export const VerticalFeed = ({
       role="feed"
       aria-label="Vertical video feed"
       className={className}
+      id="vertical-feed-container"
       style={{
         height: '100dvh',
         overflowY: 'scroll',

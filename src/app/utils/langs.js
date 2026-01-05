@@ -150,8 +150,7 @@ const langs = {
     "Travel with Alefe's video feed.": 'Feed de vídeos do Viajar com Alê.',
     'Swipe up': 'Arraste para cima',
     'Tap to unmute': 'Toque para ativar o som',
-    'Due to iOS limitations, the following videos will be initially muted as you directly accessed this page. You can have an unmuted experience by accessing the home page and clicking "Videos" on the navbar. Do you want to try it now?':
-      'Devido a limitações do iOS, os vídeos a seguir estarão inicialmente sem som, pois você acessou esta página diretamente. Você pode ter uma experiência com som ativado acessando a página inicial e clicando em "Vídeos" na barra de navegação. Você quer tentar agora?',
+    Refresh: 'Recarregar',
     'Due to iOS limitations, the following videos will be initially muted, please tap the video if you want to unmute it.':
       'Devido a limitações do iOS, os vídeos a seguir estarão inicialmente sem som, por favor toque no vídeo se quiser ativar o som.',
 

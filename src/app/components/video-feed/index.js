@@ -12,8 +12,9 @@ export default function VideoFeed({
   openText,
   swipeUpText,
   tapToUnmuteText,
+  refreshText,
+  homeText,
   iOSVideoFeedWarningMessage,
-  iOSVideoFeedWarningMessage2,
   initialVideos,
 }) {
   const isIOS =
@@ -27,7 +28,6 @@ export default function VideoFeed({
       !navigator.userActivation?.hasBeenActive);
 
   const [showSwipeUp, setShowSwipeUp] = useState(true);
-  const [showUnmuteButton, setShowUnmuteButton] = useState(startMuted);
   const [videos, setVideos] = useState(
     initialVideos.map((video) => ({
       ...video,
@@ -51,11 +51,7 @@ export default function VideoFeed({
       return;
     }
 
-    setIsLoading(true);
-
-    const response = await fetch('/api/random-videos');
-    const json = await response.json();
-    const newVideos = json.videos;
+    const newVideos = await getMoreVideos();
 
     setVideos((prevVideos) =>
       [...prevVideos, ...newVideos].map((video) => ({
@@ -63,8 +59,35 @@ export default function VideoFeed({
         src: FILE_DOMAIN + video.file,
       }))
     );
+  };
+
+  const getMoreVideos = async () => {
+    setIsLoading(true);
+
+    const response = await fetch('/api/random-videos');
+    const json = await response.json();
+    const newVideos = json.videos;
 
     setIsLoading(false);
+
+    return newVideos;
+  };
+
+  const handleRefreshClick = async () => {
+    const newVideos = await getMoreVideos();
+
+    setVideos(
+      newVideos.map((video) => ({
+        ...video,
+        src: FILE_DOMAIN + video.file,
+      }))
+    );
+
+    document.getElementById('vertical-feed-container').scrollTo({
+      top: 0,
+    });
+
+    window.navbarClicked = true;
   };
 
   const renderVideoOverlay = (item, index) => {
@@ -82,45 +105,49 @@ export default function VideoFeed({
             zIndex: 10,
           }}
         >
-          <div
-            style={{
-              background: 'rgba(255, 255, 255, 0.5)',
-              borderRadius: '12px',
-              padding: '8px',
-              backdropFilter: 'blur(4px)',
-            }}
+          <Link
+            className={styles.button}
+            href={mediaToUrl(item)}
+            title={openText}
+            prefetch={false}
           >
-            <Link
-              style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                padding: '8px',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-              href={mediaToUrl(item)}
-            >
-              <span style={{ color: 'white', fontSize: '14px' }}>
-                {openText}
-              </span>
-            </Link>
-          </div>
+            <img src="/images/open.svg" width={24} height={24} alt={openText} />
+          </Link>
+          <button
+            className={styles.button}
+            onClick={handleRefreshClick}
+            title={refreshText}
+          >
+            <img
+              src="/images/refresh.svg"
+              width={24}
+              height={24}
+              alt={refreshText}
+            />
+          </button>
+          <Link
+            className={styles.button + ' ' + styles.homeButton}
+            href="/"
+            prefetch={false}
+            title={homeText}
+          >
+            <img src="/images/home.svg" width={24} height={24} alt={homeText} />
+          </Link>
         </div>
 
-        {index === 0 && showUnmuteButton && (
-          <div
-            className={styles.unmuteButtonContainer}
-            suppressHydrationWarning
-          >
-            <div className={styles.unmuteButton}>
-              <span style={{ fontSize: '20px' }}>🔊</span>
-              {tapToUnmuteText}
+        {index === 0 &&
+          typeof window !== 'undefined' &&
+          !window.unmutedVideo && (
+            <div
+              className={styles.unmuteButtonContainer}
+              suppressHydrationWarning
+            >
+              <div className={styles.unmuteButton}>
+                <span style={{ fontSize: '20px' }}>🔊</span>
+                {tapToUnmuteText}
+              </div>
             </div>
-          </div>
-        )}
+          )}
       </>
     );
   };
@@ -134,7 +161,6 @@ export default function VideoFeed({
       isIOS={isIOS}
       suppressHydrationWarning
       iOSVideoFeedWarningMessage={iOSVideoFeedWarningMessage}
-      iOSVideoFeedWarningMessage2={iOSVideoFeedWarningMessage2}
       swipeUpComponent={
         showSwipeUp && (
           <div className={styles.swipeUpIndicator}>
