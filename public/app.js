@@ -2,10 +2,6 @@
 const utils = {
   isBrazilian: () => window.location.host.includes('viajarcomale.com.br'),
 
-  isStandaloneMode: () =>
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.matchMedia('(display-mode: window-controls-overlay)').matches,
-
   getCurrentLanguageSwitcherUrl: () => {
     const currentUrl = window.location.href;
     return utils.isBrazilian()
@@ -18,26 +14,27 @@ const utils = {
   },
 
   getText: (textEN, textPT) => (utils.isBrazilian() ? textPT : textEN),
+};
 
-  setCookie: (name, value, days) => {
-    let expires = '';
-    if (days) {
-      const date = new Date();
-      date.setTime(date.getTime() + days * 24 * 60 * 60 * 1000);
-      expires = '; expires=' + date.toUTCString();
-    }
-    document.cookie = name + '=' + (value || '') + expires + '; path=/';
-  },
+const pwa = {
+  isStandaloneMode: () =>
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.matchMedia('(display-mode: window-controls-overlay)').matches,
 
-  getCookie: (name) => {
-    const nameEQ = name + '=';
-    const ca = document.cookie.split(';');
-    for (let i = 0; i < ca.length; i++) {
-      let c = ca[i];
-      while (c.charAt(0) === ' ') c = c.substring(1, c.length);
-      if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+  isWindowControlsOverlayMode: () =>
+    window.matchMedia('(display-mode: window-controls-overlay)').matches,
+
+  checkWindowControlsOverlay: () => {
+    const body = document.querySelector('body');
+
+    const isOverlayVisible = navigator.windowControlsOverlay.visible;
+
+    if (isOverlayVisible) {
+      body.classList.add('window-controls-overlay');
+      return;
     }
-    return '';
+
+    body.classList.remove('window-controls-overlay');
   },
 };
 
@@ -116,92 +113,16 @@ const navigation = {
 
     window.navbarClicked = true;
     window.unmutedVideo = true;
+
+    console.log('Navbar link clicked');
   },
 
   initNavbarLinkClick: () => {
-    const navLinks = [...document.querySelectorAll('.navbar .nav-link')];
+    const navLinks = [...document.querySelectorAll('.navbar-nav .nav-link')];
     navLinks.forEach((item) => {
       item.removeEventListener('click', navigation.onNavbarLinkClick);
       item.addEventListener('click', navigation.onNavbarLinkClick);
     });
-  },
-};
-
-// Shuffle functionality
-const shuffle = {
-  clicks: 0,
-  today: new Date().toISOString().split('T')[0],
-
-  getTotalClicksToday: () =>
-    parseInt(localStorage.getItem('total_shuffle_clicks_today') || '0'),
-
-  getTotalClicksTodayDate: () =>
-    localStorage.getItem('total_shuffle_clicks_today_date'),
-
-  setTotalClicksToday: (value) =>
-    localStorage.setItem('total_shuffle_clicks_today', value.toString()),
-
-  setTotalClicksTodayDate: (value) =>
-    localStorage.setItem('total_shuffle_clicks_today_date', value),
-
-  hideButtons: () => {
-    [...document.querySelectorAll('.shuffle')].forEach((item) => {
-      item.style.display = 'none';
-    });
-  },
-
-  init: () => {
-    const totalClicksToday = shuffle.getTotalClicksToday();
-    if (totalClicksToday >= 25) {
-      shuffle.hideButtons();
-    }
-  },
-
-  onClick: function () {
-    const totalClicksToday = shuffle.getTotalClicksToday();
-    const totalClicksTodayDate = shuffle.getTotalClicksTodayDate();
-
-    if (totalClicksTodayDate !== shuffle.today) {
-      shuffle.setTotalClicksTodayDate(shuffle.today);
-      shuffle.setTotalClicksToday(0);
-    }
-
-    shuffle.clicks++;
-
-    const newTotal = totalClicksToday + 1;
-    shuffle.setTotalClicksToday(newTotal);
-
-    if (shuffle.clicks >= 5 || newTotal >= 25) {
-      shuffle.hideButtons();
-    }
-
-    let count = 30;
-    const initialText = this.textContent;
-
-    const buttons = [...document.querySelectorAll('.shuffle button')];
-    buttons.forEach((item) => {
-      item.disabled = true;
-      item.textContent = count;
-    });
-
-    count--;
-
-    const interval = setInterval(() => {
-      buttons.forEach((item) => {
-        item.disabled = true;
-        item.textContent = count;
-      });
-
-      if (count === 0) {
-        buttons.forEach((item) => {
-          item.disabled = false;
-          item.textContent = initialText;
-        });
-        clearInterval(interval);
-      }
-
-      count--;
-    }, 1000);
   },
 };
 
@@ -472,7 +393,10 @@ const pageDetection = {
       main.style.paddingTop = pathname === '/videos' ? '0px' : '';
       main.style.paddingBottom = pathname === '/videos' ? '0px' : '';
       document.querySelector('.mobile-navbar').style.display = 'none';
-      document.querySelector('header').style.display = 'none';
+
+      if (!pwa.isWindowControlsOverlayMode()) {
+        document.querySelector('header').style.display = 'none';
+      }
 
       window.videosClicked = true;
     } else {
@@ -487,6 +411,8 @@ const pageDetection = {
     } else {
       body.classList.remove('single-media-page');
     }
+
+    pwa.checkWindowControlsOverlay();
   },
 };
 
@@ -546,18 +472,13 @@ const pageDetection = {
         languageSwitcherLink;
     }
 
-    if (utils.isStandaloneMode()) {
+    if (pwa.isStandaloneMode()) {
       document.querySelectorAll('a[target=_blank]').forEach(function (a) {
         if (!a.href.includes('/webstories/')) {
           a.removeAttribute('target');
         }
       });
     }
-
-    [...document.querySelectorAll('.shuffle button')].forEach((item) => {
-      item.removeEventListener('click', shuffle.onClick);
-      item.addEventListener('click', shuffle.onClick);
-    });
 
     navigation.initNavbarLinkClick();
     navigation.updateNavbarActiveState();
@@ -607,7 +528,7 @@ const pageDetection = {
     if (
       navigator.language.startsWith('pt') &&
       !document.querySelector('#portuguese-language-switcher') &&
-      !utils.isStandaloneMode() &&
+      !pwa.isStandaloneMode() &&
       !utils.isBrazilian()
     ) {
       const portugueseLanguageSwitcher = document.createElement('div');
@@ -668,7 +589,6 @@ const pageDetection = {
     subtree: true,
   });
 
-  shuffle.init();
   setupLinks('body');
 
   const { pathname } = window.location;
@@ -677,34 +597,11 @@ const pageDetection = {
   }
 
   if ('windowControlsOverlay' in navigator) {
-    const body = document.querySelector('body');
-
     navigator.windowControlsOverlay.addEventListener('geometrychange', () => {
-      const isOverlayVisible = navigator.windowControlsOverlay.visible;
-      const session = utils.getCookie('__session');
-
-      if (isOverlayVisible) {
-        body.classList.add('window-controls-overlay');
-
-        if (!session.includes('window_controls_overlay')) {
-          utils.setCookie(
-            '__session',
-            session + (session ? '&' : '') + 'window_controls_overlay%3Dtrue',
-            30
-          );
-        }
-        return;
-      }
-
-      body.classList.remove('window-controls-overlay');
-      utils.setCookie(
-        '__session',
-        session
-          .replace('&window_controls_overlay%3Dtrue', '')
-          .replace('window_controls_overlay%3Dtrue', ''),
-        30
-      );
+      pwa.checkWindowControlsOverlay();
     });
+
+    pwa.checkWindowControlsOverlay();
   }
 
   window.addEventListener('pageshow', navigation.hideSpinner);

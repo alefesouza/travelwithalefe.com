@@ -81,7 +81,7 @@ body {
   text-align: inherit;
 }
 
-.list-group-item+.list-group-item {
+.list-group-item + .list-group-item {
   border-top-width: 0;
 }
 
@@ -375,7 +375,7 @@ button:not(:disabled) {
   justify-content: flex-end;
 }
 
-.autocomplete>div {
+.autocomplete > div {
   width: 75%;
 }
 
@@ -386,10 +386,12 @@ button:not(:disabled) {
   top: env(titlebar-area-y, 0);
   height: calc(env(titlebar-area-height, 50px));
   width: env(titlebar-area-width, 100%);
-  background: linear-gradient(to right,
-      #2096cc,
-      rgba(32, 150, 204, 0.5),
-      #2096cc);
+  background: linear-gradient(
+    to right,
+    #2096cc,
+    rgba(32, 150, 204, 0.5),
+    #2096cc
+  );
   backdrop-filter: saturate(180%) blur(20px);
   align-items: center;
   gap: 6px;
@@ -430,12 +432,14 @@ button:not(:disabled) {
   padding: 0 8px;
 }
 
+.window-controls-overlay #title-bar .title-bar-logo,
 .window-controls-overlay #title-bar img {
   max-height: calc(env(titlebar-area-height, 38px) - 2px);
   max-width: calc(env(titlebar-area-height, 38px) - 2px);
+  -webkit-app-region: no-drag;
 }
 
-.window-controls-overlay .autocomplete>div {
+.window-controls-overlay .autocomplete > div {
   width: 100%;
   -webkit-app-region: no-drag;
   app-region: no-drag;
@@ -457,6 +461,48 @@ button:not(:disabled) {
   margin-top: env(titlebar-area-height, 0);
 }
 
+.window-controls-overlay .main {
+  padding-top: calc(env(titlebar-area-height, 0) + 20px) !important;
+}
+
+.window-controls-overlay .sidebar {
+  padding-top: env(titlebar-area-height, 0);
+}
+
+.window-controls-overlay .autocomplete {
+  display: none !important;
+}
+
+.window-controls-overlay .mobile-autocomplete {
+  display: none !important;
+}
+
+.window-controls-overlay .mobile-autocomplete .autocomplete {
+  display: block !important;
+}
+
+.window-controls-overlay #title-bar .title-bar-title {
+  display: none;
+  -webkit-app-region: no-drag;
+  color: inherit;
+}
+
+.window-controls-overlay #title-bar .title-bar-title:hover {
+  text-decoration: none;
+}
+
+@media (min-width: 710px) {
+  .window-controls-overlay #title-bar .title-bar-title {
+    display: block;
+  }
+}
+
+@media (min-width: 810px) {
+  .window-controls-overlay .mobile-autocomplete {
+    display: block !important;
+  }
+}
+
 .navbar {
   position: relative;
   display: -ms-flexbox;
@@ -465,10 +511,12 @@ button:not(:disabled) {
   align-items: center;
   justify-content: center;
   padding: 0rem 0.5rem;
-  background: linear-gradient(to right,
-      rgba(248, 249, 250, 0),
-      rgba(248, 249, 250, 0.15),
-      rgba(248, 249, 250, 0));
+  background: linear-gradient(
+    to right,
+    rgba(248, 249, 250, 0),
+    rgba(248, 249, 250, 0.15),
+    rgba(248, 249, 250, 0)
+  );
 }
 
 .navbar-brand {
@@ -556,10 +604,6 @@ button:not(:disabled) {
   align-items: center;
 }
 
-.window-controls-overlay .media_navigation {
-  margin-top: calc(env(titlebar-area-height, 0) + 16px);
-}
-
 .navbar .site-name {
   display: none;
 }
@@ -638,7 +682,6 @@ button:not(:disabled) {
 }
 
 @media (min-width: 424px) {
-
   .instagram_media_gallery_item.instagram_media_portrait img,
   .instagram_media_gallery_item.instagram_media_portrait video {
     max-width: 400px;
@@ -721,10 +764,12 @@ a:hover {
 }
 
 .page {
-  background: linear-gradient(to right,
-      rgba(248, 249, 250, 0),
-      rgba(248, 249, 250, 0.15),
-      rgba(248, 249, 250, 0));
+  background: linear-gradient(
+    to right,
+    rgba(248, 249, 250, 0),
+    rgba(248, 249, 250, 0.15),
+    rgba(248, 249, 250, 0)
+  );
   padding-bottom: 16px;
 }
 
@@ -960,7 +1005,7 @@ body:not(.sub-page) .mobile-autocomplete {
 }
 
 @media (min-width: 644px) {
-  .main.home-page .autocomplete>div {
+  .main.home-page .autocomplete > div {
     width: 50%;
   }
 
@@ -1003,30 +1048,6 @@ body:not(.sub-page) .mobile-autocomplete {
   .main {
     margin-left: 415px;
   }
-}
-
-.window-controls-overlay .main {
-  padding-top: calc(env(titlebar-area-height, 0) + 20px);
-}
-
-.window-controls-overlay .sidebar {
-  padding-top: env(titlebar-area-height, 0);
-}
-
-.window-controls-overlay .mobile-autocomplete {
-  display: block !important;
-}
-
-.window-controls-overlay .autocomplete {
-  display: none !important;
-}
-
-.window-controls-overlay .mobile-autocomplete {
-  display: block !important;
-}
-
-.window-controls-overlay .mobile-autocomplete .autocomplete {
-  display: block !important;
 }
 
 .nav-tabs {

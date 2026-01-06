@@ -246,14 +246,18 @@ export default async function RootLayout({ children }) {
 
         <header className="container" suppressHydrationWarning>
           <div id="title-bar">
-            <img
-              src={host('/icons/72x72.png')}
-              alt={i18n('Travel with Alefe Icon')}
-              width={36}
-              height={36}
-            />
+            <Link href="/" className="title-bar-logo" prefetch={false}>
+              <img
+                src={host('/icons/72x72.png')}
+                alt={i18n('Travel with Alefe Icon')}
+                width={36}
+                height={36}
+              />
+            </Link>
 
-            <span>{i18n(SITE_NAME)}</span>
+            <Link href="/" prefetch={false} className="title-bar-title">
+              <span>{i18n(SITE_NAME)}</span>
+            </Link>
 
             <NavbarLinks />
           </div>

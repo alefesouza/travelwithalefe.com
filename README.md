@@ -5,7 +5,7 @@ This repository contains the code for my travel account Travel with Alefe websit
 - Full `manifest.json`
 - Service Worker
 - Offline access
-- Window Control Overlay
+- Window Controls Overlay
 
 Also some search engine optimizations like:
 
