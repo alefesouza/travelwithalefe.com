@@ -193,7 +193,12 @@ export async function generateMetadata({
   const maxPages = Math.ceil(theMedia.total / WEBSTORIES_ITEMS_PER_PAGE);
 
   return {
-    ...defaultMetadata(title, description, cover),
+    ...defaultMetadata(
+      title,
+      description,
+      `countries/${country}/cities/${city}/locations/${location}`,
+      cover
+    ),
     ...(!isWebStories && page <= maxPages
       ? {
           icons: {

@@ -3,7 +3,13 @@ import useI18n from '@/app/hooks/use-i18n';
 import { FILE_DOMAIN, FILE_DOMAIN_SQUARE, SITE_NAME } from './constants';
 import getMetadata from './get-metadata';
 
-export default function defaultMetadata(title, description, media, isSingle) {
+export default function defaultMetadata(
+  title,
+  description,
+  pathname = '',
+  media = null,
+  isSingle = false
+) {
   // eslint-disable-next-line react-hooks/rules-of-hooks
   const i18n = useI18n();
   // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -15,12 +21,14 @@ export default function defaultMetadata(title, description, media, isSingle) {
     'Travel photos and links to Travel with Alefe social networks.'
   );
 
-  const pathname = '';
-
-  const canonical = new URL(
+  let canonical = new URL(
     pathname,
     isBR ? 'https://viajarcomale.com.br' : 'https://travelwithalefe.com'
   ).toString();
+
+  if (pathname === '') {
+    canonical = canonical.slice(0, -1);
+  }
 
   let images = [];
 
@@ -64,8 +72,6 @@ export default function defaultMetadata(title, description, media, isSingle) {
     (media.type === 'youtube' ||
       media.type === 'short-video' ||
       media.file.includes('.mp4'));
-
-  console.log(title || defaultTitle);
 
   return {
     title: title || defaultTitle,
@@ -116,9 +122,9 @@ export default function defaultMetadata(title, description, media, isSingle) {
     alternates: {
       canonical,
       languages: {
-        'x-default': 'https://travelwithalefe.com' + pathname,
-        en: 'https://travelwithalefe.com' + pathname,
-        pt: 'https://viajarcomale.com.br' + pathname,
+        'x-default': canonical,
+        en: 'https://travelwithalefe.com' + (pathname ? '/' + pathname : ''),
+        pt: 'https://viajarcomale.com.br' + (pathname ? '/' + pathname : ''),
       },
     },
   };

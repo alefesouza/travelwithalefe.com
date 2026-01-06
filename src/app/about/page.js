@@ -15,7 +15,7 @@ export async function generateMetadata() {
   const title = i18n('About') + ' - ' + i18n(SITE_NAME);
   const description = i18n('About Travel with Alefe website.');
 
-  return defaultMetadata(title, description);
+  return defaultMetadata(title, description, 'about');
 }
 
 export default async function About() {

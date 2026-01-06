@@ -120,7 +120,14 @@ export async function generateMetadata({ params: paramsPromise }) {
   });
 
   return {
-    ...defaultMetadata(title, description, theMedia),
+    ...defaultMetadata(
+      title,
+      description,
+      `countries/${country}/cities/${city}/stories${
+        stories ? '/' + stories[0] : ''
+      }`,
+      theMedia
+    ),
     ...(!isWebStories
       ? {
           icons: {

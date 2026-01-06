@@ -98,6 +98,7 @@ export async function generateMetadata({ params: paramsPromise }) {
   return defaultMetadata(
     title,
     description,
+    `countries/${country}/cities/${city}/posts/${media[0]}`,
     theMedia,
     media[1] ||
       theMedia.type === 'story' ||

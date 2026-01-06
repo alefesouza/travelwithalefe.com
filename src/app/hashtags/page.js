@@ -20,7 +20,7 @@ export async function generateMetadata() {
     'Navigate through my website with main and random hashtags.'
   );
 
-  return defaultMetadata(title, description);
+  return defaultMetadata(title, description, 'hashtags');
 }
 
 export default async function MapPage() {

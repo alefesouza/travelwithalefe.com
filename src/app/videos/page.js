@@ -14,7 +14,7 @@ export function generateMetadata() {
   const title = i18n('Video Feed') + ' - ' + i18n(SITE_NAME);
   const description = i18n("Travel with Alefe's video feed.");
 
-  return defaultMetadata(title, description);
+  return defaultMetadata(title, description, 'videos');
 }
 
 export default async function Videos() {
@@ -36,7 +36,7 @@ export default async function Videos() {
       refreshingText={i18n('Refreshing')}
       homeText={i18n('Home')}
       iOSVideoFeedWarningMessage={i18n(
-        'Due to iOS limitations, the following videos will be initially muted, please tap the video if you want to unmute it.'
+        'Due to iOS limitations, the following videos will be initially muted, please tap the video if you want to unmute it. Clicking the refresh button, the next 10 videos will be loaded with sound enabled.'
       )}
       initialVideos={videos}
     />

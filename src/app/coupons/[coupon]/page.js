@@ -65,7 +65,7 @@ export async function generateMetadata({ params: paramsPromise }) {
     couponData.description_pt
   );
 
-  return defaultMetadata(title, description);
+  return defaultMetadata(title, description, `coupons/${coupon}`);
 }
 
 export default async function Coupons({

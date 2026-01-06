@@ -151,8 +151,8 @@ const langs = {
     'Tap to unmute': 'Toque para ativar o som',
     Refresh: 'Recarregar',
     Refreshing: 'Recarregando',
-    'Due to iOS limitations, the following videos will be initially muted, please tap the video if you want to unmute it.':
-      'Devido a limitações do iOS, os vídeos a seguir estarão inicialmente sem som, por favor toque no vídeo se quiser ativar o som.',
+    'Due to iOS limitations, the following videos will be initially muted, please tap the video if you want to unmute it. Clicking the refresh button, the next 10 videos will be loaded with sound enabled.':
+      'Devido a limitações do iOS, os vídeos a seguir estarão inicialmente sem som, por favor toque no vídeo se quiser ativar o som. Clicando no botão de recarregar, os próximos 10 vídeos serão carregados com som ativado.',
 
     // Countries
     Brazil: 'Brasil',

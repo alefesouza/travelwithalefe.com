@@ -150,7 +150,12 @@ export async function generateMetadata({
   }
 
   return {
-    ...defaultMetadata(title, description, cover),
+    ...defaultMetadata(
+      title,
+      description,
+      `countries/${slug.join('/')}`,
+      cover
+    ),
     ...(city && page <= maxPages
       ? {
           icons: {

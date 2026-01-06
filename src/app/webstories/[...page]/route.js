@@ -8,6 +8,7 @@ customInitApp();
 // Remove Next.js assets from Web Stories pages.
 export async function GET(req) {
   const host = useHost();
+  const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   let { pathname, searchParams } = new URL(req.url);
   let sort = searchParams.get('sort');
   sort = sort === 'asc' ? 'asc' : 'desc';
@@ -82,6 +83,23 @@ export async function GET(req) {
     redirect(pathname.replace('/webstories', ''));
   }
 
+  const url = isBR
+    ? 'https://viajarcomale.com.br'
+    : 'https://travelwithalefe.com';
+
+  const canonicalHref = url + pathname.replace('/webstories', '');
+
+  const enHref =
+    'https://travelwithalefe.com/webstories' +
+    pathname.replace('/webstories', '');
+  const ptHref =
+    'https://viajarcomale.com.br/webstories' +
+    pathname.replace('/webstories', '');
+
+  $('link[rel="canonical"]').attr('href', canonicalHref);
+  $('link[hreflang="x-default"]').attr('href', isBR ? ptHref : enHref);
+  $('link[hreflang="en"]').attr('href', enHref);
+  $('link[hreflang="pt"]').attr('href', ptHref);
   $('[standalone]').attr('standalone', '');
   $('[autoplay]').attr('autoplay', '');
   $('[itemscope]').attr('itemscope', '');

@@ -7,7 +7,6 @@ import { SITE_NAME } from '../utils/constants';
 import ShareButton from '../components/share-button';
 import defaultMetadata from '../utils/default-metadata';
 import logAccess from '../utils/log-access';
-import { UAParser } from 'ua-parser-js';
 import RandomPostButton from '../components/random-post-button';
 
 export async function generateMetadata() {
@@ -17,7 +16,7 @@ export async function generateMetadata() {
   const title = i18n('Albums') + ' - ' + i18n(SITE_NAME);
   const description = i18n('Choose which country to Travel with Alefe.');
 
-  return defaultMetadata(title, description);
+  return defaultMetadata(title, description, 'countries');
 }
 
 export default async function Countries() {

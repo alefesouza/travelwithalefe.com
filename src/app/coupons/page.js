@@ -80,7 +80,7 @@ export async function generateMetadata() {
     couponsPageData.description_pt
   );
 
-  return defaultMetadata(title, description);
+  return defaultMetadata(title, description, 'coupons');
 }
 
 export default async function Coupons({ searchParams }) {

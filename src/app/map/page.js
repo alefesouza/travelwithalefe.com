@@ -16,7 +16,7 @@ export async function generateMetadata() {
   const title = i18n('Map') + ' - ' + i18n(SITE_NAME);
   const description = i18n('The map of the places I have been.');
 
-  return defaultMetadata(title, description);
+  return defaultMetadata(title, description, 'map');
 }
 
 export default async function MapPage({ searchParams }) {

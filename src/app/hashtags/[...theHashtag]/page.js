@@ -129,7 +129,12 @@ export async function generateMetadata({
     return notFound();
   }
 
-  const defaultMeta = defaultMetadata(title, description, cover);
+  const defaultMeta = defaultMetadata(
+    title,
+    description,
+    `hashtags/${theHashtag.join('/')}`,
+    cover
+  );
 
   const enUrl =
     'https://travelwithalefe.com' +

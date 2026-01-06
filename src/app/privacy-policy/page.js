@@ -16,7 +16,7 @@ export async function generateMetadata() {
   const title = i18n('Privacy Policy') + ' - ' + i18n(SITE_NAME);
   const description = i18n("Travel with Alefe's website privacy policy.");
 
-  return defaultMetadata(title, description);
+  return defaultMetadata(title, description, 'privacy-policy');
 }
 
 export default async function PrivacyPolicy() {
