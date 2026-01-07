@@ -97,7 +97,7 @@ export async function GET(req) {
     pathname.replace('/webstories', '');
 
   $('link[rel="canonical"]').attr('href', canonicalHref);
-  $('link[hreflang="x-default"]').attr('href', isBR ? ptHref : enHref);
+  $('link[hreflang="x-default"]').attr('href', enHref);
   $('link[hreflang="en"]').attr('href', enHref);
   $('link[hreflang="pt"]').attr('href', ptHref);
   $('[standalone]').attr('standalone', '');

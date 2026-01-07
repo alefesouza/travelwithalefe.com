@@ -73,6 +73,9 @@ export default function defaultMetadata(
       media.type === 'short-video' ||
       media.file.includes('.mp4'));
 
+  const defaultUrl =
+    'https://travelwithalefe.com' + (pathname ? '/' + pathname : '');
+
   return {
     title: title || defaultTitle,
     description: description || defaultDescription,
@@ -122,8 +125,8 @@ export default function defaultMetadata(
     alternates: {
       canonical,
       languages: {
-        'x-default': canonical,
-        en: 'https://travelwithalefe.com' + (pathname ? '/' + pathname : ''),
+        'x-default': defaultUrl,
+        en: defaultUrl,
         pt: 'https://viajarcomale.com.br' + (pathname ? '/' + pathname : ''),
       },
     },
