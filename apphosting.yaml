@@ -16,10 +16,6 @@ env:
     value: wldnvasjnp3dk8qrop6ei51w19hsxd
   - variable: NEXT_FACEBOOK_DOMAIN_VERIFICATION
     value: f18d9fjwasg617z0ta7inl1go9c44u
-  - variable: NEXT_GTM_TRACKING_BR
-    value: GTM-TKHNG4LM
-  - variable: NEXT_GTM_TRACKING
-    value: GTM-KG98M7XG
   - variable: NEXT_GA_TRACKING_BR
     value: G-DYLH5B5H8G
   - variable: NEXT_GA_TRACKING

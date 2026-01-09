@@ -166,52 +166,9 @@ export default async function RootLayout({ children }) {
             }),
           }}
         ></script>
-
-        {/* eslint-disable-next-line @next/next/next-script-for-ga */}
-        <script
-          id="gtm"
-          dangerouslySetInnerHTML={{
-            __html: `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-        new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-        j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-        'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-        })(window,document,'script','dataLayer','${
-          isBR
-            ? process.env.NEXT_GTM_TRACKING_BR
-            : process.env.NEXT_GTM_TRACKING
-        }');`,
-          }}
-        />
       </head>
 
-      <body
-        className={[
-          // isSubPage ? 'sub-page' : null,
-          // isMediaSingle ? 'single-media-page' : null,
-          // (await getCookie('window_controls_overlay'))
-          //   ? 'window-controls-overlay'
-          //   : null,
-        ]
-          .filter((c) => c)
-          .join(' ')}
-        suppressHydrationWarning
-      >
-        {!ignoreAnalytics && (
-          <noscript>
-            <iframe
-              src={
-                'https://www.googletagmanager.com/ns.html?id=' +
-                (isBR
-                  ? process.env.NEXT_GTM_TRACKING_BR
-                  : process.env.NEXT_GTM_TRACKING)
-              }
-              height="0"
-              width="0"
-              style={{ display: 'none', visibility: 'hidden' }}
-            ></iframe>
-          </noscript>
-        )}
-
+      <body suppressHydrationWarning>
         <div className="background"></div>
 
         <div id="loader-spinner" suppressHydrationWarning>

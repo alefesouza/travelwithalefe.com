@@ -219,15 +219,6 @@ const scroller = {
 // Panorama viewer
 const panorama = {
   initScript: (callback) => {
-    if (!document.querySelector('#pannellum-css')) {
-      const link = document.createElement('link');
-      link.href =
-        'https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css';
-      link.id = 'pannellum-css';
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
-    }
-
     const pannellumLoader = document.querySelector('#pannellum-loader');
 
     if (!pannellumLoader) {
@@ -311,15 +302,6 @@ const mediaViewers = {
   initImageViewer: () => {
     const image = document.querySelector('img[itemprop="contentUrl"]');
     if (!image) return;
-
-    if (!document.querySelector('#viewer-css')) {
-      const link = document.createElement('link');
-      link.href =
-        'https://cdnjs.cloudflare.com/ajax/libs/viewerjs/1.11.6/viewer.min.css';
-      link.id = 'viewer-css';
-      link.rel = 'stylesheet';
-      document.head.appendChild(link);
-    }
 
     setTimeout(() => {
       new Viewer(image, {
