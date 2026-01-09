@@ -8,10 +8,8 @@ User-agent: Googlebot-Video
 User-agent: GoogleOther
 User-agent: Bingbot
 User-agent: BingPreview
-User-agent: DuckDuckBot
 User-agent: Slurp
 User-agent: Baiduspider
-User-agent: YandexBot
 User-agent: AdsBot-Google
 User-agent: GPTBot
 User-agent: Claude-Web
@@ -42,6 +40,15 @@ User-agent: Mediapartners-Google
 User-agent: Pinterestbot
 User-agent: DuckAssistBot
 User-agent: archive.org_bot
+User-agent: NaverBot
+User-agent: OpenAI-SearchBot
+User-agent: OpenAI-DataCollector
+User-agent: WhatsApp
+User-agent: TelegramBot
+User-agent: Discordbot
+User-agent: Slackbot
+User-agent: SkypeUriPreview
+User-agent: YouBot
 Allow: /
 
 User-agent: Googlebot
@@ -51,10 +58,8 @@ User-agent: Googlebot-Video
 User-agent: GoogleOther
 User-agent: Bingbot
 User-agent: BingPreview
-User-agent: DuckDuckBot
 User-agent: Slurp
 User-agent: Baiduspider
-User-agent: YandexBot
 User-agent: AdsBot-Google
 User-agent: GPTBot
 User-agent: Claude-Web
@@ -85,4 +90,8 @@ User-agent: Mediapartners-Google
 User-agent: Pinterestbot
 User-agent: DuckAssistBot
 User-agent: archive.org_bot
+User-agent: NaverBot
+User-agent: OpenAI-SearchBot
+User-agent: OpenAI-DataCollector
+User-agent: YouBot
 Disallow: /*?*sort=
