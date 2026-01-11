@@ -22,4 +22,5 @@ export const RSS_HASHTAGS = [
   'lima',
   'cusco',
   'machupicchu',
+  '7wondersoftheworld',
 ];

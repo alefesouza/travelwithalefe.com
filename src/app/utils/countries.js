@@ -2116,7 +2116,7 @@ const countries = [
         end: '2025-11-16',
         mapZoom: 16,
         latitude: -14.087459557052847,
-        order: 1,
+        order: 4,
         start: '2025-11-16',
         longitude: -75.76315015243257,
         name: 'Huacachina',

@@ -83,6 +83,8 @@ async function fetchLocationsFromFirestore(db) {
     );
   });
 
+  firestoreCache.set({ locations });
+
   return locations;
 }
 
