@@ -2084,7 +2084,7 @@ const countries = [
         slug: 'machu-picchu',
         total: 123,
         end: '2025-11-14',
-        mapZoom: 11,
+        mapZoom: 14,
         order: 2,
         name: 'Machu Picchu',
         latitude: -13.16081127358846,

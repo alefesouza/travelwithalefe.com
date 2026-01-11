@@ -13,6 +13,7 @@ const langs = {
     'Hashtag Search': 'Busca de hashtags',
     '#food': '#comida',
     '#observationdeck': '#mirante',
+    '#7wondersoftheworld': '#7maravilhasdomundo',
     '#favorites': '#favoritos',
     'My photos and videos by country': 'Minhas fotos e vídeos de cada país',
     'Random post': 'Post aleatório',
@@ -68,6 +69,7 @@ const langs = {
     items: 'itens',
     'Main visited places': 'Principais locais visitados',
     Coupons: 'Cupons',
+    'Discount Coupons': 'Cupons de desconto',
     'Click here to open the referral link':
       'Clique para abrir o link de indicação',
     Code: 'Código',
@@ -76,6 +78,7 @@ const langs = {
     Copy: 'Copiar',
     Regulation: 'Regulamento',
     'Open in Stories format': 'Abrir em formato de Stories',
+    'Load Full Quality': 'Carregar qualidade total',
 
     'Next post': 'Próximo post',
     'Next story': 'Próximo story',

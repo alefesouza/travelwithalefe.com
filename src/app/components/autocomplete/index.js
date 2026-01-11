@@ -15,6 +15,7 @@ export default function Autocomplete() {
     i18n('#favorites'),
     i18n('#food'),
     i18n('#observationdeck'),
+    i18n('#7wondersoftheworld'),
   ];
   const featuredOptions = featuredHashtags.map((item) => ({
     label: item,
@@ -39,13 +40,19 @@ export default function Autocomplete() {
   const [customStyle, setCustomStyles] = useState(defaultStyling);
   const [text, setText] = useState('');
 
-  const updateRandomHashtags = (hashtags) => {
+  const updateRandomHashtags = (hashtags, fromClick = false) => {
     const array = Array.from(Array(hashtags.length).keys());
     const randomArray = shuffleArray(array).slice(0, ITEMS_PER_PAGE);
     const randomHashtags = randomArray.map((i) => hashtags[i]);
 
     setRandomHashtags(randomHashtags);
-    setAllOptions([...featuredOptions, ...randomHashtags]);
+
+    if (!fromClick) {
+      setAllOptions([...featuredOptions, ...randomHashtags]);
+      return;
+    }
+
+    setAllOptions([...randomHashtags]);
   };
 
   const updateHashtags = async () => {
@@ -190,7 +197,7 @@ export default function Autocomplete() {
       return;
     }
 
-    updateRandomHashtags(allHashtags);
+    updateRandomHashtags(allHashtags, true);
   };
 
   const Menu = (props) => {
