@@ -1,19 +1,22 @@
-const { translate } = require('@vitalets/google-translate-api');
-const items = require('./the-result.json');
-const fs = require('fs');
+import { translate } from '@vitalets/google-translate-api';
+import items from './the-result.json' with { type: "json" };
+import fs from 'fs';
 
 items
   .filter((item) => item.description && !item.description_pt)
   .forEach(async (item) => {
     const { text } = await translate(item.description, {
-      from: 'en',
-      to: 'pt',
+      from: 'pt',
+      to: 'en',
     });
-    console.log(text);
-    item.description_pt = text;
+
+    console.log(item.description);
+
+    item.description_pt = item.description;
+    item.description = text;
 
     fs.writeFileSync(
-      'helpers/the-result.js',
+      './the-result.js',
       'const result = ' + JSON.stringify(items, null, 4)
     );
   });

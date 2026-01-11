@@ -6,8 +6,8 @@ const { getStorage } = require('firebase-admin/storage');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
 const admin = require('firebase-admin');
-const { createPost } = require('./social-sharing');
-const { createPixelfedPost } = require('./pixelfed-sharing');
+// const { createPost } = require('./social-sharing');
+// const { createPixelfedPost } = require('./pixelfed-sharing');
 
 admin.initializeApp();
 
@@ -106,9 +106,8 @@ exports.onMediaUpdated = onDocumentUpdated(
       return;
     }
 
-
     if (newValue.city === 'lisbon-2' && !newValue.cityData.travel_number) {
-      update.cityData = {...newValue.cityData, travel_number: 2};
+      update.cityData = { ...newValue.cityData, travel_number: 2 };
     }
 
     // Set hashtags to an array
@@ -636,11 +635,11 @@ exports.onHashtagUpdated = onDocumentUpdated(
   }
 );
 
-exports.createPostEveryThirtyMinutes = onSchedule(
-  '*/30 11-23 * * *',
-  createPost
-);
-exports.createPixelfedPostEveryThirtyMinutes = onSchedule(
-  '*/30 11-23 * * *',
-  createPixelfedPost
-);
+// exports.createPostEveryThirtyMinutes = onSchedule(
+//   '*/30 11-23 * * *',
+//   createPost
+// );
+// exports.createPixelfedPostEveryThirtyMinutes = onSchedule(
+//   '*/30 11-23 * * *',
+//   createPixelfedPost
+// );

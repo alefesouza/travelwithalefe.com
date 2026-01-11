@@ -10,17 +10,21 @@ import { theCachedLocations } from '../utils/cache-locations';
 import { theCachedHashtags } from '../utils/cache-hashtags';
 import countries from '../utils/countries';
 import { theCachedCoupons } from '../utils/cache-coupons';
+import { getFirestore } from 'firebase-admin/firestore';
+import useI18n from '../hooks/use-i18n';
 
 customInitApp();
 
 export async function GET() {
+  const i18n = useI18n();
+
   // const host = (string = '') =>
   //   new URL(string, 'https://viajarcomale.com.br/').toString();
   // const host = (string = '') =>
   //   new URL(string, 'https://travelwithalefe.com/').toString();
   const host = useHost();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
-  const lastmod = '2025-08-31';
+  const lastmod = '2026-01-10';
 
   const reference = host('sitemap.xml')
     .split('//')[1]
@@ -53,6 +57,7 @@ export async function GET() {
       highlights = medias.filter((m) => m.is_highlight);
       coupons = theCachedCoupons;
     } else {
+      const db = getFirestore();
       const countriesSnapshot = await db.collection('countries').get();
       let countries = [];
 
@@ -91,7 +96,7 @@ export async function GET() {
       });
     }
 
-    const mediaProcessing = async (media, gallery, position) => {
+    const mediaProcessing = (media, gallery, position) => {
       const item = gallery || media;
 
       if (!item) {
@@ -193,6 +198,9 @@ export async function GET() {
         },
         {
           ...makeLoc('/countries'),
+        },
+        {
+          ...makeLoc('/videos'),
         },
         {
           ...makeLoc('/map'),

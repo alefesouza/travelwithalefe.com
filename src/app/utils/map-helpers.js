@@ -40,6 +40,17 @@ function getLocationsFromCache() {
  * @returns {Promise<Location[]>}
  */
 async function fetchLocationsFromFirestore(db) {
+  const firestoreCache = db.doc('/caches/static_pages/static_pages/locations');
+
+  if (firestoreCache.exists) {
+    const cacheDoc = await firestoreCache.get();
+    const cacheData = cacheDoc.data();
+
+    if (cacheData && Array.isArray(cacheData.locations)) {
+      return cacheData.locations;
+    }
+  }
+
   const locations = [];
 
   const locationsSnapshot = await db.collectionGroup('locations').get();

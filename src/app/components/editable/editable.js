@@ -50,9 +50,9 @@ const Editable = ({ item, path, forceEditTextMode, autoOpenEdit }) => {
       app = firebase.initializeApp(firebaseConfig);
       db = app.firestore();
 
-      if (location.hostname === 'localhost') {
-        db.useEmulator('127.0.0.1', 8080);
-      }
+      // if (location.hostname === 'localhost') {
+      //   db.useEmulator('127.0.0.1', 8080);
+      // }
     } else {
       app = apps[0];
       db = app.firestore();

@@ -7,7 +7,10 @@
   </head>
 
   <body>
-    <script src="./the-result.js"></script>
+    <script src="backup/countries.js"></script>
+    <script src="backup/locations.js"></script>
+    <script src="backup/hashtags.js"></script>
+    <script src="backup/medias.js"></script>
     <script type="module">
       // Import the functions you need from the SDKs you need
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js';
@@ -29,7 +32,7 @@
         collectionGroup,
         query,
         deleteField,
-        setDoc,
+        updateDoc,
         getDoc,
         where,
         connectFirestoreEmulator,
@@ -59,38 +62,14 @@
 
       const theBatch = writeBatch(db);
 
-      result.forEach((item) => {
-        if (item.order === 1) {
-          item.is_highlight = true;
-        }
-
-        item.hashtags = [
-          item.country.replaceAll('-', ''),
-          item.city.replaceAll('-', ''),
-        ];
-        item.hashtags_pt = [
-          item.country.replaceAll('-', ''),
-          item.city.replaceAll('-', ''),
-        ];
-        item.createdAt = serverTimestamp();
-
-        theBatch.set(
-          doc(
-            db,
-            '/countries/' +
-              item.country +
-              '/cities/' +
-              item.city +
-              '/medias/' +
-              item.id
-          ),
-          item,
-          {
-            merge: true,
-          }
-        );
-
-        console.log(item.id);
+      theBatch.set(doc(db, 'pages', 'random'), {
+        value: medias.map((m) => ({
+          city: m.city,
+          country: m.country,
+          file: m.type === 'story' && m.file.includes('.mp4') ? m.file : null,
+          id: m.id,
+          type: m.type,
+        })),
       });
 
       theBatch.commit();

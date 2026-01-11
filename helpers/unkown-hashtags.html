@@ -1,0 +1,191 @@
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <script src="backup/countries.js"></script>
+    <script src="backup/locations.js"></script>
+    <script src="backup/hashtags.js"></script>
+    <script src="backup/medias.js"></script>
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js';
+      import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-analytics.js';
+      import {
+        getStorage,
+        ref,
+        getDownloadURL,
+      } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-storage.js';
+
+      import {
+        getFirestore,
+        collection,
+        getDocs,
+        doc,
+        writeBatch,
+        addDoc,
+        serverTimestamp,
+        collectionGroup,
+        query,
+        deleteField,
+        updateDoc,
+        getDoc,
+        where,
+        connectFirestoreEmulator,
+      } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js';
+
+      // Your web app's Firebase configuration
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: 'AIzaSyBwRPBNhCfGDLC8wdAkIlx9m5mba5gm_iA',
+        authDomain: 'viajarcomale.firebaseapp.com',
+        projectId: 'viajarcomale',
+        storageBucket: 'viajarcomale.appspot.com',
+        messagingSenderId: '207097887664',
+        appId: '1:207097887664:web:b0f038dd322c756f77b475',
+        measurementId: 'G-SGK9KS9BBN',
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+
+      const db = getFirestore(app);
+
+      // connectFirestoreEmulator(db, '127.0.0.1', 8080);
+
+      const theBatch = writeBatch(db);
+
+      const storage = getStorage();
+
+      function string_to_slug(str) {
+        str = str.replace(/^\s+|\s+$/g, ''); // trim
+        str = str.toLowerCase();
+
+        // remove accents, swap ñ for n, etc
+        var from = 'àáäâãèéëêìíïîòóöôõùúüûñç·/_,:;';
+        var to = 'aaaaaeeeeiiiiooooõuuuunc------';
+        for (var i = 0, l = from.length; i < l; i++) {
+          str = str.replace(new RegExp(from.charAt(i), 'g'), to.charAt(i));
+        }
+
+        str = str
+          .replace(/[^a-z0-9 -]/g, '') // remove invalid chars
+          .replace(/\s+/g, '-') // collapse whitespace and replace by -
+          .replace(/-+/g, '-'); // collapse dashes
+
+        return str;
+      }
+
+      const allHashtags = [
+        ...new Set(
+          hashtags.flatMap((hashtag) => [
+            string_to_slug(hashtag.name),
+            hashtag.name_pt ? string_to_slug(hashtag.name_pt) : '',
+          ])
+        ),
+      ].filter((hashtag) => hashtag);
+      let unkownHashtags = medias
+        .filter((media) => media.hashtags && ['peru'].includes(media.country))
+        .flatMap((media) => {
+          return media.hashtags.map((hashtag, i) => {
+            if (media.hashtags_pt[i] && hashtag !== media.hashtags_pt[i]) {
+              return hashtag + ' $ ' + media.hashtags_pt[i];
+            }
+
+            return hashtag;
+          });
+        })
+        .filter((hashtag) => {
+          return !allHashtags.includes(hashtag.split(' $ ')[0]);
+        })
+        .filter((hashtag) => hashtag)
+        .map((hashtag) => string_to_slug(hashtag));
+
+      unkownHashtags = [...new Set([...unkownHashtags])];
+
+      const countrySlugs = countries.map((country) =>
+        country.slug.replaceAll('-', '')
+      );
+      const citySlugs = countries
+        .flatMap((country) => country.cities)
+        .map((city) => city.slug.replaceAll('-', ''));
+      const locationSlugs = locations.map((location) =>
+        location.slug.replaceAll('-', '')
+      );
+
+      console.log(unkownHashtags);
+
+      const newHashtags = [];
+
+      unkownHashtags.forEach((theHashtag) => {
+        const [hashtag, name_pt] = theHashtag.split('-');
+
+        const newHashtag = {
+          name: hashtag,
+          total: 0,
+          totals: {
+            stories: medias.filter(
+              (c) =>
+                c.type === 'story' && c.hashtags && c.hashtags.includes(hashtag)
+            ).length,
+            posts: medias.filter(
+              (c) =>
+                c.type === 'post' && c.hashtags && c.hashtags.includes(hashtag)
+            ).length,
+            photos360: medias.filter(
+              (c) =>
+                c.type === '360photo' &&
+                c.hashtags &&
+                c.hashtags.includes(hashtag)
+            ).length,
+            videos: medias.filter(
+              (c) =>
+                c.type === 'youtube' &&
+                c.hashtags &&
+                c.hashtags.includes(hashtag)
+            ).length,
+            shorts: medias.filter(
+              (c) =>
+                c.type === 'short-video' &&
+                c.hashtags &&
+                c.hashtags.includes(hashtag)
+            ).length,
+            maps: medias.filter(
+              (c) =>
+                c.type === 'maps' && c.hashtags && c.hashtags.includes(hashtag)
+            ).length,
+          },
+          is_place:
+            citySlugs.includes(hashtag) ||
+            countrySlugs.includes(hashtag) ||
+            locationSlugs.includes(hashtag),
+          is_city: citySlugs.includes(hashtag),
+          is_country: countrySlugs.includes(hashtag),
+          is_location: locationSlugs.includes(hashtag),
+          hide_on_cloud: false,
+        };
+
+        if (name_pt) {
+          newHashtag.name_pt = name_pt;
+        }
+
+        console.log(newHashtag);
+
+        const newHashtagRef = doc(db, 'hashtags/' + hashtag);
+
+        theBatch.set(newHashtagRef, newHashtag);
+
+        newHashtags.push(newHashtag);
+      });
+
+      theBatch.commit();
+
+      console.log([...hashtags, ...newHashtags]);
+    </script>
+  </body>
+</html>

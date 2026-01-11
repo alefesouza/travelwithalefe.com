@@ -1,6 +1,6 @@
 # [travelwithalefe.com](https://travelwithalefe.com)
 
-This repository contains the code for the [Travel with Alefe](https://travelwithalefe.com) website, which intends to be a hub to all my travel social media content, with content separated by country, city, location and hashtag, with pages like a map with every place I went, a hashtag cloud, my discount coupons and a TikTok style random vertical video feed of all my Instagram video stories, the template is inspired on link in bio platforms using Google Analytics and PWA concepts like:
+This repository contains the code for the [Travel with Alefe](https://travelwithalefe.com) website, which intends to be a hub to all my travel social media content, with content separated by country, city, location and hashtag, with pages like a map with every place I went, a hashtag cloud, my discount coupons, a TikTok style random vertical video feed of all my Instagram video stories and a random post button, the template is inspired on link in bio platforms using Google Analytics and PWA concepts like:
 
 - Full `manifest.json`
 - Service Worker
@@ -12,7 +12,7 @@ Also some search engine optimizations like:
 - Web Stories
 - Structured Data where possible
 - Full sitemap with image and video extensions
-- Heavy use of local and CDN cache
+- Heavy use of local and Firebase App Hosting caching
 
 You can check the indexed content by searching `site:travelwithalefe.com`.
 

@@ -7,7 +7,10 @@
   </head>
 
   <body>
-    <script src="./the-result.js"></script>
+    <script src="backup/countries.js"></script>
+    <script src="backup/locations.js"></script>
+    <script src="backup/hashtags.js"></script>
+    <script src="backup/medias.js"></script>
     <script type="module">
       // Import the functions you need from the SDKs you need
       import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js';
@@ -29,7 +32,7 @@
         collectionGroup,
         query,
         deleteField,
-        setDoc,
+        updateDoc,
         getDoc,
         where,
         connectFirestoreEmulator,
@@ -59,39 +62,57 @@
 
       const theBatch = writeBatch(db);
 
-      result.forEach((item) => {
-        if (item.order === 1) {
-          item.is_highlight = true;
+      medias.forEach((media, i) => {
+        if (!media.id.includes(media.city) && !media.id.includes('-')) {
+          const split = media.path.split('/');
+          media.id = split[split.length - 1];
+        }
+      });
+
+      medias.sort((a, b) => {
+        return a.id.localeCompare(b.id, 'en', { numeric: true });
+      });
+
+      medias.forEach((media, i) => {
+        const before = medias[i - 1];
+        const after = medias[i + 1];
+
+        const [, beforeCountry, , beforeCity] = before
+          ? before.path.split('/')
+          : [];
+        const [, afterCountry, , afterCity] = after
+          ? after.path.split('/')
+          : [];
+        const [, country, , city] = media.path.split('/');
+
+        if (
+          before &&
+          before.type == media.type &&
+          beforeCity == city &&
+          beforeCountry == country
+        ) {
+          media.previous = before.id;
         }
 
-        item.hashtags = [
-          item.country.replaceAll('-', ''),
-          item.city.replaceAll('-', ''),
-        ];
-        item.hashtags_pt = [
-          item.country.replaceAll('-', ''),
-          item.city.replaceAll('-', ''),
-        ];
-        item.createdAt = serverTimestamp();
+        if (
+          after &&
+          after.type == media.type &&
+          afterCity == city &&
+          afterCountry == country
+        ) {
+          media.next = after.id;
+        }
 
-        theBatch.set(
-          doc(
-            db,
-            '/countries/' +
-              item.country +
-              '/cities/' +
-              item.city +
-              '/medias/' +
-              item.id
-          ),
-          item,
-          {
-            merge: true,
-          }
-        );
-
-        console.log(item.id);
+        if (media.next || media.previous) {
+          theBatch.update(doc(db, media.path), {
+            previous: media.previous || null,
+            next: media.next || null,
+            id: media.id,
+          });
+        }
       });
+
+      console.log(medias);
 
       theBatch.commit();
     </script>

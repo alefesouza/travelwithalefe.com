@@ -1,7 +1,12 @@
 import { parse } from 'js2xmlparser';
 import useHost from '@/app/hooks/use-host';
 import useI18n from '@/app/hooks/use-i18n';
-import { FILE_DOMAIN, SITE_NAME, USE_CACHE } from '@/app/utils/constants';
+import {
+  FILE_DOMAIN,
+  ITEMS_PER_PAGE,
+  SITE_NAME,
+  USE_CACHE,
+} from '@/app/utils/constants';
 import removeDiacritics from '@/app/utils/remove-diacritics';
 import getMetadata from '@/app/utils/get-metadata';
 import getTypePath from '@/app/utils/get-type-path';
@@ -72,7 +77,7 @@ export async function GET(req) {
       USE_CACHE,
       finalHashtag.name,
       type,
-      10,
+      finalHashtag.rss_limit || ITEMS_PER_PAGE,
       editMode
     );
 

@@ -1,0 +1,313 @@
+# hashtags_totals
+
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>Document</title>
+  </head>
+
+  <body>
+    <script type="module">
+      // Import the functions you need from the SDKs you need
+      import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-app.js';
+      import { getAnalytics } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-analytics.js';
+      import {
+        getStorage,
+        ref,
+        getDownloadURL,
+      } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-storage.js';
+
+      import {
+        getFirestore,
+        collection,
+        getDocs,
+        doc,
+        writeBatch,
+        addDoc,
+        serverTimestamp,
+        collectionGroup,
+        query,
+        deleteField,
+        updateDoc,
+        getDoc,
+        where,
+        connectFirestoreEmulator,
+      } from 'https://www.gstatic.com/firebasejs/10.5.2/firebase-firestore.js';
+
+      // Your web app's Firebase configuration
+      // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+      const firebaseConfig = {
+        apiKey: 'AIzaSyBwRPBNhCfGDLC8wdAkIlx9m5mba5gm_iA',
+        authDomain: 'viajarcomale.firebaseapp.com',
+        projectId: 'viajarcomale',
+        storageBucket: 'viajarcomale.appspot.com',
+        messagingSenderId: '207097887664',
+        appId: '1:207097887664:web:b0f038dd322c756f77b475',
+        measurementId: 'G-SGK9KS9BBN',
+      };
+
+      // Initialize Firebase
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+
+      const db = getFirestore(app);
+
+      // connectFirestoreEmulator(db, '127.0.0.1', 8080);
+
+      const storage = getStorage();
+
+      const theBatch = writeBatch(db);
+
+      const museums = collectionGroup(db, 'medias');
+      const querySnapshot = await getDocs(museums);
+
+      const medias = [];
+      querySnapshot.forEach((theDoc) => {
+        const data = theDoc.data();
+        data.path = theDoc.ref.path;
+
+        medias.push(data);
+      });
+
+      const museums2 = collectionGroup(db, 'locations');
+      const querySnapshot2 = await getDocs(museums2);
+
+      const locations = [];
+
+      querySnapshot2.forEach((theDoc) => {
+        const data = theDoc.data();
+
+        const totals = {
+          stories: medias.filter(
+            (c) =>
+              c.country === data.country &&
+              c.type === 'story' &&
+              c.locations &&
+              c.locations.includes(data.slug)
+          ).length,
+          posts: medias.filter(
+            (c) =>
+              c.country === data.country &&
+              c.type === 'post' &&
+              c.locations &&
+              c.locations.includes(data.slug)
+          ).length,
+          photos360: medias.filter(
+            (c) =>
+              c.country === data.country &&
+              c.type === '360photo' &&
+              c.locations &&
+              c.locations.includes(data.slug)
+          ).length,
+          videos: medias.filter(
+            (c) =>
+              c.country === data.country &&
+              c.type === 'youtube' &&
+              c.locations &&
+              c.locations.includes(data.slug)
+          ).length,
+          shorts: medias.filter(
+            (c) =>
+              c.country === data.country &&
+              c.type === 'short-video' &&
+              c.locations &&
+              c.locations.includes(data.slug)
+          ).length,
+          maps: medias.filter(
+            (c) =>
+              c.country === data.country &&
+              c.type === 'maps' &&
+              c.locations &&
+              c.locations.includes(data.slug)
+          ).length,
+        };
+
+        const update = {
+          total:
+            (totals.stories || 0) +
+            (totals.posts || 0) +
+            (totals.photos360 || 0) +
+            (totals.videos || 0) +
+            (totals.shorts || 0) +
+            (totals.maps || 0),
+          totals: {
+            ...totals,
+          },
+        };
+
+        data.total = update.total;
+        data.totals = update.totals;
+
+        locations.push(data);
+
+        theBatch.update(doc(db, theDoc.ref.path), update);
+      });
+
+      const museums3 = collectionGroup(db, 'hashtags');
+      const querySnapshot3 = await getDocs(museums3);
+
+      const hashtags = [];
+
+      querySnapshot3.forEach((theDoc) => {
+        const data = theDoc.data();
+
+        const totals = {
+          stories: medias.filter(
+            (c) =>
+              c.type === 'story' && c.hashtags && c.hashtags.includes(data.name)
+          ).length,
+          posts: medias.filter(
+            (c) =>
+              c.type === 'post' && c.hashtags && c.hashtags.includes(data.name)
+          ).length,
+          photos360: medias.filter(
+            (c) =>
+              c.type === '360photo' &&
+              c.hashtags &&
+              c.hashtags.includes(data.name)
+          ).length,
+          videos: medias.filter(
+            (c) =>
+              c.type === 'youtube' &&
+              c.hashtags &&
+              c.hashtags.includes(data.name)
+          ).length,
+          shorts: medias.filter(
+            (c) =>
+              c.type === 'short-video' &&
+              c.hashtags &&
+              c.hashtags.includes(data.name)
+          ).length,
+          maps: medias.filter(
+            (c) =>
+              c.type === 'maps' && c.hashtags && c.hashtags.includes(data.name)
+          ).length,
+        };
+
+        const update = {
+          total:
+            (totals.stories || 0) +
+            (totals.posts || 0) +
+            (totals.photos360 || 0) +
+            (totals.videos || 0) +
+            (totals.shorts || 0) +
+            (totals.maps || 0),
+          totals: {
+            ...totals,
+          },
+        };
+
+        data.total = update.total;
+        data.totals = update.totals;
+
+        hashtags.push(data);
+
+        theBatch.update(doc(db, theDoc.ref.path), update);
+      });
+
+      const museums4 = collectionGroup(db, 'countries');
+      const querySnapshot4 = await getDocs(museums4);
+
+      const countries = [];
+
+      querySnapshot4.forEach((theDoc) => {
+        const data = theDoc.data();
+
+        data.cities.forEach((city) => {
+          const totals = {
+            stories: medias.filter(
+              (c) =>
+                c.country === data.slug &&
+                c.type === 'story' &&
+                c.city === city.slug
+            ).length,
+            posts: medias.filter(
+              (c) =>
+                c.country === data.slug &&
+                c.type === 'post' &&
+                c.city === city.slug
+            ).length,
+            photos360: medias.filter(
+              (c) =>
+                c.country === data.slug &&
+                c.type === '360photo' &&
+                c.city === city.slug
+            ).length,
+            videos: medias.filter(
+              (c) =>
+                c.country === data.slug &&
+                c.type === 'youtube' &&
+                c.city === city.slug
+            ).length,
+            shorts: medias.filter(
+              (c) =>
+                c.country === data.slug &&
+                c.type === 'short-video' &&
+                c.city === city.slug
+            ).length,
+            maps: medias.filter(
+              (c) =>
+                c.country === data.slug &&
+                c.type === 'maps' &&
+                c.city === city.slug
+            ).length,
+          };
+
+          city.total =
+            (totals.stories || 0) +
+            (totals.posts || 0) +
+            (totals.photos360 || 0) +
+            (totals.videos || 0) +
+            (totals.shorts || 0) +
+            (totals.maps || 0);
+
+          city.totals = totals;
+        });
+
+        const totals = {
+          stories: medias.filter(
+            (c) => c.country === data.slug && c.type === 'story'
+          ).length,
+          posts: medias.filter(
+            (c) => c.country === data.slug && c.type === 'post'
+          ).length,
+          photos360: medias.filter(
+            (c) => c.country === data.slug && c.type === '360photo'
+          ).length,
+          videos: medias.filter(
+            (c) => c.country === data.slug && c.type === 'youtube'
+          ).length,
+          shorts: medias.filter(
+            (c) => c.country === data.slug && c.type === 'short-video'
+          ).length,
+          maps: medias.filter(
+            (c) => c.country === data.slug && c.type === 'maps'
+          ).length,
+        };
+
+        data.total =
+          (totals.stories || 0) +
+          (totals.posts || 0) +
+          (totals.photos360 || 0) +
+          (totals.videos || 0) +
+          (totals.shorts || 0) +
+          (totals.maps || 0);
+
+        data.totals = totals;
+
+        countries.push(data);
+
+        theBatch.update(doc(db, theDoc.ref.path), data);
+      });
+
+      console.log(medias);
+      console.log(locations);
+      console.log(hashtags);
+      console.log(countries);
+
+      theBatch.commit();
+    </script>
+  </body>
+</html>
