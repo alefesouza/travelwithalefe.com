@@ -38,9 +38,8 @@ export default function Hashtags({ item, isBR }) {
 
   return (
     <div className={styles.item_hashtags}>
-      Hashtags:{' '}
       <span itemProp="keywords">
-        {hashtags.reverse().map((h) => {
+        {[...new Set(hashtags)].reverse().map((h) => {
           let link = `/hashtags/${h}`;
 
           if (h == country) {

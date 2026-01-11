@@ -1,7 +1,7 @@
 const socialLinks = [
   {
     text: 'Twitter',
-    url: 'https://twitter.com/travelwithalefe',
+    url: 'https://twitter.com/viajarcomale',
     url_pt: 'https://twitter.com/viajarcomale',
   },
   {

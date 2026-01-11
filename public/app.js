@@ -3,10 +3,10 @@ const utils = {
   isBrazilian: () => window.location.host.includes('viajarcomale.com.br'),
 
   getCurrentLanguageSwitcherUrl: () => {
-    const currentUrl = window.location.href;
-    return utils.isBrazilian()
-      ? currentUrl.replace('viajarcomale.com.br', 'travelwithalefe.com')
-      : currentUrl.replace('travelwithalefe.com', 'viajarcomale.com.br');
+    return !utils.isBrazilian()
+      ? document.querySelector('link[rel="alternate"][hreflang="pt"]').href
+      : document.querySelector('link[rel="alternate"][hreflang="x-default"]')
+          .href;
   },
 
   showAlert: (messageEN, messagePT) => {
@@ -511,14 +511,16 @@ const pageDetection = {
       navigator.language.startsWith('pt') &&
       !document.querySelector('#portuguese-language-switcher') &&
       !pwa.isStandaloneMode() &&
-      !utils.isBrazilian()
+      !utils.isBrazilian() &&
+      !pageDetection.isMediaSingle()
     ) {
       const portugueseLanguageSwitcher = document.createElement('div');
       portugueseLanguageSwitcher.id = 'portuguese-language-switcher';
       const portugueseLanguageSwitcherLink = document.createElement('a');
       portugueseLanguageSwitcherLink.className = 'language';
-      portugueseLanguageSwitcherLink.href =
-        'https://viajarcomale.com.br' + window.location.pathname;
+      portugueseLanguageSwitcherLink.href = document.querySelector(
+        'link[rel="alternate"][hreflang="pt"]'
+      ).href;
       portugueseLanguageSwitcherLink.textContent = 'Clique aqui para português';
       portugueseLanguageSwitcher.appendChild(portugueseLanguageSwitcherLink);
       document.querySelector('header').appendChild(portugueseLanguageSwitcher);
