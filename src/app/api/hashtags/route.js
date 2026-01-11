@@ -7,28 +7,33 @@ import { USE_CACHE } from '@/app/utils/constants';
 
 customInitApp();
 
-export async function GET() {
+export async function GET(req) {
+  const { searchParams } = new URL(req.url);
+  const withLocations = searchParams.get('with_locations');
+
   const host = useHost();
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
-  let theHashtags = [];
+  let allHashtags = [];
 
   if (USE_CACHE) {
-    theHashtags = isBR
-      ? theCachedHashtags.map((h) => h.name_pt || h.name)
-      : theCachedHashtags.map((h) => h.name);
+    allHashtags = theCachedHashtags;
   } else {
     const db = getFirestore();
 
-    const allHashtagsRef = await db
+    const firestoreCachedHashtagsRef = await db
       .collection('caches')
       .doc('static_pages')
       .collection('static_pages')
       .doc('hashtags')
       .get();
-    const allHashtags = allHashtagsRef.data();
+    const firestoreCachedHashtags = firestoreCachedHashtagsRef.data();
 
-    if (!allHashtags || allHashtags.a_should_update) {
+    allHashtags = firestoreCachedHashtags
+      ? firestoreCachedHashtags.hashtags
+      : [];
+
+    if (!firestoreCachedHashtags || firestoreCachedHashtags.a_should_update) {
       const snapshot = await db.collection('hashtags').get();
       const hashtagDocs = [];
 
@@ -37,28 +42,30 @@ export async function GET() {
         hashtagDocs.push(data);
       });
 
-      const hashtags = hashtagDocs.map((h) => h.name).filter((h) => h);
-      const hashtagsPt = hashtagDocs
-        .map((h) => h.name_pt || h.name)
-        .filter((h) => h);
+      allHashtags = hashtagDocs.map((h) => ({
+        name: h.name,
+        name_pt: h.name_pt || null,
+        is_location: h.is_location || false,
+      }));
 
-      theHashtags = isBR ? hashtagsPt : hashtags;
-
-      await allHashtagsRef.ref.set({
+      await firestoreCachedHashtagsRef.ref.set({
         a_should_update: false,
-        hashtags_pt: hashtagsPt,
-        hashtags,
+        hashtags: allHashtags,
       });
-    }
-
-    if (theHashtags.length === 0) {
-      theHashtags = isBR ? allHashtags.hashtags_pt : allHashtags.hashtags;
     }
   }
 
-  logAccess(host('/api/hashtags'));
+  if (!withLocations || withLocations !== 'true') {
+    allHashtags = allHashtags.filter((h) => !h.is_location);
+  }
 
-  return new Response(JSON.stringify(theHashtags), {
+  const hashtags = allHashtags.map((h) =>
+    isBR && h.name_pt ? h.name_pt : h.name
+  );
+
+  logAccess(host('/api/hashtags?with_locations=' + withLocations));
+
+  return new Response(JSON.stringify(hashtags), {
     headers: { 'Content-Type': 'application/json' },
   });
 }

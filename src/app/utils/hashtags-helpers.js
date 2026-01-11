@@ -63,7 +63,9 @@ async function fetchAllHashtagsFromFirestore(db, isBR) {
     .doc('hashtags')
     .get();
   const allHashtagsData = allHashtagsRef.data();
-  return isBR ? allHashtagsData.hashtags_pt : allHashtagsData.hashtags;
+  return allHashtagsData.hashtags.map((h) =>
+    isBR && h.name_pt ? h.name_pt : h.name
+  );
 }
 
 /**

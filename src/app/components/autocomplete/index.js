@@ -23,8 +23,10 @@ export default function Autocomplete() {
   }));
   const [allOptions, setAllOptions] = useState(featuredOptions);
   const [allHashtags, setAllHashtags] = useState(featuredOptions);
+  const [withLocationsChecked, setWithLocationsChecked] = useState(false);
   const [randomHashtags, setRandomHashtags] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [wasShuffled, setWasShuffled] = useState(false);
   const defaultStyling = {
     control: (base, state) => ({
       ...base,
@@ -41,32 +43,46 @@ export default function Autocomplete() {
   const [text, setText] = useState('');
 
   const updateRandomHashtags = (hashtags, fromClick = false) => {
+    if (text.length) {
+      setAllOptions(allHashtags);
+      return;
+    }
+
     const array = Array.from(Array(hashtags.length).keys());
     const randomArray = shuffleArray(array).slice(0, ITEMS_PER_PAGE);
     const randomHashtags = randomArray.map((i) => hashtags[i]);
 
     setRandomHashtags(randomHashtags);
 
-    if (!fromClick) {
+    if (!fromClick && !wasShuffled) {
       setAllOptions([...featuredOptions, ...randomHashtags]);
       return;
     }
 
-    setAllOptions([...randomHashtags]);
+    setAllOptions(randomHashtags);
+    setWasShuffled(true);
   };
 
-  const updateHashtags = async () => {
+  const updateHashtags = async (withLocations, shouldUpdateRandom) => {
     const today = new Date().toISOString().split('T')[0];
-    const hashtagsUpdated = localStorage.getItem('hashtags_updated');
+    const hashtagsUpdated = localStorage.getItem(
+      'hashtags_updated' + (withLocations ? '_with_locations' : '')
+    );
 
     if (hashtagsUpdated) {
-      const hashtags = JSON.parse(localStorage.getItem('hashtags')).map(
-        (h) => ({ label: '#' + h, value: '#' + h })
-      );
+      const hashtags = JSON.parse(
+        localStorage.getItem(
+          'hashtags' + (withLocations ? '_with_locations' : '')
+        )
+      ).map((h) => ({ label: '#' + h, value: '#' + h }));
       setAllHashtags(hashtags);
 
-      if (!randomHashtags.length) {
-        updateRandomHashtags(hashtags);
+      if ((!randomHashtags.length || shouldUpdateRandom) && text.length === 0) {
+        updateRandomHashtags(hashtags, shouldUpdateRandom);
+      }
+
+      if (shouldUpdateRandom && text.length > 0) {
+        setAllOptions(hashtags);
       }
     }
 
@@ -76,23 +92,22 @@ export default function Autocomplete() {
 
     setIsLoading(true);
 
-    const result = await fetch('/api/hashtags');
+    const result = await fetch('/api/hashtags?with_locations=' + withLocations);
     const data = await result.text();
 
     const hashtags = JSON.parse(data).map((h) => ({
       label: '#' + h,
       value: '#' + h,
     }));
-    setAllHashtags([...featuredOptions, ...hashtags]);
 
-    localStorage.setItem('hashtags', data);
-    localStorage.setItem(
-      'hashtags_updated',
-      new Date().toISOString().split('T')[0]
-    );
+    if (withLocations) {
+      setAllHashtags(hashtags);
+    } else {
+      setAllHashtags([...featuredOptions, ...hashtags]);
+    }
 
-    if (!hashtagsUpdated) {
-      updateRandomHashtags(hashtags);
+    if (!hashtagsUpdated || withLocations) {
+      updateRandomHashtags(hashtags, withLocations);
     }
 
     setIsLoading(false);
@@ -189,7 +204,7 @@ export default function Autocomplete() {
     };
   }, []);
 
-  const onShuffleClick = (e) => {
+  const handleShuffleClick = (e) => {
     if (
       e.nativeEvent instanceof PointerEvent &&
       e.nativeEvent.pointerType === 'touch'
@@ -200,6 +215,11 @@ export default function Autocomplete() {
     updateRandomHashtags(allHashtags, true);
   };
 
+  const handleIncluceLocationsChange = (e) => {
+    setWithLocationsChecked(e.target.checked);
+    updateHashtags(e.target.checked, true);
+  };
+
   const Menu = (props) => {
     return (
       <>
@@ -207,13 +227,23 @@ export default function Autocomplete() {
           <div>
             <div>{props.children}</div>
           </div>
+          <div>
+            <label>
+              <input
+                type="checkbox"
+                onChange={handleIncluceLocationsChange}
+                checked={withLocationsChecked}
+              />{' '}
+              Include locations
+            </label>
+          </div>
           {text.length <= 1 && (
             <div style={{ textAlign: 'center', padding: 5 }}>
               <button
                 className="btn btn-primary"
                 style={{ width: '100%' }}
-                onClick={onShuffleClick}
-                onTouchStart={onShuffleClick}
+                onClick={handleShuffleClick}
+                onTouchStart={handleShuffleClick}
               >
                 {i18n('Shuffle')}
               </button>

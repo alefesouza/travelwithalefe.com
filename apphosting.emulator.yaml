@@ -9,9 +9,9 @@ env:
   - variable: NEXT_FACEBOOK_DOMAIN_VERIFICATION
     value: f18d9fjwasg617z0ta7inl1go9c44u
   - variable: NEXT_GA_TRACKING_BR
-    value: G-DYLH5B5H8G
+    value: G-SGK9KS9BBN
   - variable: NEXT_GA_TRACKING
-    value: G-5P2W9QP6M4
+    value: G-82XD635PJV
   - variable: NEXT_MAPS_API_KEY
     value: AIzaSyDHlaC0rNWLdOVdagruwlLTCGu6BajppZQ
   - variable: NEXT_PUBLIC_LOCALE
