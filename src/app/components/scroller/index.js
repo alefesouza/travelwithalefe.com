@@ -31,7 +31,10 @@ export default async function Scroller({
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
 
   return (
-    <div data-scroller data-only-stories={isStories ? 'true' : 'false'}>
+    <div
+      data-scroller
+      data-only-stories={isStories || isInstagramHighlights ? 'true' : 'false'}
+    >
       <div className="container-fluid">
         <div
           style={{

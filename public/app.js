@@ -151,8 +151,7 @@ const scroller = {
         scrollElement.classList.add('instagram_highlights_items');
         scrollElement.classList.add('container-fluid');
         scrollElement.classList.remove('scroller_scroller_items');
-        maximizeButton.textContent = maximizeButton.dataset.mintext;
-        maximizeButton.style.display = 'flex';
+        maximizeButton.style.display = 'none';
         scrollRight.style.display = 'none';
         scrollLeft.style.display = 'none';
       } else if (

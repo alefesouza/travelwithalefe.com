@@ -11,6 +11,8 @@ export default function RandomPostButton({ text }) {
   const handleRandomPost = async () => {
     setIsLoading(true);
 
+    document.querySelector('#loader-spinner').style.display = 'block';
+
     try {
       // Fetch random media URL from API
       const response = await fetch('/api/random');

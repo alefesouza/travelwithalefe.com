@@ -133,7 +133,7 @@ export default function Autocomplete() {
   };
 
   const onFocus = () => {
-    updateHashtags();
+    updateHashtags(withLocationsChecked);
   };
 
   useEffect(() => {
@@ -215,9 +215,9 @@ export default function Autocomplete() {
     updateRandomHashtags(allHashtags, true);
   };
 
-  const handleIncluceLocationsChange = (e) => {
-    setWithLocationsChecked(e.target.checked);
-    updateHashtags(e.target.checked, true);
+  const handleIncluceLocationsChange = () => {
+    setWithLocationsChecked(!withLocationsChecked);
+    updateHashtags(!withLocationsChecked, true);
   };
 
   const Menu = (props) => {
@@ -227,15 +227,13 @@ export default function Autocomplete() {
           <div>
             <div>{props.children}</div>
           </div>
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                onChange={handleIncluceLocationsChange}
-                checked={withLocationsChecked}
-              />{' '}
-              Include locations
-            </label>
+          <div onClick={handleIncluceLocationsChange} role="button">
+            <input
+              type="checkbox"
+              id="autocomplete_include_locations"
+              defaultChecked={withLocationsChecked}
+            />{' '}
+            <label>{i18n('Include locations')}</label>
           </div>
           {text.length <= 1 && (
             <div style={{ textAlign: 'center', padding: 5 }}>

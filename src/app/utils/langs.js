@@ -15,6 +15,7 @@ const langs = {
     '#observationdeck': '#mirante',
     '#7wondersoftheworld': '#7maravilhasdomundo',
     '#favorites': '#favoritos',
+    'Include locations': 'Incluir locais',
     'My photos and videos by country': 'Minhas fotos e vídeos de cada país',
     'Random post': 'Post aleatório',
 
