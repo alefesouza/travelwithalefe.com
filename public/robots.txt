@@ -59,7 +59,6 @@ User-agent: SkypeUriPreview
 User-agent: YouBot
 Allow: /
 
-
 User-agent: Googlebot
 User-agent: Googlebot-Image
 User-agent: Googlebot-News
@@ -111,5 +110,6 @@ User-agent: NaverBot
 User-agent: OpenAI-SearchBot
 User-agent: OpenAI-DataCollector
 User-agent: YouBot
-Disallow: /*?*sort=
+Disallow: /*?*
 Disallow: /*expand
+Disallow: */webstories$

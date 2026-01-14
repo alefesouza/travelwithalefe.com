@@ -221,9 +221,6 @@ export async function GET() {
           {
             ...makeLoc('/countries/' + c.slug),
           },
-          {
-            ...makeLoc('/countries/' + c.slug + '/expand'),
-          },
           ...Array.from(
             {
               length: Math.ceil(
@@ -234,11 +231,6 @@ export async function GET() {
               {
                 ...makeLoc('/countries/' + c.slug + '/page/' + (i + 2)),
               },
-              {
-                ...makeLoc(
-                  '/countries/' + c.slug + '/page/' + (i + 2) + '/expand'
-                ),
-              },
             ]
           ),
         ]),
@@ -247,11 +239,6 @@ export async function GET() {
             c.cities.map((city) => [
               {
                 ...makeLoc('/countries/' + c.slug + '/cities/' + city.slug),
-              },
-              {
-                ...makeLoc(
-                  '/countries/' + c.slug + '/cities/' + city.slug + '/expand'
-                ),
               },
               ...Array.from(
                 {
@@ -271,18 +258,7 @@ export async function GET() {
                         '/page/' +
                         (i + 2)
                     ),
-                  },
-                  {
-                    ...makeLoc(
-                      '/countries/' +
-                        c.slug +
-                        '/cities/' +
-                        city.slug +
-                        '/page/' +
-                        (i + 2) +
-                        '/expand'
-                    ),
-                  },
+                  }
                 ]
               ),
             ])
@@ -302,18 +278,6 @@ export async function GET() {
                 decodeURIComponent(c.slug)
               ),
             },
-            c?.totals?.posts
-              ? {
-                  ...makeLoc(
-                    '/countries/' +
-                      c.country +
-                      '/cities/' +
-                      c.city +
-                      '/locations/',
-                    decodeURIComponent(c.slug) + '/expand'
-                  ),
-                }
-              : null,
             ...Array.from(
               {
                 length:
@@ -341,21 +305,6 @@ export async function GET() {
                 ),
               })
             ),
-            ...Array.from(
-              {
-                length: Math.ceil(c?.totals?.posts / ITEMS_PER_PAGE - 1),
-              },
-              (_, i) => ({
-                ...makeLoc(
-                  '/countries/' +
-                    c.country +
-                    '/cities/' +
-                    c.city +
-                    '/locations/',
-                  decodeURIComponent(c.slug) + '/page/' + (i + 2) + '/expand'
-                ),
-              })
-            ),
           ])
           .filter((c) => c),
 
@@ -373,16 +322,6 @@ export async function GET() {
                 c.name_pt
               ),
             },
-            c?.totals?.posts
-              ? {
-                  ...makeLoc(
-                    '/hashtags/',
-                    decodeURIComponent(c.name) + '/expand',
-                    c.name,
-                    c.name_pt
-                  ),
-                }
-              : null,
             ...Array.from(
               {
                 length:
@@ -403,19 +342,6 @@ export async function GET() {
                 ...makeLoc(
                   '/hashtags/',
                   decodeURIComponent(c.name) + '/page/' + (i + 2),
-                  c.name,
-                  c.name_pt
-                ),
-              })
-            ),
-            ...Array.from(
-              {
-                length: Math.ceil(c?.totals?.posts / ITEMS_PER_PAGE - 1),
-              },
-              (_, i) => ({
-                ...makeLoc(
-                  '/hashtags/',
-                  decodeURIComponent(c.name) + '/page/' + (i + 2) + '/expand',
                   c.name,
                   c.name_pt
                 ),
