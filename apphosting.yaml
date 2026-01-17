@@ -6,7 +6,7 @@
 runConfig:
   minInstances: 0
   cpu: 1
-  memoryMiB: 512
+  memoryMiB: 256
 
 # Environment variables and secrets.
 env:
