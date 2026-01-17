@@ -227,7 +227,7 @@ export default function Autocomplete() {
           <div>
             <div>{props.children}</div>
           </div>
-          <div onClick={handleIncluceLocationsChange} role="button">
+          <div onClick={handleIncluceLocationsChange} onTouchStart={handleIncluceLocationsChange} role="button">
             <input
               type="checkbox"
               id="autocomplete_include_locations"

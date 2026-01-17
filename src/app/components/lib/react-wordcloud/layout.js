@@ -27,7 +27,6 @@ export function render({ callbacks, options, random, selection, words }) {
   } = callbacks;
   const {
     colors,
-    enableTooltip,
     fontStyle,
     fontWeight,
     textAttributes,
@@ -44,7 +43,7 @@ export function render({ callbacks, options, random, selection, words }) {
   const vizWords = selection.selectAll('text').data(words);
   vizWords.join(
     enter => {
-      const a = enter.append('a').attr('href', word => '/hashtags/' + word.text.replace('#', ''));
+      const a = enter.append('a').attr('href', word => '/hashtags/' + word.text.replace('#', '')).attr('target', '_blank');
 
       a
       .on('click', word => {
@@ -80,7 +79,7 @@ export function render({ callbacks, options, random, selection, words }) {
 
       let text = a
         .append('text')
-        .attr('cursor', onWordClick ? 'pointer' : 'default')
+        .attr('cursor', 'pointer')
         .attr('fill', getFill)
         .attr('font-family', fontFamily)
         .attr('font-style', fontStyle)
