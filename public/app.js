@@ -393,7 +393,9 @@ const pageDetection = {
       body.classList.remove('single-media-page');
     }
 
-    pwa.checkWindowControlsOverlay();
+    if ('windowControlsOverlay' in navigator) {
+      pwa.checkWindowControlsOverlay();
+    }
   },
 };
 
