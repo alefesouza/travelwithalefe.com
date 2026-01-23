@@ -1,8 +1,19 @@
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
-    'Noto Sans', 'Liberation Sans', Arial, sans-serif, 'Apple Color Emoji',
-    'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+  font-family:
+    system-ui,
+    -apple-system,
+    'Segoe UI',
+    Roboto,
+    'Helvetica Neue',
+    'Noto Sans',
+    'Liberation Sans',
+    Arial,
+    sans-serif,
+    'Apple Color Emoji',
+    'Segoe UI Emoji',
+    'Segoe UI Symbol',
+    'Noto Color Emoji';
   font-size: 16px;
   font-weight: 400;
   line-height: 1.5;
@@ -356,8 +367,11 @@ button:not(:disabled) {
   font-size: 1rem;
   line-height: 1.5;
   border-radius: 0.25rem;
-  transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out,
-    border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+  transition:
+    color 0.15s ease-in-out,
+    background-color 0.15s ease-in-out,
+    border-color 0.15s ease-in-out,
+    box-shadow 0.15s ease-in-out;
 }
 
 .btn-primary {
@@ -1082,4 +1096,18 @@ body:not(.sub-page) .mobile-autocomplete {
 
 #back-button {
   display: flex;
+}
+
+.short-videos-link {
+  margin-top: -6.5px;
+}
+
+.short-videos-link a {
+  display: inline-flex;
+  flex-direction: column;
+  line-height: 12px;
+}
+
+.short-videos-link small {
+  font-size: 10px;
 }

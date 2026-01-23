@@ -6,10 +6,15 @@ const NavbarLinks = async () => {
 
   return (
     <ul className="navbar-nav">
-      <li className="nav-item" suppressHydrationWarning>
-        <Link className="nav-link" href="/videos" prefetch={false}>
-          {i18n('Videos')}
-        </Link>
+      <li className="nav-item short-videos-link" suppressHydrationWarning>
+        <Link
+          className="nav-link"
+          href="/videos"
+          prefetch={false}
+          dangerouslySetInnerHTML={{
+            __html: i18n('<small>Short</small>Videos'),
+          }}
+        />
       </li>
       <li className="nav-item" suppressHydrationWarning>
         <Link className="nav-link" href="/map" prefetch={false}>

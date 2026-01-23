@@ -149,6 +149,7 @@ const langs = {
       'Feed principal com as fotos e vídeos mais recentes do Viajar com Alê',
 
     Videos: 'Vídeos',
+    '<small>Short</small>Videos': '<small>Short</small>Vídeos',
     'Video Feed': 'Feed de vídeos',
     "Travel with Alefe's video feed.": 'Feed de vídeos do Viajar com Alê.',
     'Swipe up': 'Arraste para cima',
