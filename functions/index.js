@@ -781,17 +781,18 @@ function buildNotificationPayload(media) {
   if (cityName) bodyParts.push(`City: ${cityName}`);
   if (countryName) bodyParts.push(countryName);
 
-  const body = bodyParts.join(', ') || 'Check out this travel content!';
+  const body =
+    bodyParts.slice(1).join(', ') || 'Check out this travel content!';
   const contentUrl = mediaToUrl(media);
 
   if (media.file.includes('.mp4')) {
-    media.file.replace('.mp4', '-thumb.png');
+    media.file = media.file.replace('.mp4', '-thumb.png');
   }
 
   return {
     topic: 'daily-content-en',
     notification: {
-      title: 'Travel with Alefe',
+      title: bodyParts[0] || 'Travel with Alefe',
       body: body,
       imageUrl: `https://storage.googleapis.com/files.viajarcomale.com/resize/500${media.file}`,
     },
@@ -827,13 +828,14 @@ function buildNotificationPayloadPt(media) {
   if (cityName) bodyParts.push(`Cidade: ${cityName}`);
   if (countryName) bodyParts.push(countryName);
 
-  const body = bodyParts.join(', ') || 'Confira este conteúdo de viagem!';
+  const body =
+    bodyParts.slice(1).join(', ') || 'Confira este conteúdo de viagem!';
   const contentUrl = mediaToUrl(media);
 
   return {
     topic: 'daily-content-pt',
     notification: {
-      title: 'Viajar com Alê',
+      title: bodyParts[0] || 'Viajar com Alê',
       body: body,
       imageUrl: `https://storage.googleapis.com/files.viajarcomale.com/resize/500${media.file}`,
     },
@@ -856,7 +858,7 @@ function buildNotificationPayloadPt(media) {
 }
 
 // Scheduled function: Send daily notification at 3:00 PM UTC
-exports.sendDailyNotification = onSchedule('0 15 * * *', async () => {
+exports.sendDailyNotification = onSchedule('0 15,21 * * *', async () => {
   console.log('Starting daily notification job...');
 
   try {

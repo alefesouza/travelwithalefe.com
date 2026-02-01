@@ -72,23 +72,19 @@ self.addEventListener('notificationclick', async (event) => {
 
   if (event.action === 'short_videos') {
     urlToOpen = '/videos';
-  } else if (event.action === 'random_post') {
-    const randomResponse = await fetch('/api/random');
-    const randomData = await randomResponse.json();
-    urlToOpen = randomData.url || '/';
   }
 
   event.waitUntil(
-    clients
-      .matchAll({ type: 'window', includeUncontrolled: true })
-      .then((windowClients) => {
-        for (const client of windowClients) {
-          if (client.url.includes(self.location.origin) && 'focus' in client) {
-            client.navigate(urlToOpen);
-            return client.focus();
-          }
-        }
+    new Promise(async () => {
+      if (event.action === 'random_post') {
+        const randomResponse = await fetch('/api/random');
+        const randomData = await randomResponse.json();
+        urlToOpen = randomData.url || '/';
+      }
+
+      return clients.matchAll({ type: 'window' }).then(() => {
         return clients.openWindow(urlToOpen);
-      }),
+      });
+    }),
   );
 });

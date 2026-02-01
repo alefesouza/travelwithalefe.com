@@ -312,11 +312,15 @@ pwa.checkWindowControlsOverlay = () => {
 // Navigation utilities
 const navigation = {
   showSpinner: (e) => {
-    const link = e?.target?.href || e?.target?.closest('a')?.href;
+    if (e.target.getAttribute('href') === '#') {
+      return;
+    }
 
     if ((e?.target?.closest('a')?.target || e?.target?.target) === '_blank') {
       return;
     }
+
+    const link = e?.target?.href || e?.target?.closest('a')?.href;
 
     if (e?.metaKey || !link) {
       return;
@@ -324,7 +328,6 @@ const navigation = {
 
     if (
       !link.includes(window.location.origin + '/') ||
-      link.includes(window.location.origin + window.location.pathname + '#') ||
       link === window.location.href
     ) {
       return;

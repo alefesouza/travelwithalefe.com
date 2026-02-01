@@ -26,6 +26,6 @@ The [./functions](./functions/) directory contains Firebase Cloud Functions that
 
 ![Web App Screenshot](./webapp2.png)
 
-<div style="text-align: center;">
-  <img src="./public/images/notification_2.png" alt="Push Notifications" style="max-width: 400px;">
+<div align="center">
+  <img src="./public/images/notification_2.png" alt="Push Notifications" style="width: 350px;">
 </div>
