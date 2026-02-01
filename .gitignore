@@ -71,3 +71,4 @@ public/swe-worker*
 .claude
 .specify/scripts
 .specify/templates
+.gemini
