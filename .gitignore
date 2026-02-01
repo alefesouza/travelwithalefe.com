@@ -67,3 +67,7 @@ items.json
 
 public/sw*
 public/swe-worker*
+
+.claude
+.specify/scripts
+.specify/templates
