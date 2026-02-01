@@ -25,3 +25,7 @@ The website uses Firebase Cloud Firestore as its database. The [./helpers](./hel
 The [./functions](./functions/) directory contains Firebase Cloud Functions that help update Cloud Firestore docs when a related doc is created or changed, and some functions that automatically share content to X, Bluesky, and some Fediverse platforms (Mastodon, Pixelfed) periodically. The website also automatically generates RSS feeds for the home page and hashtags, which are useful for automatically sharing content to Pinterest.
 
 ![Web App Screenshot](./webapp2.png)
+
+<div style="text-align: center;">
+  <img src="./public/images/notification_2.png" alt="Push Notifications" style="max-width: 400px;">
+</div>

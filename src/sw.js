@@ -26,9 +26,23 @@ serwist.addEventListeners();
 self.addEventListener('push', (event) => {
   const data = event.data?.json() || {};
 
+  const labels = {
+    body:
+      data.data?.lang === 'pt-BR'
+        ? 'Novo conteúdo disponível!'
+        : 'New content available!',
+    short_videos:
+      data.data?.lang === 'pt-BR' ? 'Vídeos curtos' : 'Short Videos',
+    random_post: data.data?.lang === 'pt-BR' ? 'Post aleatório' : 'Random Post',
+  };
+
   const options = {
-    body: data.notification?.body || 'New content available!',
-    icon: data.notification?.icon || '/icons/192x192.png',
+    body: data.notification?.body || labels.body,
+    icon:
+      // Use only if Notification API supports 'image' property (macOS does not support it)
+      ('image' in Notification.prototype
+        ? data.notification?.icon
+        : data.notification?.image) || '/icons/192x192.png',
     badge: '/icons/96x96.png',
     image: data.notification?.image,
     data: {
@@ -36,21 +50,33 @@ self.addEventListener('push', (event) => {
     },
     vibrate: [100, 50, 100],
     requireInteraction: false,
+    actions: [
+      { action: 'short_videos', title: labels.short_videos },
+      { action: 'random_post', title: labels.random_post },
+    ],
   };
 
   event.waitUntil(
     self.registration.showNotification(
       data.notification?.title || 'Travel with Alefe',
-      options
-    )
+      options,
+    ),
   );
 });
 
 // Notification click handler
-self.addEventListener('notificationclick', (event) => {
+self.addEventListener('notificationclick', async (event) => {
   event.notification.close();
 
-  const urlToOpen = event.notification.data?.url || '/';
+  let urlToOpen = event.notification.data?.url || '/';
+
+  if (event.action === 'short_videos') {
+    urlToOpen = '/videos';
+  } else if (event.action === 'random_post') {
+    const randomResponse = await fetch('/api/random');
+    const randomData = await randomResponse.json();
+    urlToOpen = randomData.url || '/';
+  }
 
   event.waitUntil(
     clients
@@ -63,6 +89,6 @@ self.addEventListener('notificationclick', (event) => {
           }
         }
         return clients.openWindow(urlToOpen);
-      })
+      }),
   );
 });

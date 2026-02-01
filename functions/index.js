@@ -726,7 +726,7 @@ async function getRandomMedia() {
   }
 
   const data = randomDoc.data();
-  const allMedia = data.medias || [];
+  const allMedia = data.value || [];
 
   if (allMedia.length === 0) {
     console.error('No media found in pages/random');
@@ -749,8 +749,23 @@ function mediaToUrl(media) {
     maps: 'maps',
   };
 
-  const path = typeToPath[media.type] || 'posts';
-  return `/countries/${media.country}/cities/${media.city}/${path}/${media.id}`;
+  // Process the media ID
+  let mediaId = media.id
+    .replace(media.city + '-post-', '')
+    .replace(media.city + '-story-', '')
+    .replace(media.city + '-youtube-', '')
+    .replace(media.city + '-short-video-', '')
+    .replace(media.city + '-360photo-', '')
+    .replace(media.city + '-maps-', '')
+    .replace('road-trip-sea-las-story-', '')
+    .replace('road-trip-sea-las-post-', '');
+
+  // Construct the URL
+  const url = `/countries/${media.country}/cities/${media.city}/${
+    typeToPath[media.type]
+  }/${mediaId}`;
+
+  return url;
 }
 
 // Helper: Build notification payload for English topic
@@ -769,12 +784,16 @@ function buildNotificationPayload(media) {
   const body = bodyParts.join(', ') || 'Check out this travel content!';
   const contentUrl = mediaToUrl(media);
 
+  if (media.file.includes('.mp4')) {
+    media.file.replace('.mp4', '-thumb.png');
+  }
+
   return {
     topic: 'daily-content-en',
     notification: {
       title: 'Travel with Alefe',
       body: body,
-      imageUrl: `https://storage.googleapis.com/files.viajarcomale.com/resize/500/${media.file}`,
+      imageUrl: `https://storage.googleapis.com/files.viajarcomale.com/resize/500${media.file}`,
     },
     webpush: {
       fcmOptions: {
@@ -789,6 +808,7 @@ function buildNotificationPayload(media) {
       url: contentUrl,
       contentType: media.type,
       contentId: media.id,
+      lang: 'en-US',
     },
   };
 }
@@ -815,7 +835,7 @@ function buildNotificationPayloadPt(media) {
     notification: {
       title: 'Viajar com Alê',
       body: body,
-      imageUrl: `https://storage.googleapis.com/files.viajarcomale.com/resize/500/${media.file}`,
+      imageUrl: `https://storage.googleapis.com/files.viajarcomale.com/resize/500${media.file}`,
     },
     webpush: {
       fcmOptions: {
@@ -830,6 +850,7 @@ function buildNotificationPayloadPt(media) {
       url: contentUrl,
       contentType: media.type,
       contentId: media.id,
+      lang: 'pt-BR',
     },
   };
 }
@@ -840,14 +861,28 @@ exports.sendDailyNotification = onSchedule('0 15 * * *', async () => {
 
   try {
     // Get random media
-    const media = await getRandomMedia();
+    const randomMedia = await getRandomMedia();
 
-    if (!media) {
+    if (!randomMedia) {
       console.error('No media available for notification');
       return;
     }
 
-    console.log(`Selected media: ${media.id} (${media.type})`);
+    console.log(
+      `Selected random media: ${randomMedia.id} (${randomMedia.type})`,
+    );
+
+    // Fetch and log the specific media document based on the random media
+    const db = getFirestore();
+    const docRef = db
+      .collection('countries')
+      .doc(randomMedia.country)
+      .collection('cities')
+      .doc(randomMedia.city)
+      .collection('medias')
+      .doc(randomMedia.id);
+    const doc = await docRef.get();
+    const media = doc.data();
 
     const messaging = getMessaging();
 

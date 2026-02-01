@@ -9,8 +9,51 @@ const utils = {
           .href;
   },
 
-  showAlert: (messageEN, messagePT) => {
-    alert(utils.isBrazilian() ? messagePT : messageEN);
+  showModal: (messageEN, messagePT, html = '', intervalId = null) => {
+    const message = utils.isBrazilian() ? messagePT : messageEN;
+
+    // Create modal elements
+    const modalOverlay = document.createElement('div');
+    modalOverlay.id = 'gemini-modal-overlay';
+    modalOverlay.className = 'gemini-modal-overlay';
+
+    const modalContainer = document.createElement('div');
+    modalContainer.id = 'gemini-modal-container';
+    modalContainer.className = 'gemini-modal-container';
+
+    const modalContent = document.createElement('div');
+    modalContent.className = 'gemini-modal-content';
+    modalContent.innerHTML = `
+      <p>${message}</p>
+      ${html}
+      <button class="gemini-modal-close-button">X</button>
+      <button class="btn btn-primary modal-close-bottom">${utils.isBrazilian() ? 'Fechar' : 'Close'}</button>
+    `;
+
+    modalContainer.appendChild(modalContent);
+    modalOverlay.appendChild(modalContainer);
+    document.body.appendChild(modalOverlay);
+
+    // Close functionality
+    const closeButtonTop = modalContent.querySelector(
+      '.gemini-modal-close-button',
+    );
+    const closeButtonBottom = modalContent.querySelector('.modal-close-bottom');
+    const closeModal = () => {
+      clearInterval(intervalId); // Clear the interval
+      document.body.removeChild(modalOverlay);
+    };
+
+    closeButtonTop.addEventListener('click', closeModal);
+    closeButtonBottom.addEventListener('click', closeModal);
+
+    modalOverlay.addEventListener('click', (e) => {
+      if (e.target === modalOverlay) {
+        closeModal();
+      }
+    });
+
+    return closeModal;
   },
 
   getText: (textEN, textPT) => (utils.isBrazilian() ? textPT : textEN),
@@ -70,11 +113,35 @@ const pushNotifications = {
 
   // Request permission and subscribe to topic
   requestPermissionAndSubscribe: async () => {
+    let notificationImage1 = null;
+    let notificationImage2 = null;
+    let currentImage = 1;
+
+    const intervalId = setInterval(() => {
+      if (currentImage === 1) {
+        notificationImage1.style.display = 'none';
+        notificationImage2.style.display = 'block';
+        currentImage = 2;
+      } else {
+        notificationImage1.style.display = 'block';
+        notificationImage2.style.display = 'none';
+        currentImage = 1;
+      }
+    }, 2000); // Change image every 1 second
+
     // Show explanatory dialog while requesting permission
-    utils.showAlert(
+    const closePushModal = utils.showModal(
       'By enabling push notifications, you will receive a notification with random content every day.',
       'Ao ativar as notificações push, você receberá uma notificação com conteúdo aleatório todos os dias.',
+      `<div id="gemini-notification-images" style="text-align: center; margin-top: 10px;">
+        <img id="notification-image-1" src="/images/notification_1.png" alt="Notification Image 1" style="max-width: 100%; height: auto; display: block; margin: 0 auto;" />
+        <img id="notification-image-2" src="/images/notification_2.png" alt="Notification Image 2" style="max-width: 100%; height: auto; display: none; margin: 0 auto;" />
+      </div>`,
+      intervalId,
     );
+
+    notificationImage1 = document.getElementById('notification-image-1');
+    notificationImage2 = document.getElementById('notification-image-2');
 
     try {
       const permission = await Notification.requestPermission();
@@ -134,24 +201,26 @@ const pushNotifications = {
             // Update button visibility
             pushNotifications.updateButtonVisibility();
 
-            utils.showAlert(
+            utils.showModal(
               'Push notifications enabled successfully!',
               'Notificações push ativadas com sucesso!',
             );
+            closePushModal();
           } else {
             throw new Error('Failed to subscribe to topic');
           }
         }
       } else if (permission === 'denied') {
-        utils.showAlert(
+        utils.showModal(
           'Permission denied. You can enable notifications in browser settings.',
           'Permissão negada. Você pode ativar as notificações nas configurações do navegador.',
         );
         pushNotifications.updateButtonVisibility();
+        closePushModal();
       }
     } catch (error) {
       console.error('Error enabling push notifications:', error);
-      utils.showAlert(
+      utils.showModal(
         'Push notifications are not supported in this browser.',
         'Notificações push não são suportadas neste navegador.',
       );
@@ -187,7 +256,7 @@ const pushNotifications = {
       // Update button visibility
       pushNotifications.updateButtonVisibility();
 
-      utils.showAlert(
+      utils.showModal(
         'Push notifications disabled.',
         'Notificações push desativadas.',
       );
@@ -673,7 +742,7 @@ const pageDetection = {
     document.querySelectorAll('[data-copy]').forEach((item) => {
       item.onclick = function () {
         navigator.clipboard.writeText(this.dataset.copy).then(() => {
-          utils.showAlert(
+          utils.showModal(
             'Copied to clipboard.',
             'Copiado para a área de transferência.',
           );
