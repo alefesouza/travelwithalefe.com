@@ -23,16 +23,13 @@ import styles from './page.module.css';
  * @returns {Promise<{coupons: Coupon[]}>}
  */
 async function fetchCouponsFromFirestore(db) {
-  const coupons = [];
   const couponsSnapshot = await db
-    .collection('coupons')
-    .orderBy('order', 'desc')
+    .doc('/caches/static_pages/static_pages/coupons')
     .get();
+  const coupons = couponsSnapshot.data().coupons || [];
 
-  couponsSnapshot.forEach((doc) => {
-    const data = doc.data();
-    data.id = data.slug;
-    coupons.push(data);
+  coupons.forEach((coupon) => {
+    coupon.id = coupon.slug;
   });
 
   return { coupons };
@@ -77,7 +74,7 @@ export async function generateMetadata() {
   const description = getLocalizedText(
     host(),
     couponsPageData.description,
-    couponsPageData.description_pt
+    couponsPageData.description_pt,
   );
 
   return defaultMetadata(title, description, 'coupons');
@@ -128,7 +125,7 @@ export default async function Coupons({ searchParams }) {
             {getLocalizedText(
               host(),
               couponsPageData.description,
-              couponsPageData.description_pt
+              couponsPageData.description_pt,
             )}
           </div>
         </div>

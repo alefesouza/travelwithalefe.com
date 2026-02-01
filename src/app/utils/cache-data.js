@@ -2,9 +2,10 @@ import countries from './countries';
 
 const cachedCountries = countries.map((country) => country.slug);
 const cachedCities = countries.flatMap((country) =>
-  country.cities ? country.cities.map((city) => city.slug) : []
+  country.cities ? country.cities.map((city) => city.slug) : [],
 );
 const cachedCoupons = [
+  '99food',
   'airalo',
   'aliexpress',
   'binance',
