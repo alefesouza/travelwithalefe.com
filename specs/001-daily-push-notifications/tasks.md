@@ -25,8 +25,8 @@
 
 **Purpose**: Add translation strings and verify Firebase configuration
 
-- [ ] T001 Add push notification translation strings to src/app/utils/langs.js
-- [ ] T002 Verify FCM is enabled in Firebase Console (Settings > Cloud Messaging)
+- [x] T001 Add push notification translation strings to src/app/utils/langs.js
+- [x] T002 Verify FCM is enabled in Firebase Console (Settings > Cloud Messaging)
 
 ---
 
@@ -36,8 +36,8 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T003 Add push event handler to service worker in src/sw.js (handles incoming notifications)
-- [ ] T004 Add notificationclick event handler to service worker in src/sw.js (handles notification tap/click)
+- [x] T003 Add push event handler to service worker in src/sw.js (handles incoming notifications)
+- [x] T004 Add notificationclick event handler to service worker in src/sw.js (handles notification tap/click)
 
 **Checkpoint**: Foundation ready - user story implementation can now begin
 
@@ -51,13 +51,13 @@
 
 ### Implementation for User Story 1
 
-- [ ] T005 [US1] Add hidden "Enable push notifications" button to sidebar in src/app/components/sidebar/index.js (following "Add to Home Screen" pattern)
-- [ ] T006 [US1] Add pushNotifications object to public/app.js with capability detection logic
-- [ ] T007 [US1] Implement showEnableButton() function in public/app.js to show button when Push API supported and not subscribed
-- [ ] T008 [US1] Implement requestPermissionAndSubscribe() function in public/app.js with explanatory dialog
-- [ ] T009 [US1] Implement topic subscription logic in public/app.js (subscribe to daily-content-en or daily-content-pt based on domain)
-- [ ] T010 [US1] Implement localStorage state management in public/app.js (pushNotificationSubscribed, pushNotificationTopic keys)
-- [ ] T011 [US1] Wire up button click handler and initial visibility check in public/app.js
+- [x] T005 [US1] Add hidden "Enable push notifications" button to sidebar in src/app/components/sidebar/index.js (following "Add to Home Screen" pattern)
+- [x] T006 [US1] Add pushNotifications object to public/app.js with capability detection logic
+- [x] T007 [US1] Implement showEnableButton() function in public/app.js to show button when Push API supported and not subscribed
+- [x] T008 [US1] Implement requestPermissionAndSubscribe() function in public/app.js with explanatory dialog
+- [x] T009 [US1] Implement topic subscription logic in public/app.js (subscribe to daily-content-en or daily-content-pt based on domain)
+- [x] T010 [US1] Implement localStorage state management in public/app.js (pushNotificationSubscribed, pushNotificationTopic keys)
+- [x] T011 [US1] Wire up button click handler and initial visibility check in public/app.js
 
 **Checkpoint**: Users can subscribe to notifications. Button shows/hides correctly based on state.
 
@@ -71,13 +71,13 @@
 
 ### Implementation for User Story 2
 
-- [ ] T012 [US2] Add getMessaging import to functions/index.js
-- [ ] T013 [US2] Create getRandomMedia() helper function in functions/index.js to select random item from pages/random document
-- [ ] T014 [US2] Create mediaToUrl() helper function in functions/index.js to generate content URL from media object
-- [ ] T015 [US2] Create buildNotificationPayload() function in functions/index.js for English topic (daily-content-en)
-- [ ] T016 [US2] Create buildNotificationPayloadPt() function in functions/index.js for Portuguese topic (daily-content-pt) with name_pt fallbacks
-- [ ] T017 [US2] Create sendDailyNotification scheduled function in functions/index.js with onSchedule('0 15 * * *') for 3:00 PM UTC
-- [ ] T018 [US2] Implement notification send to both topics (daily-content-en and daily-content-pt) in sendDailyNotification function
+- [x] T012 [US2] Add getMessaging import to functions/index.js
+- [x] T013 [US2] Create getRandomMedia() helper function in functions/index.js to select random item from pages/random document
+- [x] T014 [US2] Create mediaToUrl() helper function in functions/index.js to generate content URL from media object
+- [x] T015 [US2] Create buildNotificationPayload() function in functions/index.js for English topic (daily-content-en)
+- [x] T016 [US2] Create buildNotificationPayloadPt() function in functions/index.js for Portuguese topic (daily-content-pt) with name_pt fallbacks
+- [x] T017 [US2] Create sendDailyNotification scheduled function in functions/index.js with onSchedule('0 15 * * *') for 3:00 PM UTC
+- [x] T018 [US2] Implement notification send to both topics (daily-content-en and daily-content-pt) in sendDailyNotification function
 
 **Checkpoint**: Daily notifications are sent at 3:00 PM UTC to all subscribers in their language.
 
@@ -91,10 +91,10 @@
 
 ### Implementation for User Story 3
 
-- [ ] T019 [US3] Update sidebar button in src/app/components/sidebar/index.js to support both enable and disable states
-- [ ] T020 [US3] Add unsubscribeFromNotifications() function in public/app.js to unsubscribe from topic
-- [ ] T021 [US3] Update button state management in public/app.js to toggle between enable/disable based on subscription status
-- [ ] T022 [US3] Add translation strings for "Disable push notifications" in src/app/utils/langs.js
+- [x] T019 [US3] Update sidebar button in src/app/components/sidebar/index.js to support both enable and disable states
+- [x] T020 [US3] Add unsubscribeFromNotifications() function in public/app.js to unsubscribe from topic
+- [x] T021 [US3] Update button state management in public/app.js to toggle between enable/disable based on subscription status
+- [x] T022 [US3] Add translation strings for "Disable push notifications" in src/app/utils/langs.js
 
 **Checkpoint**: Users can unsubscribe and re-subscribe to notifications via the UI.
 
@@ -110,8 +110,8 @@
 
 > Note: Most bilingual support is already integrated into US1 (topic selection) and US2 (payload building). This phase handles any remaining items.
 
-- [ ] T023 [US4] Verify topic selection logic in public/app.js correctly detects viajarcomale.com.br domain
-- [ ] T024 [US4] Verify Portuguese payload in functions/index.js uses name_pt with fallback to name for all fields
+- [x] T023 [US4] Verify topic selection logic in public/app.js correctly detects viajarcomale.com.br domain
+- [x] T024 [US4] Verify Portuguese payload in functions/index.js uses name_pt with fallback to name for all fields
 
 **Checkpoint**: Bilingual notifications work correctly for both domains.
 
@@ -121,11 +121,11 @@
 
 **Purpose**: Validation and final checks
 
-- [ ] T025 Run `npm run lint` and fix any linting errors
-- [ ] T026 Run `npm run build` and verify build succeeds
-- [ ] T027 Manual testing: Subscribe from localhost, trigger function manually, verify notification received
-- [ ] T028 Manual testing: Click notification and verify redirect to correct content page
-- [ ] T029 Deploy functions with `cd functions && npm run deploy`
+- [x] T025 Run `npm run lint` and fix any linting errors
+- [x] T026 Run `npm run build` and verify build succeeds
+- [x] T027 Manual testing: Subscribe from localhost, trigger function manually, verify notification received
+- [x] T028 Manual testing: Click notification and verify redirect to correct content page
+- [x] T029 Deploy functions with `cd functions && npm run deploy`
 
 ---
 

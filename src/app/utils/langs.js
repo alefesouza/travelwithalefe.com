@@ -10,6 +10,17 @@ const langs = {
     'Albums - Photos separated by country': 'Álbuns - Fotos separadas por país',
     '360 Photos': 'Fotos 360',
     'Add to Home Screen': 'Adicionar à tela inicial',
+    'Enable push notifications': 'Ativar notificações push',
+    'Disable push notifications': 'Desativar notificações push',
+    'By enabling push notifications, you will receive a notification with random content every day.':
+      'Ao ativar as notificações push, você receberá uma notificação com conteúdo aleatório todos os dias.',
+    'Push notifications enabled successfully!':
+      'Notificações push ativadas com sucesso!',
+    'Push notifications disabled.': 'Notificações push desativadas.',
+    'Push notifications are not supported in this browser.':
+      'Notificações push não são suportadas neste navegador.',
+    'Permission denied. You can enable notifications in browser settings.':
+      'Permissão negada. Você pode ativar as notificações nas configurações do navegador.',
     'Hashtag Search': 'Busca de hashtags',
     '#food': '#comida',
     '#observationdeck': '#mirante',

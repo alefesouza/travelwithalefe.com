@@ -139,6 +139,24 @@ export default async function Sidebar() {
           >
             {i18n('Add to Home Screen')}
           </a>
+          <a
+            href="#"
+            id="enable-push-notifications"
+            className="list-group-item list-group-item-action"
+            style={{ display: 'none' }}
+            suppressHydrationWarning
+          >
+            {i18n('Enable push notifications')}
+          </a>
+          <a
+            href="#"
+            id="disable-push-notifications"
+            className="list-group-item list-group-item-action"
+            style={{ display: 'none' }}
+            suppressHydrationWarning
+          >
+            {i18n('Disable push notifications')}
+          </a>
         </div>
       </div>
       <Footer />

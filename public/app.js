@@ -23,19 +23,221 @@ const pwa = {
 
   isWindowControlsOverlayMode: () =>
     window.matchMedia('(display-mode: window-controls-overlay)').matches,
+};
 
-  checkWindowControlsOverlay: () => {
-    const body = document.querySelector('body');
+// Push Notifications
+const pushNotifications = {
+  // Check if browser supports push notifications
+  isSupported: () =>
+    'Notification' in window &&
+    'serviceWorker' in navigator &&
+    'PushManager' in window,
 
-    const isOverlayVisible = navigator.windowControlsOverlay.visible;
+  // Check if user is already subscribed
+  isSubscribed: () =>
+    localStorage.getItem('pushNotificationSubscribed') === 'true',
 
-    if (isOverlayVisible) {
-      body.classList.add('window-controls-overlay');
+  // Get the topic based on domain
+  getTopic: () =>
+    utils.isBrazilian() ? 'daily-content-pt' : 'daily-content-en',
+
+  // Update button visibility based on subscription state
+  updateButtonVisibility: () => {
+    const enableBtns = document.querySelectorAll('#enable-push-notifications');
+    const disableBtns = document.querySelectorAll(
+      '#disable-push-notifications',
+    );
+
+    if (enableBtns.length === 0 && disableBtns.length === 0) return;
+
+    if (!pushNotifications.isSupported()) {
+      enableBtns.forEach((btn) => (btn.style.display = 'none'));
+      disableBtns.forEach((btn) => (btn.style.display = 'none'));
       return;
     }
 
-    body.classList.remove('window-controls-overlay');
+    if (pushNotifications.isSubscribed()) {
+      enableBtns.forEach((btn) => (btn.style.display = 'none'));
+      disableBtns.forEach((btn) => (btn.style.display = 'block'));
+    } else if (Notification.permission !== 'denied') {
+      enableBtns.forEach((btn) => (btn.style.display = 'block'));
+      disableBtns.forEach((btn) => (btn.style.display = 'none'));
+    } else {
+      enableBtns.forEach((btn) => (btn.style.display = 'none'));
+      disableBtns.forEach((btn) => (btn.style.display = 'none'));
+    }
   },
+
+  // Request permission and subscribe to topic
+  requestPermissionAndSubscribe: async () => {
+    // Show explanatory dialog while requesting permission
+    utils.showAlert(
+      'By enabling push notifications, you will receive a notification with random content every day.',
+      'Ao ativar as notificações push, você receberá uma notificação com conteúdo aleatório todos os dias.',
+    );
+
+    try {
+      const permission = await Notification.requestPermission();
+
+      if (permission === 'granted') {
+        // Get service worker registration
+        const registration = await navigator.serviceWorker.ready;
+
+        // Get FCM token and subscribe to topic
+        const { getToken, getMessaging } =
+          await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-messaging.js');
+        const { initializeApp } =
+          await import('https://www.gstatic.com/firebasejs/11.1.0/firebase-app.js');
+
+        // Initialize Firebase (use existing config if available)
+        const firebaseConfig = {
+          apiKey: 'AIzaSyAF_eks-zMMusYpr0a-lZPfhxsMEo-2MS8',
+          authDomain: 'viajarcomale.firebaseapp.com',
+          projectId: 'viajarcomale',
+          storageBucket: 'viajarcomale.appspot.com',
+          messagingSenderId: '207097887664',
+          appId: utils.isBrazilian
+            ? '1:207097887664:web:b0f038dd322c756f77b475'
+            : '1:207097887664:web:2a746899ec96057577b475',
+          measurementId: 'G-82XD635PJV',
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const messaging = getMessaging(app);
+
+        // Get token with service worker
+        const token = await getToken(messaging, {
+          serviceWorkerRegistration: registration,
+        });
+
+        if (token) {
+          // Subscribe to topic via Cloud Function
+          const topic = utils.isBrazilian()
+            ? 'daily-content-pt'
+            : 'daily-content-en';
+
+          const response = await fetch(
+            'https://us-central1-viajarcomale.cloudfunctions.net/subscribeToTopic',
+            {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ token, topic }),
+            },
+          );
+
+          if (response.ok) {
+            // Save subscription state to localStorage
+            localStorage.setItem('pushNotificationSubscribed', 'true');
+            localStorage.setItem('pushNotificationTopic', topic);
+            localStorage.setItem('pushNotificationToken', token);
+
+            // Update button visibility
+            pushNotifications.updateButtonVisibility();
+
+            utils.showAlert(
+              'Push notifications enabled successfully!',
+              'Notificações push ativadas com sucesso!',
+            );
+          } else {
+            throw new Error('Failed to subscribe to topic');
+          }
+        }
+      } else if (permission === 'denied') {
+        utils.showAlert(
+          'Permission denied. You can enable notifications in browser settings.',
+          'Permissão negada. Você pode ativar as notificações nas configurações do navegador.',
+        );
+        pushNotifications.updateButtonVisibility();
+      }
+    } catch (error) {
+      console.error('Error enabling push notifications:', error);
+      utils.showAlert(
+        'Push notifications are not supported in this browser.',
+        'Notificações push não são suportadas neste navegador.',
+      );
+    }
+  },
+
+  // Unsubscribe from push notifications
+  unsubscribeFromNotifications: async () => {
+    try {
+      const token = localStorage.getItem('pushNotificationToken');
+      const topic = localStorage.getItem('pushNotificationTopic');
+
+      if (token && topic) {
+        const response = await fetch(
+          'https://us-central1-viajarcomale.cloudfunctions.net/unsubscribeFromTopic',
+          {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token, topic }),
+          },
+        );
+
+        if (!response.ok) {
+          console.error('Failed to unsubscribe from topic');
+        }
+      }
+
+      // Clear subscription state from localStorage
+      localStorage.removeItem('pushNotificationSubscribed');
+      localStorage.removeItem('pushNotificationTopic');
+      localStorage.removeItem('pushNotificationToken');
+
+      // Update button visibility
+      pushNotifications.updateButtonVisibility();
+
+      utils.showAlert(
+        'Push notifications disabled.',
+        'Notificações push desativadas.',
+      );
+    } catch (error) {
+      console.error('Error disabling push notifications:', error);
+    }
+  },
+
+  // Initialize push notification buttons
+  init: () => {
+    const enableBtns = document.querySelectorAll('#enable-push-notifications');
+    const disableBtns = document.querySelectorAll(
+      '#disable-push-notifications',
+    );
+
+    if (enableBtns.length === 0 && disableBtns.length === 0) return;
+
+    // Update button visibility
+    pushNotifications.updateButtonVisibility();
+
+    // Add click handler for enable button
+    enableBtns.forEach((enableBtn) => {
+      enableBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        pushNotifications.requestPermissionAndSubscribe();
+      });
+    });
+
+    // Add click handler for disable button
+    disableBtns.forEach((disableBtn) => {
+      disableBtn.addEventListener('click', (event) => {
+        event.preventDefault();
+        pushNotifications.unsubscribeFromNotifications();
+      });
+    });
+  },
+};
+
+// Add checkWindowControlsOverlay to pwa object
+pwa.checkWindowControlsOverlay = () => {
+  const body = document.querySelector('body');
+
+  const isOverlayVisible = navigator.windowControlsOverlay.visible;
+
+  if (isOverlayVisible) {
+    body.classList.add('window-controls-overlay');
+    return;
+  }
+
+  body.classList.remove('window-controls-overlay');
 };
 
 // Navigation utilities
@@ -255,8 +457,8 @@ const panorama = {
         panorama: fullQuality
           ? panoramaEl.dataset.photo
           : maxWidth > 8192
-          ? panoramaEl.dataset.resize11968
-          : panoramaEl.dataset.resize8192,
+            ? panoramaEl.dataset.resize11968
+            : panoramaEl.dataset.resize8192,
         autoLoad: true,
         autoRotate: -2,
         preview: panoramaEl.dataset.thumbnail,
@@ -292,7 +494,7 @@ const mediaViewers = {
         window.location.replace(
           'vnd.youtube://www.youtube.com/watch?v=' +
             youtubeId +
-            '&sub_confirmation=1'
+            '&sub_confirmation=1',
         );
       }
     }
@@ -401,31 +603,33 @@ const pageDetection = {
 
 (() => {
   let deferredPrompt;
-  const addToHomeBtn = document.querySelector('#add-to-home');
+  const addToHomeBtns = document.querySelectorAll('#add-to-home');
 
   window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
 
-    if (!addToHomeBtn) {
+    if (addToHomeBtns.length === 0) {
       return;
     }
 
-    addToHomeBtn.style.display = 'block';
+    addToHomeBtns.forEach((addToHomeBtn) => {
+      addToHomeBtn.style.display = 'block';
 
-    addToHomeBtn.addEventListener('click', (event) => {
-      event.preventDefault();
+      addToHomeBtn.addEventListener('click', (event) => {
+        event.preventDefault();
 
-      addToHomeBtn.style.display = 'none';
+        addToHomeBtn.style.display = 'none';
 
-      deferredPrompt.prompt();
+        deferredPrompt.prompt();
 
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted to install Travel with Alefe');
-        } else {
-          console.log('User dismissed to install Travel with Alefe');
-        }
-        deferredPrompt = null;
+        deferredPrompt.userChoice.then((choiceResult) => {
+          if (choiceResult.outcome === 'accepted') {
+            console.log('User accepted to install Travel with Alefe');
+          } else {
+            console.log('User dismissed to install Travel with Alefe');
+          }
+          deferredPrompt = null;
+        });
       });
     });
   });
@@ -471,7 +675,7 @@ const pageDetection = {
         navigator.clipboard.writeText(this.dataset.copy).then(() => {
           utils.showAlert(
             'Copied to clipboard.',
-            'Copiado para a área de transferência.'
+            'Copiado para a área de transferência.',
           );
         });
       };
@@ -520,7 +724,7 @@ const pageDetection = {
       const portugueseLanguageSwitcherLink = document.createElement('a');
       portugueseLanguageSwitcherLink.className = 'language';
       portugueseLanguageSwitcherLink.href = document.querySelector(
-        'link[rel="alternate"][hreflang="pt"]'
+        'link[rel="alternate"][hreflang="pt"]',
       ).href;
       portugueseLanguageSwitcherLink.textContent = 'Clique aqui para português';
       portugueseLanguageSwitcher.appendChild(portugueseLanguageSwitcherLink);
@@ -592,6 +796,9 @@ const pageDetection = {
   window.addEventListener('pageshow', navigation.hideSpinner);
 
   navigation.initNavbarLinkClick();
+
+  // Initialize push notifications button
+  pushNotifications.init();
 
   headObserverFn();
 

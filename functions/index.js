@@ -5,6 +5,8 @@ const {
 const { getStorage } = require('firebase-admin/storage');
 const { getFirestore, FieldValue } = require('firebase-admin/firestore');
 const { onSchedule } = require('firebase-functions/v2/scheduler');
+const { onRequest } = require('firebase-functions/v2/https');
+const { getMessaging } = require('firebase-admin/messaging');
 const admin = require('firebase-admin');
 // const { createPost } = require('./social-sharing');
 // const { createPixelfedPost } = require('./pixelfed-sharing');
@@ -24,7 +26,7 @@ exports.onMediaCreated = onDocumentCreated(
           newValue.hashtags
             .split('#')
             .map((h) => h.trim())
-            .filter((h) => h)
+            .filter((h) => h),
         ),
       ];
     }
@@ -35,7 +37,7 @@ exports.onMediaCreated = onDocumentCreated(
     update.createdAt = FieldValue.serverTimestamp();
 
     return event.data.ref.update(update);
-  }
+  },
 );
 
 function getTotalKey(type) {
@@ -117,7 +119,7 @@ exports.onMediaUpdated = onDocumentUpdated(
           newValue.hashtags
             .split('#')
             .map((h) => h.trim())
-            .filter((h) => h)
+            .filter((h) => h),
         ),
       ];
     }
@@ -128,7 +130,7 @@ exports.onMediaUpdated = onDocumentUpdated(
           newValue.hashtags_pt
             .split('#')
             .map((h) => h.trim())
-            .filter((h) => h)
+            .filter((h) => h),
         ),
       ];
     }
@@ -167,7 +169,7 @@ exports.onMediaUpdated = onDocumentUpdated(
         .where(
           'slug',
           'in',
-          newValue.locations.map((l) => string_to_slug(l))
+          newValue.locations.map((l) => string_to_slug(l)),
         )
         .get();
 
@@ -201,7 +203,7 @@ exports.onMediaUpdated = onDocumentUpdated(
           [
             newValue.hashtags,
             locations.map((l) => l.slug.replaceAll('-', '')),
-          ].flat()
+          ].flat(),
         ),
       ];
       update.hashtags_pt = [
@@ -209,7 +211,7 @@ exports.onMediaUpdated = onDocumentUpdated(
           [
             newValue.hashtags_pt,
             locations.map((l) => l.slug.replaceAll('-', '')),
-          ].flat()
+          ].flat(),
         ),
       ];
     }
@@ -265,7 +267,7 @@ exports.onMediaUpdated = onDocumentUpdated(
       }
 
       db.doc(
-        `/countries/${newValue.country}/cities/${newValue.city}/locations/${slug}`
+        `/countries/${newValue.country}/cities/${newValue.city}/locations/${slug}`,
       ).set(theNewLocation, { merge: true });
 
       update.location_data = [theNewLocation];
@@ -279,7 +281,7 @@ exports.onMediaUpdated = onDocumentUpdated(
             : []),
           ...(newValue.alternative_names
             ? newValue.alternative_names.map((l) =>
-                string_to_slug(l).replaceAll('-', '')
+                string_to_slug(l).replaceAll('-', ''),
               )
             : []),
         ]),
@@ -295,7 +297,7 @@ exports.onMediaUpdated = onDocumentUpdated(
             : []),
           ...(newValue.alternative_names
             ? newValue.alternative_names.map((l) =>
-                string_to_slug(l).replaceAll('-', '')
+                string_to_slug(l).replaceAll('-', ''),
               )
             : []),
         ]),
@@ -325,10 +327,10 @@ exports.onMediaUpdated = onDocumentUpdated(
         (hashtag) => {
           sorts.forEach((sort) => {
             batch.delete(
-              db.doc(`caches/feeds/hashtags-cache/${hashtag}/sort/${sort}`)
+              db.doc(`caches/feeds/hashtags-cache/${hashtag}/sort/${sort}`),
             );
             batch.delete(
-              db.doc(`caches/hashtags/hashtags-cache/${hashtag}/sort/${sort}`)
+              db.doc(`caches/hashtags/hashtags-cache/${hashtag}/sort/${sort}`),
             );
           });
 
@@ -337,8 +339,8 @@ exports.onMediaUpdated = onDocumentUpdated(
               sorts.forEach((sort) => {
                 const file = bucket.file(
                   `webstories/${site}-webstories-hashtags-${encodeURIComponent(
-                    hashtag
-                  )}-${sort}.html`
+                    hashtag,
+                  )}-${sort}.html`,
                 );
 
                 promises.push(
@@ -346,14 +348,14 @@ exports.onMediaUpdated = onDocumentUpdated(
                     if (exists[0]) {
                       return file.delete();
                     }
-                  })
+                  }),
                 );
               });
             });
           } catch (e) {
             console.log(e);
           }
-        }
+        },
       );
 
       if (newValue.locations) {
@@ -361,8 +363,8 @@ exports.onMediaUpdated = onDocumentUpdated(
           sorts.forEach((sort) => {
             batch.delete(
               db.doc(
-                `caches/locations/locations-cache/${newValue.city}-${location}/sort/${sort}`
-              )
+                `caches/locations/locations-cache/${newValue.city}-${location}/sort/${sort}`,
+              ),
             );
           });
 
@@ -370,7 +372,7 @@ exports.onMediaUpdated = onDocumentUpdated(
             sites.forEach((site) => {
               sorts.forEach((sort) => {
                 const file = bucket.file(
-                  `webstories/${site}-webstories-countries-${newValue.country}-cities-${newValue.city}-locations-${location}-${sort}.html`
+                  `webstories/${site}-webstories-countries-${newValue.country}-cities-${newValue.city}-locations-${location}-${sort}.html`,
                 );
 
                 promises.push(
@@ -378,7 +380,7 @@ exports.onMediaUpdated = onDocumentUpdated(
                     if (exists[0]) {
                       return file.delete();
                     }
-                  })
+                  }),
                 );
               });
             });
@@ -391,7 +393,9 @@ exports.onMediaUpdated = onDocumentUpdated(
       if (newValue.type === 'story') {
         sorts.forEach((sort) => {
           batch.delete(
-            db.doc(`caches/stories/stories-cache/${newValue.city}/sort/${sort}`)
+            db.doc(
+              `caches/stories/stories-cache/${newValue.city}/sort/${sort}`,
+            ),
           );
         });
 
@@ -399,7 +403,7 @@ exports.onMediaUpdated = onDocumentUpdated(
           sites.forEach((site) => {
             sorts.forEach((sort) => {
               const file = bucket.file(
-                `webstories/${site}-webstories-countries-${newValue.country}-cities-${newValue.city}-stories-${sort}.html`
+                `webstories/${site}-webstories-countries-${newValue.country}-cities-${newValue.city}-stories-${sort}.html`,
               );
 
               promises.push(
@@ -407,7 +411,7 @@ exports.onMediaUpdated = onDocumentUpdated(
                   if (exists[0]) {
                     return file.delete();
                   }
-                })
+                }),
               );
             });
           });
@@ -421,16 +425,16 @@ exports.onMediaUpdated = onDocumentUpdated(
               db.doc(
                 `caches/countries/countries-cache/${
                   newValue.country
-                }/country/page/${index + 1}/sort/${sort}`
-              )
+                }/country/page/${index + 1}/sort/${sort}`,
+              ),
             );
 
             batch.delete(
               db.doc(
                 `caches/countries/countries-cache/${newValue.country}/${
                   newValue.city
-                }/page/${index + 1}/sort/${sort}`
-              )
+                }/page/${index + 1}/sort/${sort}`,
+              ),
             );
           });
         });
@@ -450,7 +454,7 @@ exports.onMediaUpdated = onDocumentUpdated(
     promises.push(event.data.after.ref.update(update));
 
     return Promise.all(promises);
-  }
+  },
 );
 
 exports.onLocationUpdated = onDocumentUpdated(
@@ -465,9 +469,9 @@ exports.onLocationUpdated = onDocumentUpdated(
     if (oldValue.slug !== newValue.slug || oldValue.city !== newValue.city) {
       batch.set(
         db.doc(
-          `/countries/${newValue.country}/cities/${newValue.city}/locations/${newValue.slug}`
+          `/countries/${newValue.country}/cities/${newValue.city}/locations/${newValue.slug}`,
         ),
-        newValue
+        newValue,
       );
     }
 
@@ -509,7 +513,7 @@ exports.onLocationUpdated = onDocumentUpdated(
 
         if (locationData) {
           const locationDataIndex = locationData.findIndex(
-            (l) => l.slug === oldValue.slug
+            (l) => l.slug === oldValue.slug,
           );
 
           if (locationData[locationDataIndex]) {
@@ -518,7 +522,7 @@ exports.onLocationUpdated = onDocumentUpdated(
 
           if (newValue.slug !== oldValue.slug) {
             const locationIndex = locations.findIndex(
-              (l) => l === oldValue.slug
+              (l) => l === oldValue.slug,
             );
 
             if (locationData[locationIndex]) {
@@ -565,7 +569,7 @@ exports.onLocationUpdated = onDocumentUpdated(
     }
 
     return batch.commit();
-  }
+  },
 );
 
 exports.onHashtagUpdated = onDocumentUpdated(
@@ -599,11 +603,11 @@ exports.onHashtagUpdated = onDocumentUpdated(
         hashtags[hashtagIndex] = newValue.name;
 
         const hashtagPtIndex = hashtags_pt.findIndex(
-          (l) => l === oldValue.name
+          (l) => l === oldValue.name,
         );
 
         const hashtagPtPtIndex = hashtags_pt.findIndex(
-          (l) => l === oldValue.name_pt
+          (l) => l === oldValue.name_pt,
         );
 
         if (hashtags_pt[hashtagPtIndex]) {
@@ -632,7 +636,7 @@ exports.onHashtagUpdated = onDocumentUpdated(
     }
 
     return batch.commit();
-  }
+  },
 );
 
 // exports.createPostEveryThirtyMinutes = onSchedule(
@@ -643,3 +647,238 @@ exports.onHashtagUpdated = onDocumentUpdated(
 //   '*/30 11-23 * * *',
 //   createPixelfedPost
 // );
+
+// ============================================
+// Push Notifications
+// ============================================
+
+// HTTP function to subscribe a token to a topic
+exports.subscribeToTopic = onRequest(
+  { cors: ['https://travelwithalefe.com', 'https://viajarcomale.com.br'] },
+  async (req, res) => {
+    if (req.method !== 'POST') {
+      res.status(405).send('Method Not Allowed');
+      return;
+    }
+
+    const { token, topic } = req.body;
+
+    if (!token || !topic) {
+      res.status(400).send('Missing token or topic');
+      return;
+    }
+
+    // Validate topic name
+    const validTopics = ['daily-content-en', 'daily-content-pt'];
+    if (!validTopics.includes(topic)) {
+      res.status(400).send('Invalid topic');
+      return;
+    }
+
+    try {
+      const messaging = getMessaging();
+      await messaging.subscribeToTopic([token], topic);
+      console.log(`Successfully subscribed token to topic ${topic}`);
+      res.status(200).json({ success: true, topic });
+    } catch (error) {
+      console.error('Error subscribing to topic:', error);
+      res.status(500).send('Error subscribing to topic');
+    }
+  },
+);
+
+// HTTP function to unsubscribe a token from a topic
+exports.unsubscribeFromTopic = onRequest(
+  { cors: ['https://travelwithalefe.com', 'https://viajarcomale.com.br'] },
+  async (req, res) => {
+    if (req.method !== 'POST') {
+      res.status(405).send('Method Not Allowed');
+      return;
+    }
+
+    const { token, topic } = req.body;
+
+    if (!token || !topic) {
+      res.status(400).send('Missing token or topic');
+      return;
+    }
+
+    try {
+      const messaging = getMessaging();
+      await messaging.unsubscribeFromTopic([token], topic);
+      console.log(`Successfully unsubscribed token from topic ${topic}`);
+      res.status(200).json({ success: true });
+    } catch (error) {
+      console.error('Error unsubscribing from topic:', error);
+      res.status(500).send('Error unsubscribing from topic');
+    }
+  },
+);
+
+// Helper: Get random media from pages/random document
+async function getRandomMedia() {
+  const db = getFirestore();
+  const randomDoc = await db.collection('pages').doc('random').get();
+
+  if (!randomDoc.exists) {
+    console.error('pages/random document does not exist');
+    return null;
+  }
+
+  const data = randomDoc.data();
+  const allMedia = data.medias || [];
+
+  if (allMedia.length === 0) {
+    console.error('No media found in pages/random');
+    return null;
+  }
+
+  // Select a random item
+  const randomIndex = Math.floor(Math.random() * allMedia.length);
+  return allMedia[randomIndex];
+}
+
+// Helper: Generate content URL from media object
+function mediaToUrl(media) {
+  const typeToPath = {
+    post: 'posts',
+    story: 'stories',
+    '360photo': '360-photos',
+    youtube: 'videos',
+    'short-video': 'short-videos',
+    maps: 'maps',
+  };
+
+  const path = typeToPath[media.type] || 'posts';
+  return `/countries/${media.country}/cities/${media.city}/${path}/${media.id}`;
+}
+
+// Helper: Build notification payload for English topic
+function buildNotificationPayload(media) {
+  const locationName = media.location_data
+    ? media.location_data.map((l) => l.name).join(', ')
+    : '';
+  const cityName = media.cityData?.name || '';
+  const countryName = media.countryData?.name || '';
+
+  const bodyParts = [];
+  if (locationName) bodyParts.push(`Place: ${locationName}`);
+  if (cityName) bodyParts.push(`City: ${cityName}`);
+  if (countryName) bodyParts.push(countryName);
+
+  const body = bodyParts.join(', ') || 'Check out this travel content!';
+  const contentUrl = mediaToUrl(media);
+
+  return {
+    topic: 'daily-content-en',
+    notification: {
+      title: 'Travel with Alefe',
+      body: body,
+      imageUrl: `https://storage.googleapis.com/files.viajarcomale.com/resize/500/${media.file}`,
+    },
+    webpush: {
+      fcmOptions: {
+        link: `https://travelwithalefe.com${contentUrl}`,
+      },
+      notification: {
+        icon: 'https://travelwithalefe.com/icons/192x192.png',
+        badge: 'https://travelwithalefe.com/icons/96x96.png',
+      },
+    },
+    data: {
+      url: contentUrl,
+      contentType: media.type,
+      contentId: media.id,
+    },
+  };
+}
+
+// Helper: Build notification payload for Portuguese topic
+function buildNotificationPayloadPt(media) {
+  const locationName = media.location_data
+    ? media.location_data.map((l) => l.name_pt || l.name).join(', ')
+    : '';
+  const cityName = media.cityData?.name_pt || media.cityData?.name || '';
+  const countryName =
+    media.countryData?.name_pt || media.countryData?.name || '';
+
+  const bodyParts = [];
+  if (locationName) bodyParts.push(`Local: ${locationName}`);
+  if (cityName) bodyParts.push(`Cidade: ${cityName}`);
+  if (countryName) bodyParts.push(countryName);
+
+  const body = bodyParts.join(', ') || 'Confira este conteúdo de viagem!';
+  const contentUrl = mediaToUrl(media);
+
+  return {
+    topic: 'daily-content-pt',
+    notification: {
+      title: 'Viajar com Alê',
+      body: body,
+      imageUrl: `https://storage.googleapis.com/files.viajarcomale.com/resize/500/${media.file}`,
+    },
+    webpush: {
+      fcmOptions: {
+        link: `https://viajarcomale.com.br${contentUrl}`,
+      },
+      notification: {
+        icon: 'https://viajarcomale.com.br/icons/192x192.png',
+        badge: 'https://viajarcomale.com.br/icons/96x96.png',
+      },
+    },
+    data: {
+      url: contentUrl,
+      contentType: media.type,
+      contentId: media.id,
+    },
+  };
+}
+
+// Scheduled function: Send daily notification at 3:00 PM UTC
+exports.sendDailyNotification = onSchedule('0 15 * * *', async () => {
+  console.log('Starting daily notification job...');
+
+  try {
+    // Get random media
+    const media = await getRandomMedia();
+
+    if (!media) {
+      console.error('No media available for notification');
+      return;
+    }
+
+    console.log(`Selected media: ${media.id} (${media.type})`);
+
+    const messaging = getMessaging();
+
+    // Build payloads for both languages
+    const payloadEn = buildNotificationPayload(media);
+    const payloadPt = buildNotificationPayloadPt(media);
+
+    // Send to English topic
+    try {
+      const responseEn = await messaging.send(payloadEn);
+      console.log(
+        'Successfully sent notification to English topic:',
+        responseEn,
+      );
+    } catch (error) {
+      console.error('Error sending to English topic:', error);
+    }
+
+    // Send to Portuguese topic
+    try {
+      const responsePt = await messaging.send(payloadPt);
+      console.log(
+        'Successfully sent notification to Portuguese topic:',
+        responsePt,
+      );
+    } catch (error) {
+      console.error('Error sending to Portuguese topic:', error);
+    }
+
+    console.log('Daily notification job completed');
+  } catch (error) {
+    console.error('Error in daily notification job:', error);
+  }
+});
