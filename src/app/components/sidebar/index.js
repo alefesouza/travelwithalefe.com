@@ -132,8 +132,7 @@ export default async function Sidebar() {
           ))}
           <a
             href="#"
-            id="add-to-home"
-            className="list-group-item list-group-item-action"
+            className="list-group-item list-group-item-action add-to-home"
             style={{ display: 'none' }}
             suppressHydrationWarning
           >
@@ -141,8 +140,7 @@ export default async function Sidebar() {
           </a>
           <a
             href="#"
-            id="enable-push-notifications"
-            className="list-group-item list-group-item-action"
+            className="list-group-item list-group-item-action enable-push-notifications"
             style={{ display: 'none' }}
             suppressHydrationWarning
           >
@@ -150,8 +148,7 @@ export default async function Sidebar() {
           </a>
           <a
             href="#"
-            id="disable-push-notifications"
-            className="list-group-item list-group-item-action"
+            className="list-group-item list-group-item-action disable-push-notifications"
             style={{ display: 'none' }}
             suppressHydrationWarning
           >

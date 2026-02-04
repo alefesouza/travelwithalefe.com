@@ -3,10 +3,20 @@ const utils = {
   isBrazilian: () => window.location.host.includes('viajarcomale.com.br'),
 
   getCurrentLanguageSwitcherUrl: () => {
-    return !utils.isBrazilian()
-      ? document.querySelector('link[rel="alternate"][hreflang="pt"]').href
+    let link = !utils.isBrazilian()
+      ? document.querySelector('link[rel="alternate"][hreflang="pt"]')?.href
       : document.querySelector('link[rel="alternate"][hreflang="x-default"]')
-          .href;
+          ?.href;
+
+    if (!link) {
+      const { href } = window.location;
+
+      link = utils.isBrazilian()
+        ? href.replace('viajarcomale.com.br', 'travelwithalefe.com')
+        : href.replace('travelwithalefe.com', 'viajarcomale.com.br');
+    }
+
+    return link;
   },
 
   showModal: (messageEN, messagePT, html = '', intervalId = null) => {
@@ -86,9 +96,9 @@ const pushNotifications = {
 
   // Update button visibility based on subscription state
   updateButtonVisibility: () => {
-    const enableBtns = document.querySelectorAll('#enable-push-notifications');
+    const enableBtns = document.querySelectorAll('.enable-push-notifications');
     const disableBtns = document.querySelectorAll(
-      '#disable-push-notifications',
+      '.disable-push-notifications',
     );
 
     if (enableBtns.length === 0 && disableBtns.length === 0) return;
@@ -112,7 +122,9 @@ const pushNotifications = {
   },
 
   // Request permission and subscribe to topic
-  requestPermissionAndSubscribe: async () => {
+  requestPermissionAndSubscribe: async (e) => {
+    e.preventDefault();
+
     let notificationImage1 = null;
     let notificationImage2 = null;
     let currentImage = 1;
@@ -228,7 +240,9 @@ const pushNotifications = {
   },
 
   // Unsubscribe from push notifications
-  unsubscribeFromNotifications: async () => {
+  unsubscribeFromNotifications: async (e) => {
+    e.preventDefault();
+
     try {
       const token = localStorage.getItem('pushNotificationToken');
       const topic = localStorage.getItem('pushNotificationTopic');
@@ -267,9 +281,9 @@ const pushNotifications = {
 
   // Initialize push notification buttons
   init: () => {
-    const enableBtns = document.querySelectorAll('#enable-push-notifications');
+    const enableBtns = document.querySelectorAll('.enable-push-notifications');
     const disableBtns = document.querySelectorAll(
-      '#disable-push-notifications',
+      '.disable-push-notifications',
     );
 
     if (enableBtns.length === 0 && disableBtns.length === 0) return;
@@ -279,18 +293,28 @@ const pushNotifications = {
 
     // Add click handler for enable button
     enableBtns.forEach((enableBtn) => {
-      enableBtn.addEventListener('click', (event) => {
-        event.preventDefault();
-        pushNotifications.requestPermissionAndSubscribe();
-      });
+      enableBtn.removeEventListener(
+        'click',
+        pushNotifications.requestPermissionAndSubscribe,
+      );
+
+      enableBtn.addEventListener(
+        'click',
+        pushNotifications.requestPermissionAndSubscribe,
+      );
     });
 
     // Add click handler for disable button
     disableBtns.forEach((disableBtn) => {
-      disableBtn.addEventListener('click', (event) => {
-        event.preventDefault();
-        pushNotifications.unsubscribeFromNotifications();
-      });
+      disableBtn.removeEventListener(
+        'click',
+        pushNotifications.unsubscribeFromNotifications,
+      );
+
+      disableBtn.addEventListener(
+        'click',
+        pushNotifications.unsubscribeFromNotifications,
+      );
     });
   },
 };
@@ -675,7 +699,7 @@ const pageDetection = {
 
 (() => {
   let deferredPrompt;
-  const addToHomeBtns = document.querySelectorAll('#add-to-home');
+  const addToHomeBtns = document.querySelectorAll('.add-to-home');
 
   window.addEventListener('beforeinstallprompt', (e) => {
     deferredPrompt = e;
@@ -741,6 +765,8 @@ const pageDetection = {
 
     navigation.initNavbarLinkClick();
     navigation.updateNavbarActiveState();
+
+    pushNotifications.init();
 
     document.querySelectorAll('[data-copy]').forEach((item) => {
       item.onclick = function () {
@@ -868,8 +894,6 @@ const pageDetection = {
   window.addEventListener('pageshow', navigation.hideSpinner);
 
   navigation.initNavbarLinkClick();
-
-  // Initialize push notifications button
   pushNotifications.init();
 
   headObserverFn();
