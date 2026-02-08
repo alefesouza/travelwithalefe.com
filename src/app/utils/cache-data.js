@@ -13,6 +13,7 @@ const cachedCoupons = [
   'daki',
   'holafly',
   'insider',
+  'keeta',
   'kwai',
   'letyshops',
   'meliuz',
