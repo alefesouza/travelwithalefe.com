@@ -38,7 +38,7 @@ function getSelectedMedia(media, theMedia, country, city) {
       mediaIndex > (theMedia.gallery || []).length + 1
     ) {
       redirect(
-        '/countries/' + country + '/cities/' + city + '/posts/' + media[0]
+        '/countries/' + country + '/cities/' + city + '/posts/' + media[0],
       );
     }
 
@@ -56,8 +56,36 @@ function getSelectedMedia(media, theMedia, country, city) {
   };
 }
 
+const validateOutside = (country, city, media, fromOutside) => {
+  if (!fromOutside && isNaN(media[0])) {
+    const mediaParts = media[0].split('-').slice(1).slice(-2);
+    const type = getTypePath(mediaParts[0]);
+
+    if (
+      ![
+        'posts',
+        'stories',
+        'videos',
+        'short-videos',
+        '360-photos',
+        'maps',
+      ].includes(type)
+    ) {
+      return notFound();
+    }
+
+    const mediaId = mediaParts[1];
+
+    return permanentRedirect(
+      '/countries/' + country + '/cities/' + city + '/' + type + '/' + mediaId,
+    );
+  }
+};
+
 export async function generateMetadata({ params: paramsPromise }) {
-  const { country, city, media } = await paramsPromise;
+  const { country, city, media, fromOutside } = await paramsPromise;
+
+  validateOutside(country, city, media, fromOutside);
 
   validateCountryCity(country, city);
 
@@ -105,7 +133,7 @@ export async function generateMetadata({ params: paramsPromise }) {
       theMedia.type === 'youtube' ||
       theMedia.type === 'short-video' ||
       theMedia.type === '360-photo' ||
-      theMedia.type === 'maps'
+      theMedia.type === 'maps',
   );
 }
 
@@ -113,7 +141,12 @@ export default async function MediaPage({
   params: paramsPromise,
   searchParams: searchParamsPromise,
 }) {
-  const { country, city, media } = await paramsPromise;
+  const { country, city, media, fromOutside } = await paramsPromise;
+
+  validateOutside(country, city, media, fromOutside);
+
+  validateCountryCity(country, city);
+
   const searchParams = await searchParamsPromise;
 
   const i18n = useI18n();
@@ -121,11 +154,9 @@ export default async function MediaPage({
   const isBR = process.env.NEXT_PUBLIC_LOCALE === 'pt-BR';
   const editMode = await useEditMode(searchParams);
 
-  validateCountryCity(country, city);
-
   if (media.length > 2) {
     redirect(
-      `/countries/${country}/cities/${city}/posts/${media[0]}/${media[1]}`
+      `/countries/${country}/cities/${city}/posts/${media[0]}/${media[1]}`,
     );
   }
 
@@ -142,7 +173,7 @@ export default async function MediaPage({
       USE_CACHE,
       country,
       city,
-      media[0]
+      media[0],
     );
 
     if (!data) {
@@ -153,7 +184,7 @@ export default async function MediaPage({
       base +
         '/posts/' +
         data.id.replace(city + '-post-', '') +
-        (media[1] ? '/' + media[1] : '')
+        (media[1] ? '/' + media[1] : ''),
     );
 
     return;
@@ -188,7 +219,7 @@ export default async function MediaPage({
     media,
     theMedia,
     country,
-    city
+    city,
   );
   theMedia = selectedMedia;
 
@@ -250,8 +281,8 @@ export default async function MediaPage({
         getTypePath(theMedia.type) +
         '/' +
         mediaId +
-        (media[1] ? '/' + media[1] : '')
-    )
+        (media[1] ? '/' + media[1] : ''),
+    ),
   );
 
   const header = (
@@ -405,7 +436,7 @@ export default async function MediaPage({
               mainPath +
               theMedia.previous.replace(
                 city + '-' + getTypePath(theMedia.type, true) + '-',
-                ''
+                '',
               )
             }
             className="btn"
@@ -422,7 +453,7 @@ export default async function MediaPage({
               mainPath +
               theMedia.next.replace(
                 city + '-' + getTypePath(theMedia.type, true) + '-',
-                ''
+                '',
               )
             }
             className="btn"

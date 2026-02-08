@@ -64,7 +64,7 @@ export async function generateMetadata({ params: paramsPromise }) {
         m.country === country &&
         m.city === city &&
         m.type === 'story' &&
-        m.is_highlight
+        m.is_highlight,
     );
   } else {
     const db = getFirestore();
@@ -91,6 +91,7 @@ export async function generateMetadata({ params: paramsPromise }) {
         country,
         city,
         media: [city + '-story-' + stories[0]],
+        fromOutside: true,
       },
     });
   }
@@ -126,7 +127,7 @@ export async function generateMetadata({ params: paramsPromise }) {
       `countries/${country}/cities/${city}/stories${
         stories ? '/' + stories[0] : ''
       }`,
-      theMedia
+      theMedia,
     ),
     ...(!isWebStories
       ? {
@@ -139,7 +140,7 @@ export async function generateMetadata({ params: paramsPromise }) {
                   country +
                   '/cities/' +
                   city +
-                  '/stories'
+                  '/stories',
               ),
             },
           },
@@ -177,6 +178,7 @@ export default async function Highlight({
         country,
         city,
         media: [city + '-story-' + stories[0]],
+        fromOutside: true,
       },
       searchParams,
     });
@@ -191,7 +193,7 @@ export default async function Highlight({
   logAccess(
     host((isWebStories ? '/webstories' : '') + '/stories/') +
       theCity.slug +
-      ('?sort=' + sort)
+      ('?sort=' + sort),
   );
 
   let instagramStories = photos.filter((p) => p.type === 'story');
@@ -228,7 +230,7 @@ export default async function Highlight({
 
     items = allItems.slice(
       (page - 1) * WEBSTORIES_ITEMS_PER_PAGE,
-      page * WEBSTORIES_ITEMS_PER_PAGE
+      page * WEBSTORIES_ITEMS_PER_PAGE,
     );
 
     const previousPageItem = allItems[(page - 2) * WEBSTORIES_ITEMS_PER_PAGE];
@@ -298,7 +300,7 @@ export default async function Highlight({
                     '/cities/' +
                     city +
                     '/stories' +
-                    (sort !== 'asc' ? '?sort=' + sort : '')
+                    (sort !== 'asc' ? '?sort=' + sort : ''),
                 )}
                 target="_blank"
                 title={i18n('Play')}
@@ -358,7 +360,7 @@ export default async function Highlight({
               '/cities/' +
               city +
               '/stories' +
-              (sort !== 'asc' ? '?sort=' + sort : '')
+              (sort !== 'asc' ? '?sort=' + sort : ''),
           )}
           target="_blank"
         >

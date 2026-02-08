@@ -13,6 +13,7 @@ export async function generateMetadata({ params: paramsPromise }) {
       country,
       city,
       media: [city + '-short-video-' + [video]],
+      fromOutside: true,
     },
   });
 }
@@ -31,6 +32,7 @@ export default async function Video({
       country,
       city,
       media: [city + '-short-video-' + [video]],
+      fromOutside: true,
     },
     searchParams,
   });
