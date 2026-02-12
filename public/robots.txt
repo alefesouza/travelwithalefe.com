@@ -57,6 +57,7 @@ User-agent: Discordbot
 User-agent: Slackbot
 User-agent: SkypeUriPreview
 User-agent: YouBot
+User-agent: DeepSeekBot
 Allow: /
 
 User-agent: Googlebot
@@ -110,6 +111,7 @@ User-agent: NaverBot
 User-agent: OpenAI-SearchBot
 User-agent: OpenAI-DataCollector
 User-agent: YouBot
+User-agent: DeepSeekBot
 Disallow: /*?*
 Disallow: /*expand
 Disallow: */webstories$

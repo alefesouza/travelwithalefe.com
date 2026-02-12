@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
 
 export async function GET() {
-  redirect('https://instagram.com/viajarcomale');
+  return permanentRedirect('https://instagram.com/viajarcomale');
 }

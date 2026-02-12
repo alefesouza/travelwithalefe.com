@@ -37,7 +37,7 @@ function getSelectedMedia(media, theMedia, country, city) {
       (!theMedia.gallery && mediaIndex > 1) ||
       mediaIndex > (theMedia.gallery || []).length + 1
     ) {
-      redirect(
+      return permanentRedirect(
         '/countries/' + country + '/cities/' + city + '/posts/' + media[0],
       );
     }
@@ -75,6 +75,10 @@ const validateOutside = (country, city, media, fromOutside) => {
     }
 
     const mediaId = mediaParts[1];
+
+    if (!mediaId) {
+      return notFound();
+    }
 
     return permanentRedirect(
       '/countries/' + country + '/cities/' + city + '/' + type + '/' + mediaId,
