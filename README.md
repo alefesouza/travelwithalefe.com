@@ -4,6 +4,7 @@ This repository contains the code for the [Travel with Alefe](https://travelwith
 
 - Full `manifest.json`
 - Service Worker
+- Web Push Notifications
 - Offline access
 - Window Controls Overlay
 
